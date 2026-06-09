@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f0f0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Finanças" />
+  <title>Finanças</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #242424;
+      --border: rgba(255,255,255,0.08);
+      --text: #f0f0f0;
+      --muted: #888;
+      --green: #4ade80;
+      --green-bg: rgba(74,222,128,0.1);
+      --red: #f87171;
+      --red-bg: rgba(248,113,113,0.1);
+      --blue: #60a5fa;
+      --blue-bg: rgba(96,165,250,0.1);
+      --amber: #fbbf24;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px;
+      min-height: 100dvh;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(15,15,15,0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px 12px;
+    }
+    header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 12px 20px 0;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s;
+    }
+    .tab.active {
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom: 1px solid var(--surface);
+      margin-bottom: -1px;
+    }
+
+    /* MAIN CONTENT */
+    main { padding: 20px; max-width: 600px; margin: 0 auto; }
+
+    /* METRIC CARDS */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+    .metric-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+    .metric-value.green { color: var(--green); }
+    .metric-value.red { color: var(--red); }
+    .metric-value.blue { color: var(--blue); }
+    .metric-value.amber { color: var(--amber); }
+
+    /* FORM */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .form-card h2 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+    }
+    .form-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    select, input[type=text], input[type=number] {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    select:focus, input:focus { border-color: rgba(255,255,255,0.25); }
+    select { cursor: pointer; }
+
+    .tipo-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .tipo-btn.active-gasto { background: var(--red-bg); color: var(--red); border-color: rgba(248,113,113,0.3); }
+    .tipo-btn.active-receita { background: var(--green-bg); color: var(--green); border-color: rgba(74,222,128,0.3); }
+    .tipo-btn.active-investimento { background: var(--blue-bg); color: var(--blue); border-color: rgba(96,165,250,0.3); }
+
+    input[type=text] { flex: 2; min-width: 160px; }
+    input[type=number] { flex: 1; min-width: 110px; }
+    #sel-categoria { flex: 1; min-width: 140px; }
+
+    .btn-add {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: var(--text);
+      color: var(--bg);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: opacity 0.15s;
+    }
+    .btn-add:active { opacity: 0.8; }
+    .btn-add:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* FILTER */
+    .filter-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-row::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .filter-chip.active {
+      background: var(--surface2);
+      color: var(--text);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    /* LIST */
+    .lista-vazia {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 40px 0;
+    }
+    .lista-vazia span { display: block; font-size: 32px; margin-bottom: 8px; }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .item:last-child { border-bottom: none; }
+
+    .item-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .item-icon.gasto { background: var(--red-bg); }
+    .item-icon.receita { background: var(--green-bg); }
+    .item-icon.investimento { background: var(--blue-bg); }
+
+    .item-info { flex: 1; min-width: 0; }
+    .item-desc {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .item-right { text-align: right; flex-shrink: 0; }
+    .item-valor {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    .item-valor.gasto { color: var(--red); }
+    .item-valor.receita { color: var(--green); }
+    .item-valor.investimento { color: var(--blue); }
+    .item-data { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .btn-del {
+      background: none;
+      border: none;
+      color: #444;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      flex-shrink: 0;
+      transition: color 0.15s;
+    }
+    .btn-del:hover { color: var(--red); }
+
+    /* LOADING */
+    .loading {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 30px 0;
+    }
+
+    /* MÊS SELECTOR */
+    .mes-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+    }
+    .mes-nav button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0 4px;
+      transition: color 0.15s;
+    }
+    .mes-nav button:hover { color: var(--text); }
+    .mes-nome {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* RESUMO TAB */
+    .resumo-section { margin-bottom: 24px; }
+    .resumo-section h3 {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+    .cat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .cat-row:last-child { border-bottom: none; }
+    .cat-bar-wrap {
+      width: 100%;
+      background: var(--surface2);
+      border-radius: 4px;
+      height: 4px;
+      margin-top: 6px;
+    }
+    .cat-bar { height: 4px; border-radius: 4px; background: var(--red); }
+
+    @media (max-width: 400px) {
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .metric-value { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>💰 Finanças</h1>
+  <p id="header-sub">Carregando...</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="setTab('lancar', this)">Lançar</button>
+  <button class="tab" onclick="setTab('extrato', this)">Extrato</button>
+  <button class="tab" onclick="setTab('resumo', this)">Resumo</button>
+</div>
+
+<main>
+
+  <!-- TAB: LANÇAR -->
+  <div id="tab-lancar">
+    <div style="margin-bottom:20px; margin-top:4px;">
+      <div class="mes-nav">
+        <button onclick="mudarMes(-1)">‹</button>
+        <span class="mes-nome" id="mes-display-lancar">—</span>
+        <button onclick="mudarMes(1)">›</button>
+      </div>
+    </div>
+
+    <div class="metrics" id="metrics-lancar">
+      <div class="metric"><div class="metric-label">Receitas</div><div class="metric-value green" id="m-receita">—</div></div>
+      <div class="metric"><div class="metric-label">Gastos</div><div class="metric-value red" id="m-gasto">—</div></div>
+      <div class="metric"><div class="metric-label">Investido</div><div class="metric-value blue" id="m-invest">—</div></div>
+      <div class="metric"><div class="metric-label">Saldo livre</div><div class="metric-value amber" id="m-saldo">—</div></div>
+    </div>
+
+    <div class="form-card">
+      <h2>Novo lançamento</h2>
+      <div class="form-row">
+        <button class="tipo-btn active-gasto" id="btn-gasto" onclick="setTipo('gasto')">↓ Gasto</button>
+        <button class="tipo-btn" id="btn-receita" onclick="setTipo('receita')">↑ Receita</button>
+        <button class="tipo-btn" id="btn-investimento" onclick="setTipo('investimento')">→ Invest.</button>
+      </div>
+      <div class="form-row">
+        <select id="sel-categoria"></select>
+      </div>
+      <div class="form-row">
+        <input type="text" id="inp-desc" placeholder="Descrição (ex: Uber)" />
+        <input type="number" id="inp-valor" placeholder="R$ 0,00" step="0.01" min="0" inputmode="decimal" />
+      </div>
+      <button class="btn-add" onclick="addItem()" id="btn-add">+ Adicionar</button>
+    </div>
+  </div>
+
+  <!-- TAB: EXTRATO -->
+  <div id="tab-extrato" style="display:none;">
+    <div class="mes-nav">
+      <button onclick="mudarMes(-1)">‹</button>
+      <span class="mes-nome" id="mes-display-extrato">—</span>
+      <button onclick="mudarMes(1)">›</button>
+    </div>
+    <div class="filter-row">
+      <button class="filter-chip active" onclick="setFiltro('todos',this)">Todos</button>
+      <button class="filter-chip" onclick="setFiltro('gasto',this)">Gastos</button>
+      <button class="filter-chip" onclick="setFiltro('receita',this)">Receitas</button>
+      <button class="filter-chip" onclick="setFiltro('investimento',this)">Investimentos</button>
+    </div>
+    <div id="lista-extrato"><div class="loading">Carregando...</div></div>
+  </div>
+
+  <!-- TAB: RESUMO -->
+  <div id="tab-resumo" style="display:none;">
+    <div class="mes-nav">
+      <button onclick="mudarMes(-1)">‹</button>
+      <span class="mes-nome" id="mes-display-resumo">—</span>
+      <button onclick="mudarMes(1)">›</button>
+    </div>
+    <div id="resumo-content"><div class="loading">Carregando...</div></div>
+  </div>
+
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDws4F_Jb-5ZvB92MN_hDJyYnh9Y76h4-8",
+  authDomain: "financas-4ecdd.firebaseapp.com",
+  projectId: "financas-4ecdd",
+  storageBucket: "financas-4ecdd.firebasestorage.app",
+  messagingSenderId: "655131184307",
+  appId: "1:655131184307:web:7320f622b038f9eb82f4c6",
+  measurementId: "G-R66VLQ12K3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const CATS = {
+  gasto: ['Moradia','Alimentação','Transporte','Saúde','Lazer','Assinaturas','Vestuário','Outros'],
+  receita: ['Salário','Vale alimentação','Vale home office','Freela','Outros'],
+  investimento: ['Tesouro Direto','CDB','FII','Ações','Cofrinho Itaú','Outros']
+};
+
+const ICONS = { gasto: '↓', receita: '↑', investimento: '→' };
+
+let tipoAtivo = 'gasto';
+let filtroAtivo = 'todos';
+let tabAtiva = 'lancar';
+let mesAtual = new Date();
+mesAtual.setDate(1);
+
+let items = [];
+
+// ─── UTILS ───────────────────────────────────────────
+function fmt(v) {
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function mesKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function mesNome(d) {
+  return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+}
+function dataFmt(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
+// ─── MÊS NAV ─────────────────────────────────────────
+window.mudarMes = function(delta) {
+  mesAtual.setMonth(mesAtual.getMonth() + delta);
+  atualizarMesDisplay();
+  carregarItems();
+};
+
+function atualizarMesDisplay() {
+  const nome = mesNome(mesAtual);
+  ['lancar','extrato','resumo'].forEach(t => {
+    const el = document.getElementById(`mes-display-${t}`);
+    if (el) el.textContent = nome;
+  });
+  const sub = document.getElementById('header-sub');
+  if (sub) sub.textContent = nome;
+}
+
+// ─── TIPO ────────────────────────────────────────────
+window.setTipo = function(tipo) {
+  tipoAtivo = tipo;
+  ['gasto','receita','investimento'].forEach(t => {
+    const btn = document.getElementById(`btn-${t}`);
+    btn.className = 'tipo-btn' + (t === tipo ? ` active-${t}` : '');
+  });
+  atualizarCategorias();
+};
+
+function atualizarCategorias() {
+  const sel = document.getElementById('sel-categoria');
+  sel.innerHTML = CATS[tipoAtivo].map(c => `<option>${c}</option>`).join('');
+}
+
+// ─── ADD ─────────────────────────────────────────────
+window.addItem = async function() {
+  const desc = document.getElementById('inp-desc').value.trim();
+  const valor = parseFloat(document.getElementById('inp-valor').value);
+  const cat = document.getElementById('sel-categoria').value;
+
+  if (!desc || isNaN(valor) || valor <= 0) {
+    alert('Preencha descrição e valor.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-add');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+
+  try {
+    const agora = new Date();
+    await addDoc(collection(db, 'lancamentos'), {
+      tipo: tipoAtivo,
+      categoria: cat,
+      descricao: desc,
+      valor: valor,
+      mes: mesKey(mesAtual),
+      criadoEm: agora
+    });
+
+    document.getElementById('inp-desc').value = '';
+    document.getElementById('inp-valor').value = '';
+    await carregarItems();
+  } catch(e) {
+    alert('Erro ao salvar. Verifique sua conexão.');
+    console.error(e);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '+ Adicionar';
+};
+
+// ─── DELETE ──────────────────────────────────────────
+window.delItem = async function(id) {
+  if (!confirm('Remover este lançamento?')) return;
+  try {
+    await deleteDoc(doc(db, 'lancamentos', id));
+    await carregarItems();
+  } catch(e) {
+    alert('Erro ao remover.');
+    console.error(e);
+  }
+};
+
+// ─── LOAD ────────────────────────────────────────────
+async function carregarItems() {
+  try {
+    const mk = mesKey(mesAtual);
+    const q = query(
+      collection(db, 'lancamentos'),
+      where('mes', '==', mk),
+      orderBy('criadoEm', 'desc')
+    );
+    const snap = await getDocs(q);
+    items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) {
+    console.error('Erro ao carregar:', e);
+    items = [];
+  }
+  renderTudo();
+}
+
+// ─── RENDER ──────────────────────────────────────────
+function renderTudo() {
+  renderMetrics();
+  renderExtrato();
+  renderResumo();
+}
+
+function renderMetrics() {
+  const totais = { receita: 0, gasto: 0, investimento: 0 };
+  items.forEach(i => { totais[i.tipo] = (totais[i.tipo] || 0) + i.valor; });
+  const saldo = totais.receita - totais.gasto - totais.investimento;
+
+  document.getElementById('m-receita').textContent = fmt(totais.receita);
+  document.getElementById('m-gasto').textContent = fmt(totais.gasto);
+  document.getElementById('m-invest').textContent = fmt(totais.investimento);
+  const elSaldo = document.getElementById('m-saldo');
+  elSaldo.textContent = fmt(saldo);
+  elSaldo.className = 'metric-value ' + (saldo >= 0 ? 'green' : 'red');
+}
+
+function renderExtrato() {
+  const el = document.getElementById('lista-extrato');
+  const filtrados = filtroAtivo === 'todos' ? items : items.filter(i => i.tipo === filtroAtivo);
+
+  if (filtrados.length === 0) {
+    el.innerHTML = '<div class="lista-vazia"><span>📭</span>Nenhum lançamento neste mês.</div>';
+    return;
+  }
+
+  el.innerHTML = filtrados.map(i => `
+    <div class="item">
+      <div class="item-icon ${i.tipo}">${ICONS[i.tipo]}</div>
+      <div class="item-info">
+        <div class="item-desc">${i.descricao}</div>
+        <div class="item-meta">${i.categoria}</div>
+      </div>
+      <div class="item-right">
+        <div class="item-valor ${i.tipo}">${fmt(i.valor)}</div>
+        <div class="item-data">${dataFmt(i.criadoEm)}</div>
+      </div>
+      <button class="btn-del" onclick="delItem('${i.id}')" title="Remover">×</button>
+    </div>
+  `).join('');
+}
+
+function renderResumo() {
+  const el = document.getElementById('resumo-content');
+  if (items.length === 0) {
+    el.innerHTML = '<div class="lista-vazia"><span>📊</span>Sem dados neste mês.</div>';
+    return;
+  }
+
+  // por categoria
+  const gastos = items.filter(i => i.tipo === 'gasto');
+  const totalGastos = gastos.reduce((s,i) => s+i.valor, 0);
+  const porCat = {};
+  gastos.forEach(i => { porCat[i.categoria] = (porCat[i.categoria] || 0) + i.valor; });
+  const cats = Object.entries(porCat).sort((a,b) => b[1]-a[1]);
+
+  const totalReceita = items.filter(i=>i.tipo==='receita').reduce((s,i)=>s+i.valor,0);
+  const totalInvest = items.filter(i=>i.tipo==='investimento').reduce((s,i)=>s+i.valor,0);
+  const saldo = totalReceita - totalGastos - totalInvest;
+  const taxaPoupanca = totalReceita > 0 ? ((totalInvest / totalReceita) * 100).toFixed(0) : 0;
+
+  el.innerHTML = `
+    <div class="resumo-section">
+      <h3>Visão geral</h3>
+      <div class="cat-row"><span>Receitas</span><span style="color:var(--green);font-weight:600;">${fmt(totalReceita)}</span></div>
+      <div class="cat-row"><span>Gastos</span><span style="color:var(--red);font-weight:600;">${fmt(totalGastos)}</span></div>
+      <div class="cat-row"><span>Investido</span><span style="color:var(--blue);font-weight:600;">${fmt(totalInvest)}</span></div>
+      <div class="cat-row"><span>Saldo livre</span><span style="color:${saldo>=0?'var(--green)':'var(--red)'};font-weight:600;">${fmt(saldo)}</span></div>
+      <div class="cat-row"><span>Taxa de poupança</span><span style="color:var(--amber);font-weight:600;">${taxaPoupanca}%</span></div>
+    </div>
+    ${cats.length > 0 ? `
+    <div class="resumo-section">
+      <h3>Gastos por categoria</h3>
+      ${cats.map(([cat, val]) => {
+        const pct = totalGastos > 0 ? ((val/totalGastos)*100).toFixed(0) : 0;
+        return `
+          <div style="padding: 10px 0; border-bottom: 1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;font-size:14px;">
+              <span>${cat}</span>
+              <span style="color:var(--red);font-weight:600;">${fmt(val)}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+              <div class="cat-bar-wrap"><div class="cat-bar" style="width:${pct}%"></div></div>
+              <span style="font-size:11px;color:var(--muted);min-width:28px;">${pct}%</span>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>` : ''}
+  `;
+}
+
+// ─── TABS ────────────────────────────────────────────
+window.setTab = function(tab, btn) {
+  tabAtiva = tab;
+  ['lancar','extrato','resumo'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+};
+
+// ─── FILTRO ──────────────────────────────────────────
+window.setFiltro = function(f, btn) {
+  filtroAtivo = f;
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderExtrato();
+};
+
+// ─── INIT ────────────────────────────────────────────
+setTipo('gasto');
+atualizarMesDisplay();
+carregarItems();
+</script>
+
+</body>
+</html>
