@@ -68,6 +68,14 @@
     .mes-nav button:hover { color: var(--text); }
     .mes-nome { font-size: 14px; font-weight: 600; }
 
+    .limpar-wrap { text-align: right; margin-bottom: 16px; }
+    .limpar-link {
+      font-size: 13px; color: var(--muted); cursor: pointer;
+      transition: color 0.15s;
+    }
+    .limpar-link:hover { color: var(--text); }
+    .limpar-link.ativo { color: var(--green); }
+
     /* SALDO HERO */
     .saldo-hero {
       background: linear-gradient(135deg, #1a2e22 0%, #16201a 100%);
@@ -229,20 +237,18 @@
 
   <!-- TAB: HOME -->
   <div id="tab-home">
-    <div class="mes-nav">
+    <div class="mes-nav" id="home-mes-nav">
       <button onclick="mudarMes(-1)">‹</button>
       <span class="mes-nome" id="mes-display-home">—</span>
       <button onclick="mudarMes(1)">›</button>
     </div>
-    <div class="saldo-hero">
-      <div class="label">Saldo do mês</div>
-      <div class="valor pos" id="saldo-hero">—</div>
+    <div class="limpar-wrap">
+      <span class="limpar-link" id="limpar-btn" onclick="toggleFiltroGlobal()">Limpar filtros</span>
     </div>
-    <div class="metrics">
-      <div class="metric"><div class="metric-label">Receitas</div><div class="metric-value green" id="m-receita">—</div></div>
-      <div class="metric"><div class="metric-label">Gastos</div><div class="metric-value red" id="m-gasto">—</div></div>
-      <div class="metric"><div class="metric-label">Investido no mês</div><div class="metric-value blue" id="m-invest">—</div></div>
-      <div class="metric"><div class="metric-label">Saldo livre</div><div class="metric-value amber" id="m-saldo">—</div></div>
+
+    <div class="saldo-hero">
+      <div class="label" id="saldo-hero-label">Saldo do mês</div>
+      <div class="valor pos" id="saldo-hero">—</div>
     </div>
     <div class="invest-card">
       <div class="top">
@@ -251,6 +257,12 @@
       </div>
       <div class="valor" id="patrimonio-valor">—</div>
       <div class="sub" id="patrimonio-sub">Toque em "Atualizar" para ajustar o valor atual</div>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Receitas</div><div class="metric-value green" id="m-receita">—</div></div>
+      <div class="metric"><div class="metric-label">Gastos</div><div class="metric-value red" id="m-gasto">—</div></div>
+      <div class="metric"><div class="metric-label" id="label-invest">Investido no mês</div><div class="metric-value blue" id="m-invest">—</div></div>
+      <div class="metric"><div class="metric-label">Saldo livre</div><div class="metric-value amber" id="m-saldo">—</div></div>
     </div>
   </div>
 
@@ -363,6 +375,8 @@ let tabAtiva = 'home';
 let mesAtual = new Date();
 mesAtual.setDate(1);
 let items = [];
+let filtroGlobal = false;
+let todosItems = [];
 
 // ─── UTILS ───
 function fmt(v) {
@@ -484,12 +498,45 @@ async function carregarItems() {
   renderTudo();
 }
 
+window.toggleFiltroGlobal = async function() {
+  filtroGlobal = !filtroGlobal;
+  const btn = document.getElementById('limpar-btn');
+  const mesNav = document.getElementById('home-mes-nav');
+  const heroLabel = document.getElementById('saldo-hero-label');
+  const labelInvest = document.getElementById('label-invest');
+
+  if (filtroGlobal) {
+    btn.textContent = 'Voltar para o mês';
+    btn.classList.add('ativo');
+    mesNav.style.opacity = '0.4';
+    mesNav.style.pointerEvents = 'none';
+    heroLabel.textContent = 'Saldo total';
+    labelInvest.textContent = 'Investido (todos os meses)';
+    // carregar todos
+    try {
+      const snap = await getDocs(collection(db, 'lancamentos'));
+      todosItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch(e) { console.error(e); todosItems = []; }
+    renderMetricsFrom(todosItems);
+  } else {
+    btn.textContent = 'Ver total de todos os meses';
+    btn.classList.remove('ativo');
+    mesNav.style.opacity = '1';
+    mesNav.style.pointerEvents = 'auto';
+    heroLabel.textContent = 'Saldo do mês';
+    labelInvest.textContent = 'Investido no mês';
+    renderMetrics();
+  }
+};
+
 // ─── RENDER ───
 function renderTudo() { renderMetrics(); renderExtrato(); renderResumo(); }
 
-function renderMetrics() {
+function renderMetrics() { renderMetricsFrom(items); }
+
+function renderMetricsFrom(lista) {
   const totais = { receita: 0, gasto: 0, investimento: 0 };
-  items.forEach(i => { totais[i.tipo] = (totais[i.tipo] || 0) + i.valor; });
+  lista.forEach(i => { totais[i.tipo] = (totais[i.tipo] || 0) + i.valor; });
   const saldo = totais.receita - totais.gasto - totais.investimento;
   document.getElementById('m-receita').textContent = fmt(totais.receita);
   document.getElementById('m-gasto').textContent = fmt(totais.gasto);
