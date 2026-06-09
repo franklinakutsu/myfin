@@ -436,7 +436,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDws4F_Jb-5ZvB92MN_hDJyYnh9Y76h4-8",
@@ -571,11 +571,15 @@ async function carregarItems() {
     const mk = mesKey(mesAtual);
     const q = query(
       collection(db, 'lancamentos'),
-      where('mes', '==', mk),
-      orderBy('criadoEm', 'desc')
+      where('mes', '==', mk)
     );
     const snap = await getDocs(q);
     items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    items.sort((a, b) => {
+      const ta = a.criadoEm?.toDate ? a.criadoEm.toDate() : new Date(a.criadoEm || 0);
+      const tb = b.criadoEm?.toDate ? b.criadoEm.toDate() : new Date(b.criadoEm || 0);
+      return tb - ta;
+    });
   } catch(e) {
     console.error('Erro ao carregar:', e);
     items = [];
