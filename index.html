@@ -57,38 +57,64 @@
     }
     header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-    /* TABS */
-    .tabs {
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
       display: flex;
-      gap: 4px;
-      padding: 12px 20px 0;
-      border-bottom: 1px solid var(--border);
-      overflow-x: auto;
-      scrollbar-width: none;
+      background: rgba(20,20,20,0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      padding-bottom: env(safe-area-inset-bottom);
     }
-    .tabs::-webkit-scrollbar { display: none; }
-    .tab {
-      padding: 8px 16px;
-      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 10px 0 8px;
+      background: none;
       border: none;
-      background: transparent;
       color: var(--muted);
-      font-size: 13px;
-      font-weight: 500;
       cursor: pointer;
-      white-space: nowrap;
       transition: color 0.15s;
+      font-family: inherit;
     }
-    .tab.active {
-      color: var(--text);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-bottom: 1px solid var(--surface);
-      margin-bottom: -1px;
-    }
+    .nav-btn svg { width: 24px; height: 24px; stroke-width: 2; }
+    .nav-btn span { font-size: 10px; font-weight: 500; letter-spacing: 0.2px; }
+    .nav-btn.active { color: var(--green); }
 
     /* MAIN CONTENT */
-    main { padding: 20px; max-width: 600px; margin: 0 auto; }
+    main { padding: 20px 20px 100px; max-width: 600px; margin: 0 auto; }
+
+    /* SALDO DESTAQUE */
+    .saldo-hero {
+      background: linear-gradient(135deg, #1a2e22 0%, #16201a 100%);
+      border: 1px solid rgba(74,222,128,0.15);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .saldo-hero .label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .saldo-hero .valor {
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+    .saldo-hero .valor.pos { color: var(--green); }
+    .saldo-hero .valor.neg { color: var(--red); }
 
     /* METRIC CARDS */
     .metrics {
@@ -363,11 +389,7 @@
   <p id="header-sub">Carregando...</p>
 </header>
 
-<div class="tabs">
-  <button class="tab active" onclick="setTab('lancar', this)">Lançar</button>
-  <button class="tab" onclick="setTab('extrato', this)">Extrato</button>
-  <button class="tab" onclick="setTab('resumo', this)">Resumo</button>
-</div>
+
 
 <main>
 
@@ -379,6 +401,11 @@
         <span class="mes-nome" id="mes-display-lancar">—</span>
         <button onclick="mudarMes(1)">›</button>
       </div>
+    </div>
+
+    <div class="saldo-hero">
+      <div class="label">Saldo do mês</div>
+      <div class="valor pos" id="saldo-hero">—</div>
     </div>
 
     <div class="metrics" id="metrics-lancar">
@@ -433,6 +460,21 @@
   </div>
 
 </main>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-lancar" onclick="setTab('lancar', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span>Lançar</span>
+  </button>
+  <button class="nav-btn" id="nav-extrato" onclick="setTab('extrato', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <span>Extrato</span>
+  </button>
+  <button class="nav-btn" id="nav-resumo" onclick="setTab('resumo', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span>Resumo</span>
+  </button>
+</nav>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
@@ -605,6 +647,10 @@ function renderMetrics() {
   const elSaldo = document.getElementById('m-saldo');
   elSaldo.textContent = fmt(saldo);
   elSaldo.className = 'metric-value ' + (saldo >= 0 ? 'green' : 'red');
+
+  const hero = document.getElementById('saldo-hero');
+  hero.textContent = fmt(saldo);
+  hero.className = 'valor ' + (saldo >= 0 ? 'pos' : 'neg');
 }
 
 function renderExtrato() {
@@ -687,7 +733,7 @@ window.setTab = function(tab, btn) {
   ['lancar','extrato','resumo'].forEach(t => {
     document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
   });
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 };
 
