@@ -139,12 +139,6 @@
     .orc-alloc-label span.over { color:var(--red); }
     .orc-alloc-track { width:100%; background:var(--surface2); border-radius:6px; height:8px; overflow:hidden; }
     .orc-alloc-fill { height:8px; border-radius:6px; transition:width 0.4s ease; }
-    .orc-pizza-wrap { background:var(--surface); border-radius:var(--radius); padding:20px; display:flex; align-items:center; gap:20px; }
-    .orc-pizza-legend { flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; }
-    .orc-legend-item { display:flex; align-items:center; gap:8px; font-size:13px; min-width:0; }
-    .orc-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-    .orc-legend-nome { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--muted); }
-    .orc-legend-val { font-weight:600; flex-shrink:0; font-size:12px; }
     .orc-item { display:flex; align-items:center; gap:0; padding:16px 0; border-bottom:1px solid var(--border); cursor:pointer; transition:opacity 0.15s; }
     .orc-item:last-child { border-bottom:none; }
     .orc-item:hover { opacity:0.8; }
@@ -241,7 +235,6 @@
       <span class="orc-header-title" id="ml-orc">—</span>
       <button class="orc-add-btn" onclick="novaCategoria()">+ Categoria</button>
     </div>
-    <div id="orc-pizza" style="margin-bottom:14px;"></div>
     <div id="orc-alloc-bar" style="margin-bottom:20px;"></div>
     <div id="orc-lista"><div class="loading">Carregando...</div></div>
   </section>
@@ -787,48 +780,6 @@ function renderOrcamento(){
     return {cat, gasto, limite, semLimite, pctGasto, status, barW:Math.min(pctGasto*100,100).toFixed(1)};
   }).sort((a,b)=>b.gasto-a.gasto); // ordenar maior → menor gasto
 
-  // === PIZZA SVG ===
-  const comGasto=linhas.filter(l=>l.gasto>0);
-  const totalGasto=comGasto.reduce((s,l)=>s+l.gasto,0);
-  const CORES=['#6c63ff','#34c759','#ff453a','#ff9f0a','#5ac8fa','#bf5af2','#ff2d55','#30d158','#ffd60a','#0a84ff','#ac8e68','#636366','#ff6b6b','#4ecdc4','#a8e063'];
-  const pizzaEl=document.getElementById('orc-pizza');
-  if(comGasto.length===0){ pizzaEl.innerHTML=''; }
-  else {
-    // calcular fatias
-    const fatias=[]; let angulo=-Math.PI/2; // começa no topo
-    comGasto.forEach((l,idx)=>{
-      const frac=l.gasto/totalGasto;
-      const cor=CORES[idx%CORES.length];
-      fatias.push({nome:l.cat.nome, gasto:l.gasto, frac, cor, inicio:angulo});
-      angulo+=frac*2*Math.PI;
-    });
-    // gerar paths SVG
-    const cx=80,cy=80,r=72;
-    function arcPath(cx,cy,r,a1,a2){
-      const x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
-      const x2=cx+r*Math.cos(a2), y2=cy+r*Math.sin(a2);
-      const large=a2-a1>Math.PI?1:0;
-      return `M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r},0,${large},1,${x2.toFixed(2)},${y2.toFixed(2)} Z`;
-    }
-    let paths='';
-    fatias.forEach((f,i)=>{
-      const a2=i<fatias.length-1?fatias[i+1].inicio:f.inicio+f.frac*2*Math.PI;
-      if(f.frac<0.001) return;
-      paths+=`<path d="${arcPath(cx,cy,r,f.inicio,a2)}" fill="${f.cor}" stroke="var(--bg)" stroke-width="2"/>`;
-    });
-    // legenda (top 6)
-    const legendaHTML=fatias.slice(0,6).map(f=>`
-      <div class="orc-legend-item">
-        <div class="orc-legend-dot" style="background:${f.cor}"></div>
-        <span class="orc-legend-nome">${f.nome}</span>
-        <span class="orc-legend-val" style="color:${f.cor}">${fmt(f.gasto)}</span>
-      </div>`).join('');
-    pizzaEl.innerHTML=`<div class="orc-pizza-wrap">
-      <svg width="160" height="160" viewBox="0 0 160 160" style="flex-shrink:0">${paths}</svg>
-      <div class="orc-pizza-legend">${legendaHTML}</div>
-    </div>`;
-  }
-
   // === BARRA DE ALOCAÇÃO DE % ===
   const totalPct=categoriasSaida.reduce((s,c)=>s+(c.pct||0),0);
   const fillW=Math.min(totalPct,100);
@@ -844,8 +795,9 @@ function renderOrcamento(){
 
   // === LISTA ORDENADA ===
   const lista=document.getElementById('orc-lista');
-  lista.innerHTML=linhas.map(({cat,gasto,limite,semLimite,pctGasto,status,barW})=>`
-    <div class="orc-item" onclick="abrirDetalheCategoria('${cat.id}')">
+  lista.innerHTML=linhas.map(({cat,gasto,limite,semLimite,pctGasto,status,barW})=>{
+    const pctGastoStr=semLimite?'':`${(pctGasto*100).toFixed(0)}%`;
+    return `<div class="orc-item" onclick="abrirDetalheCategoria('${cat.id}')">
       <div class="orc-item-body">
         <div class="orc-item-top">
           <span class="orc-item-nome">${cat.nome}</span>
@@ -853,11 +805,12 @@ function renderOrcamento(){
         <div class="orc-bar-wrap"><div class="orc-bar ${semLimite?'nolimit':status}" style="width:${semLimite?'0':barW}%"></div></div>
       </div>
       <div class="orc-item-vals">
-        <span class="orc-item-gasto ${semLimite?'ok':status}">${fmt(gasto)}</span>
+        <span class="orc-item-gasto ${semLimite?'ok':status}">${fmt(gasto)}${pctGastoStr?` <span style="font-size:11px;font-weight:400;color:var(--muted2)">${pctGastoStr}</span>`:''}</span>
         <span class="orc-item-limite">${semLimite?'sem teto':fmt(limite)+' ('+cat.pct+'%)'}</span>
       </div>
       <span class="orc-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 window.abrirDetalheCategoria=function(catId){
