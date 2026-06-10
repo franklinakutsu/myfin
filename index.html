@@ -112,7 +112,11 @@
     .card-amount.blue { color: var(--blue-soft); }
 
     .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .duo .card-amount { font-size: 22px; }
+    .duo .card { min-width: 0; }
+    .duo .card-amount {
+      font-size: clamp(15px, 5vw, 20px);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
     .card-sub { font-size: 12px; color: var(--muted2); margin-top: 6px; }
 
     .form-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 24px; }
@@ -384,6 +388,7 @@ let items = [];
 let todosItems = [];
 let patrimonio = null;        // saldo real investido (informado pelo usuário)
 let patrimonioAtualizadoEm = null;
+let totalAportado = 0;        // soma de TODOS os investimentos (aportes - resgates), todo o histórico
 
 // Converte qualquer valor (number, string "1.234,56" ou "1234.56") em número seguro.
 function num(v) {
@@ -515,6 +520,7 @@ window.addItem = async function() {
     });
     document.getElementById('add-desc').value = '';
     document.getElementById('add-valor').value = '';
+    if (tipoAtivo === 'investimento') await carregarTotalAportado();
     await carregarItems();
     setScreen('home', document.getElementById('tab-home'));
   } catch(e) { alert('Erro ao salvar. Verifique sua conexão.'); console.error(e); }
@@ -528,11 +534,21 @@ window.delItem = async function(id) {
       const snap = await getDocs(collection(db, 'lancamentos'));
       todosItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     }
+    await carregarTotalAportado();
     await carregarItems();
   } catch(e) { alert('Erro ao remover.'); console.error(e); }
 };
 
 // ===== PATRIMÔNIO (saldo real investido) =====
+async function carregarTotalAportado() {
+  try {
+    const snap = await getDocs(collection(db, 'lancamentos'));
+    totalAportado = snap.docs.reduce((s, d) => {
+      const i = d.data();
+      return normTipo(i.tipo) === 'investimento' ? s + num(i.valor) : s;
+    }, 0);
+  } catch(e) { console.error('Erro ao somar aportes:', e); totalAportado = 0; }
+}
 async function carregarPatrimonio() {
   try {
     const d = await getDoc(doc(db, 'config', 'patrimonio'));
@@ -599,14 +615,17 @@ function renderHome() {
 
   // Card de investimentos:
   //  - número grande = patrimônio real informado (inclui rendimentos)
-  //  - sub = aporte líquido do período (transferido p/ cofrinho - resgates), do extrato
+  //  - sub = rendimento líquido = patrimônio real - total aportado (todo histórico)
   const invAmount = document.getElementById('invest-amount');
   const invSub = document.getElementById('invest-sub');
-  const aporte = t.investimento; // líquido do mês (ou total, no consolidado)
+  const aporte = t.investimento; // líquido do período (mês ou consolidado)
   if (patrimonio != null) {
     invAmount.textContent = fmt(patrimonio);
-    const upd = patrimonioAtualizadoEm ? ' · atualizado em ' + patrimonioAtualizadoEm.toLocaleDateString('pt-BR') : '';
-    invSub.textContent = (consolidado ? 'Aportado total: ' : 'Aporte no mês: ') + fmt(aporte) + upd;
+    const rendido = patrimonio - totalAportado;
+    const positivo = rendido >= 0;
+    const seta = positivo ? '↑' : '↓';
+    const cor = positivo ? 'var(--green)' : 'var(--red)';
+    invSub.innerHTML = `<span style="color:${cor};font-weight:600;">${seta} ${fmt(Math.abs(rendido))}</span> <span style="color:var(--muted2);">rendido</span>`;
   } else {
     // sem patrimônio informado: cai no aporte calculado e convida a informar o saldo real
     invAmount.textContent = fmt(aporte);
@@ -720,7 +739,7 @@ window.setFiltroTipo = function(f, btn) {
 setTipo('saida');
 setPessoaLanc('Franklin');
 atualizarMesLabels();
-carregarPatrimonio().then(() => carregarItems());
+Promise.all([carregarPatrimonio(), carregarTotalAportado()]).then(() => carregarItems());
 </script>
 
 </body>
