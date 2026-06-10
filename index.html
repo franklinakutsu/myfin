@@ -41,35 +41,21 @@
     .month-bar button:disabled { opacity: 0.25; cursor: default; }
     .month-label { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; }
 
-    .pessoa-select { position: relative; margin-bottom: 36px; }
-    .pessoa-trigger {
-      display: flex; align-items: center; gap: 12px; cursor: pointer;
-      background: none; border: none; color: var(--text); font-family: inherit; padding: 0;
-    }
-    .avatar {
-      width: 44px; height: 44px; border-radius: 50%; background: var(--blue);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; font-weight: 600; color: #fff; flex-shrink: 0;
-    }
-    .pessoa-trigger .nome { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; }
-    .pessoa-trigger .chev { color: var(--muted); transition: transform 0.2s; display: flex; }
-    .pessoa-trigger.open .chev { transform: rotate(180deg); }
     .pessoa-menu {
-      position: absolute; top: 54px; left: 0; z-index: 30;
+      position: absolute; top: 28px; left: 0; z-index: 30;
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 6px; min-width: 180px;
+      border-radius: var(--radius-sm); padding: 6px; min-width: 150px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.5); display: none;
+      text-align: left;
     }
     .pessoa-menu.show { display: block; }
     .pessoa-option {
       display: flex; align-items: center; gap: 10px; padding: 10px 12px;
       border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 500;
-      transition: background 0.12s;
+      color: var(--text); transition: background 0.12s;
     }
     .pessoa-option:hover { background: var(--surface2); }
     .pessoa-option.sel { color: var(--blue-soft); }
-    .pessoa-option .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted2); }
-    .pessoa-option.sel .dot { background: var(--blue); }
 
     .saldo-block { margin-bottom: 8px; }
     .saldo-block .eyebrow {
@@ -80,13 +66,25 @@
     .saldo-block .amount.pos { color: var(--text); }
     .saldo-block .amount.neg { color: var(--red); }
 
-    .consolidado-row { text-align: right; margin: 12px 0 20px; min-height: 20px; }
+    .consolidado-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 12px 0 20px; min-height: 20px;
+    }
     .consolidado-link {
       font-size: 14px; color: var(--muted); cursor: pointer; transition: color 0.15s;
       display: inline-flex; align-items: center; gap: 6px;
     }
     .consolidado-link:hover { color: var(--text); }
     .consolidado-link.ativo { color: var(--blue-soft); }
+    .pessoa-link {
+      position: relative; font-size: 14px; color: var(--muted); cursor: pointer;
+      transition: color 0.15s; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .pessoa-link:hover { color: var(--text); }
+    .pessoa-link .chev { display: flex; transition: transform 0.2s; }
+    .pessoa-link.open { color: var(--text); }
+    .pessoa-link.open .chev { transform: rotate(180deg); }
+
 
     .card {
       background: var(--surface); border-radius: var(--radius);
@@ -233,25 +231,21 @@
       <button onclick="mudarMes(1)" aria-label="Próximo mês">›</button>
     </div>
 
-    <div class="pessoa-select">
-      <button class="pessoa-trigger" id="pessoa-trigger" onclick="togglePessoaMenu(event)">
-        <span class="avatar" id="avatar">F</span>
-        <span class="nome" id="pessoa-nome">Franklin</span>
-        <span class="chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-      </button>
-      <div class="pessoa-menu" id="pessoa-menu">
-        <div class="pessoa-option sel" onclick="setPessoaFiltro('Franklin')"><span class="dot"></span>Franklin</div>
-        <div class="pessoa-option" onclick="setPessoaFiltro('Airton')"><span class="dot"></span>Airton</div>
-        <div class="pessoa-option" onclick="setPessoaFiltro('Todos')"><span class="dot"></span>Todos</div>
-      </div>
-    </div>
-
     <div class="saldo-block">
       <div class="eyebrow">Saldo do mês</div>
       <div class="amount pos" id="saldo-amount">—</div>
     </div>
 
     <div class="consolidado-row">
+      <span class="pessoa-link" id="pessoa-link" onclick="togglePessoaMenu(event)">
+        <span id="pessoa-nome">Todos</span>
+        <span class="chev"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        <div class="pessoa-menu" id="pessoa-menu">
+          <div class="pessoa-option sel" onclick="setPessoaFiltro('Todos', event)">Todos</div>
+          <div class="pessoa-option" onclick="setPessoaFiltro('Franklin', event)">Franklin</div>
+          <div class="pessoa-option" onclick="setPessoaFiltro('Airton', event)">Airton</div>
+        </div>
+      </span>
       <span class="consolidado-link" id="consolidado-link" onclick="toggleConsolidado()">Ver consolidado</span>
     </div>
 
@@ -414,7 +408,7 @@ let tipoAtivo = 'saida';
 let pessoaLanc = 'Franklin';
 let noCartao = false;
 let parcelado = false;
-let pessoaFiltro = 'Franklin';
+let pessoaFiltro = 'Todos';
 let filtroTipo = 'todos';
 let screenAtiva = 'home';
 let consolidado = false;
@@ -489,19 +483,22 @@ function atualizarMesLabels() {
 window.togglePessoaMenu = function(e) {
   e.stopPropagation();
   document.getElementById('pessoa-menu').classList.toggle('show');
-  document.getElementById('pessoa-trigger').classList.toggle('open');
+  document.getElementById('pessoa-link').classList.toggle('open');
 };
 document.addEventListener('click', () => {
   document.getElementById('pessoa-menu').classList.remove('show');
-  document.getElementById('pessoa-trigger').classList.remove('open');
+  document.getElementById('pessoa-link').classList.remove('open');
 });
-window.setPessoaFiltro = function(p) {
+window.setPessoaFiltro = function(p, e) {
+  if (e) e.stopPropagation();
   pessoaFiltro = p;
   document.getElementById('pessoa-nome').textContent = p;
-  document.getElementById('avatar').textContent = p === 'Todos' ? '∑' : p[0];
   document.querySelectorAll('.pessoa-option').forEach(o => {
     o.classList.toggle('sel', o.textContent.trim() === p);
   });
+  // fecha o menu após escolher
+  document.getElementById('pessoa-menu').classList.remove('show');
+  document.getElementById('pessoa-link').classList.remove('open');
   renderHome();
   renderCategoriasHome();
 };
