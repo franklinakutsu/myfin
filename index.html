@@ -100,6 +100,13 @@
       text-transform: uppercase; font-weight: 500;
     }
     .card .card-amount { font-size: 24px; font-weight: 700; letter-spacing: -0.8px; }
+    .icon-btn {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; transition: color 0.15s, background 0.15s;
+    }
+    .icon-btn:hover { color: var(--text); background: var(--surface2); }
+    .icon-btn svg { width: 18px; height: 18px; }
     .card-amount.green { color: var(--green); }
     .card-amount.red { color: var(--red); }
     .card-amount.blue { color: var(--blue-soft); }
@@ -229,9 +236,13 @@
 
     <div class="card">
       <div class="card-head">
-        <span class="card-label">Investimentos no mês</span>
+        <span class="card-label">Investimentos</span>
+        <button class="icon-btn" onclick="editarPatrimonio()" aria-label="Atualizar saldo investido">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
       </div>
       <div class="card-amount blue" id="invest-amount">—</div>
+      <div class="card-sub" id="invest-sub"></div>
     </div>
 
     <div class="duo">
@@ -339,7 +350,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, getDoc, setDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDws4F_Jb-5ZvB92MN_hDJyYnh9Y76h4-8",
@@ -371,6 +382,8 @@ let consolidado = false;
 let mesAtual = new Date(); mesAtual.setDate(1);
 let items = [];
 let todosItems = [];
+let patrimonio = null;        // saldo real investido (informado pelo usuário)
+let patrimonioAtualizadoEm = null;
 
 // Converte qualquer valor (number, string "1.234,56" ou "1234.56") em número seguro.
 function num(v) {
@@ -519,6 +532,31 @@ window.delItem = async function(id) {
   } catch(e) { alert('Erro ao remover.'); console.error(e); }
 };
 
+// ===== PATRIMÔNIO (saldo real investido) =====
+async function carregarPatrimonio() {
+  try {
+    const d = await getDoc(doc(db, 'config', 'patrimonio'));
+    if (d.exists()) {
+      patrimonio = num(d.data().valor);
+      const upd = d.data().atualizadoEm;
+      patrimonioAtualizadoEm = upd ? (upd.toDate ? upd.toDate() : new Date(upd)) : null;
+    }
+  } catch(e) { console.error('Erro ao carregar patrimônio:', e); }
+}
+window.editarPatrimonio = async function() {
+  const atual = patrimonio != null ? patrimonio.toLocaleString('pt-BR', {minimumFractionDigits:2}) : '';
+  const novo = prompt('Saldo real investido hoje (R$):\n(inclui rendimentos — veja no app do banco)', atual);
+  if (novo === null) return;
+  const v = num(novo);
+  if (v < 0) { alert('Valor inválido.'); return; }
+  try {
+    await setDoc(doc(db, 'config', 'patrimonio'), { valor: v, atualizadoEm: new Date() });
+    patrimonio = v;
+    patrimonioAtualizadoEm = new Date();
+    renderHome();
+  } catch(e) { alert('Erro ao salvar.'); console.error(e); }
+};
+
 // ===== LOAD =====
 async function carregarItems() {
   try {
@@ -558,8 +596,22 @@ function renderHome() {
 
   document.getElementById('entradas-amount').textContent = fmt(t.entrada);
   document.getElementById('saidas-amount').textContent = fmt(t.saida);
-  // card de investimentos = soma dos lançamentos de investimento do período
-  document.getElementById('invest-amount').textContent = fmt(t.investimento);
+
+  // Card de investimentos:
+  //  - número grande = patrimônio real informado (inclui rendimentos)
+  //  - sub = aporte líquido do período (transferido p/ cofrinho - resgates), do extrato
+  const invAmount = document.getElementById('invest-amount');
+  const invSub = document.getElementById('invest-sub');
+  const aporte = t.investimento; // líquido do mês (ou total, no consolidado)
+  if (patrimonio != null) {
+    invAmount.textContent = fmt(patrimonio);
+    const upd = patrimonioAtualizadoEm ? ' · atualizado em ' + patrimonioAtualizadoEm.toLocaleDateString('pt-BR') : '';
+    invSub.textContent = (consolidado ? 'Aportado total: ' : 'Aporte no mês: ') + fmt(aporte) + upd;
+  } else {
+    // sem patrimônio informado: cai no aporte calculado e convida a informar o saldo real
+    invAmount.textContent = fmt(aporte);
+    invSub.textContent = 'Toque no lápis para informar o saldo real';
+  }
 }
 
 function renderExtrato() {
@@ -668,7 +720,7 @@ window.setFiltroTipo = function(f, btn) {
 setTipo('saida');
 setPessoaLanc('Franklin');
 atualizarMesLabels();
-carregarItems();
+carregarPatrimonio().then(() => carregarItems());
 </script>
 
 </body>
