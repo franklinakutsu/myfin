@@ -28,7 +28,6 @@
     .screen { display: none; padding: 0 var(--pad); }
     .screen.active { display: block; }
 
-    /* ===== MÊS NAV (topo, evidência) ===== */
     .month-bar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 20px 0 28px;
@@ -42,7 +41,6 @@
     .month-bar button:disabled { opacity: 0.25; cursor: default; }
     .month-label { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; }
 
-    /* ===== PESSOA DROPDOWN ===== */
     .pessoa-select { position: relative; margin-bottom: 36px; }
     .pessoa-trigger {
       display: flex; align-items: center; gap: 12px; cursor: pointer;
@@ -73,7 +71,6 @@
     .pessoa-option .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted2); }
     .pessoa-option.sel .dot { background: var(--blue); }
 
-    /* ===== SALDO (texto puro) ===== */
     .saldo-block { margin-bottom: 8px; }
     .saldo-block .eyebrow {
       font-size: 13px; color: var(--muted); letter-spacing: 0.8px;
@@ -83,7 +80,6 @@
     .saldo-block .amount.pos { color: var(--text); }
     .saldo-block .amount.neg { color: var(--red); }
 
-    /* ===== VER CONSOLIDADO ===== */
     .consolidado-row { text-align: right; margin: 12px 0 20px; min-height: 20px; }
     .consolidado-link {
       font-size: 14px; color: var(--muted); cursor: pointer; transition: color 0.15s;
@@ -92,7 +88,6 @@
     .consolidado-link:hover { color: var(--text); }
     .consolidado-link.ativo { color: var(--blue-soft); }
 
-    /* ===== CARDS ===== */
     .card {
       background: var(--surface); border-radius: var(--radius);
       padding: 20px; margin-bottom: 14px;
@@ -105,23 +100,14 @@
       text-transform: uppercase; font-weight: 500;
     }
     .card .card-amount { font-size: 24px; font-weight: 700; letter-spacing: -0.8px; }
-    .icon-btn {
-      background: none; border: none; color: var(--muted); cursor: pointer;
-      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-      border-radius: 50%; transition: color 0.15s, background 0.15s;
-    }
-    .icon-btn:hover { color: var(--text); background: var(--surface2); }
-    .icon-btn svg { width: 18px; height: 18px; }
-
     .card-amount.green { color: var(--green); }
     .card-amount.red { color: var(--red); }
-    .card-amount.blue { color: var(--text); }
+    .card-amount.blue { color: var(--blue-soft); }
 
     .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .duo .card-amount { font-size: 22px; }
     .card-sub { font-size: 12px; color: var(--muted2); margin-top: 6px; }
 
-    /* ===== FORM (Adicionar) ===== */
     .form-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 24px; }
     .field { margin-bottom: 16px; }
     .field-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
@@ -151,7 +137,6 @@
     .btn-primary:active { transform: scale(0.99); }
     .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* ===== FILTER CHIPS ===== */
     .filter-row { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; }
     .filter-row::-webkit-scrollbar { display: none; }
     .chip {
@@ -161,7 +146,6 @@
     }
     .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-    /* ===== LIST ===== */
     .empty { text-align: center; color: var(--muted2); font-size: 14px; padding: 60px 20px; }
     .empty span { display: block; font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
     .tx { display: flex; align-items: center; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--border); }
@@ -184,7 +168,6 @@
     .tx-del:hover { color: var(--red); }
     .loading { text-align: center; color: var(--muted); font-size: 13px; padding: 40px 0; }
 
-    /* ===== RESUMO ===== */
     .sec { margin-bottom: 28px; }
     .sec h3 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; font-weight: 500; }
     .line { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 15px; }
@@ -192,7 +175,6 @@
     .bar-wrap { width: 100%; background: var(--surface2); border-radius: 4px; height: 5px; margin-top: 7px; }
     .bar { height: 5px; border-radius: 4px; background: var(--red); }
 
-    /* ===== BOTTOM NAV ===== */
     .tabbar {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
       display: flex; background: rgba(18,18,20,0.92);
@@ -237,7 +219,7 @@
     </div>
 
     <div class="saldo-block">
-      <div class="eyebrow">Saldo</div>
+      <div class="eyebrow">Saldo do mês</div>
       <div class="amount pos" id="saldo-amount">—</div>
     </div>
 
@@ -247,13 +229,9 @@
 
     <div class="card">
       <div class="card-head">
-        <span class="card-label">Investimentos</span>
-        <button class="icon-btn" onclick="editarPatrimonio()" aria-label="Atualizar investimentos">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        </button>
+        <span class="card-label">Investimentos no mês</span>
       </div>
       <div class="card-amount blue" id="invest-amount">—</div>
-      <div class="card-sub" id="invest-sub"></div>
     </div>
 
     <div class="duo">
@@ -361,7 +339,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, setDoc, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDws4F_Jb-5ZvB92MN_hDJyYnh9Y76h4-8",
@@ -394,7 +372,19 @@ let mesAtual = new Date(); mesAtual.setDate(1);
 let items = [];
 let todosItems = [];
 
-function fmt(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+// Converte qualquer valor (number, string "1.234,56" ou "1234.56") em número seguro.
+function num(v) {
+  if (typeof v === 'number') return isFinite(v) ? v : 0;
+  if (typeof v === 'string') {
+    let s = v.trim();
+    // formato brasileiro: remove pontos de milhar e troca vírgula decimal
+    if (/,\d{1,2}$/.test(s)) s = s.replace(/\./g, '').replace(',', '.');
+    const n = parseFloat(s);
+    return isFinite(n) ? n : 0;
+  }
+  return 0;
+}
+function fmt(v) { return 'R$ ' + num(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function mesKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 function mesLabel(d) { return cap(d.toLocaleDateString('pt-BR', { month: 'long' })) + '/' + d.getFullYear(); }
@@ -407,6 +397,17 @@ function dataFmt(ts) {
 function normTipo(t) {
   if (t === 'receita') return 'entrada';
   if (t === 'gasto') return 'saida';
+  return t;
+}
+
+// Totaliza uma lista por tipo, sempre como número.
+function totaisPorTipo(lista) {
+  const t = { entrada: 0, saida: 0, investimento: 0 };
+  lista.forEach(i => {
+    const tp = normTipo(i.tipo);
+    if (t[tp] === undefined) return;
+    t[tp] += num(i.valor);
+  });
   return t;
 }
 
@@ -443,6 +444,7 @@ window.setPessoaFiltro = function(p) {
     o.classList.toggle('sel', o.textContent.trim() === p);
   });
   renderHome();
+  renderResumo();
 };
 
 // ===== TIPO / PESSOA (Adicionar) =====
@@ -488,9 +490,9 @@ window.toggleConsolidado = async function() {
 // ===== ADD / DELETE =====
 window.addItem = async function() {
   const desc = document.getElementById('add-desc').value.trim();
-  const valor = parseFloat(document.getElementById('add-valor').value);
+  const valor = num(document.getElementById('add-valor').value);
   const cat = document.getElementById('add-categoria').value;
-  if (!desc || isNaN(valor) || valor <= 0) { alert('Preencha descrição e valor.'); return; }
+  if (!desc || valor <= 0) { alert('Preencha descrição e um valor maior que zero.'); return; }
   const btn = document.getElementById('btn-add');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
@@ -509,41 +511,12 @@ window.delItem = async function(id) {
   if (!confirm('Remover este lançamento?')) return;
   try {
     await deleteDoc(doc(db, 'lancamentos', id));
-    await carregarItems();
     if (consolidado) {
       const snap = await getDocs(collection(db, 'lancamentos'));
       todosItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderHome();
     }
+    await carregarItems();
   } catch(e) { alert('Erro ao remover.'); console.error(e); }
-};
-
-// ===== PATRIMÔNIO =====
-let patrimonio = 0;
-async function carregarPatrimonio() {
-  try {
-    const d = await getDoc(doc(db, 'config', 'patrimonio'));
-    if (d.exists()) {
-      patrimonio = d.data().valor || 0;
-      const upd = d.data().atualizadoEm;
-      if (upd) {
-        const dt = upd.toDate ? upd.toDate() : new Date(upd);
-        document.getElementById('invest-sub').textContent = 'Atualizado em ' + dt.toLocaleDateString('pt-BR');
-      }
-    }
-  } catch(e) { console.error(e); }
-}
-window.editarPatrimonio = async function() {
-  const novo = prompt('Valor atual investido (R$):', patrimonio || '');
-  if (novo === null) return;
-  const v = parseFloat(String(novo).replace(/\./g,'').replace(',','.'));
-  if (isNaN(v) || v < 0) { alert('Valor inválido.'); return; }
-  try {
-    await setDoc(doc(db, 'config', 'patrimonio'), { valor: v, atualizadoEm: new Date() });
-    patrimonio = v;
-    document.getElementById('invest-sub').textContent = 'Atualizado em ' + new Date().toLocaleDateString('pt-BR');
-    renderHome();
-  } catch(e) { alert('Erro ao salvar.'); console.error(e); }
 };
 
 // ===== LOAD =====
@@ -571,17 +544,22 @@ function filtrarPorPessoa(lista) {
 }
 
 function renderHome() {
+  // base respeita a pessoa selecionada, inclusive no modo consolidado
   let base = consolidado ? todosItems : items;
-  if (!consolidado) base = filtrarPorPessoa(base);
-  const t = { entrada: 0, saida: 0, investimento: 0 };
-  base.forEach(i => { t[normTipo(i.tipo)] += i.valor; });
-  const saldo = t.entrada - t.saida - t.investimento;
+  base = filtrarPorPessoa(base);
+
+  const t = totaisPorTipo(base);
+  // saldo = entradas - saidas (investimento NÃO afeta o saldo)
+  const saldo = t.entrada - t.saida;
+
   const sa = document.getElementById('saldo-amount');
   sa.textContent = fmt(saldo);
   sa.className = 'amount ' + (saldo >= 0 ? 'pos' : 'neg');
+
   document.getElementById('entradas-amount').textContent = fmt(t.entrada);
   document.getElementById('saidas-amount').textContent = fmt(t.saida);
-  document.getElementById('invest-amount').textContent = fmt(patrimonio);
+  // card de investimentos = soma dos lançamentos de investimento do período
+  document.getElementById('invest-amount').textContent = fmt(t.investimento);
 }
 
 function renderExtrato() {
@@ -619,18 +597,27 @@ function renderResumo() {
     el.innerHTML = '<div class="empty"><span>○</span>Sem dados neste mês.</div>';
     return;
   }
-  const saidas = base.filter(i => normTipo(i.tipo) === 'saida');
-  const totalSaidas = saidas.reduce((s,i)=>s+i.valor,0);
-  const porCat = {};
-  saidas.forEach(i => { porCat[i.categoria] = (porCat[i.categoria]||0)+i.valor; });
-  const cats = Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
-  const totalEntradas = base.filter(i=>normTipo(i.tipo)==='entrada').reduce((s,i)=>s+i.valor,0);
-  const totalInvest = base.filter(i=>normTipo(i.tipo)==='investimento').reduce((s,i)=>s+i.valor,0);
-  const saldo = totalEntradas - totalSaidas - totalInvest;
+  const t = totaisPorTipo(base);
+  const totalEntradas = t.entrada;
+  const totalSaidas = t.saida;
+  const totalInvest = t.investimento;
+  // saldo = entradas - saidas (investimento não afeta saldo)
+  const saldo = totalEntradas - totalSaidas;
+  // taxa de poupança = quanto da entrada foi destinado a investimento
   const taxa = totalEntradas > 0 ? ((totalInvest/totalEntradas)*100).toFixed(0) : 0;
 
+  const saidas = base.filter(i => normTipo(i.tipo) === 'saida');
+  const porCat = {};
+  saidas.forEach(i => { porCat[i.categoria] = (porCat[i.categoria]||0) + num(i.valor); });
+  const cats = Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
+
   const porPessoa = { Franklin: 0, Airton: 0 };
-  base.forEach(i => { if (normTipo(i.tipo)==='saida') { const p=i.pessoa||'Franklin'; porPessoa[p]=(porPessoa[p]||0)+i.valor; } });
+  base.forEach(i => {
+    if (normTipo(i.tipo)==='saida') {
+      const p = i.pessoa || 'Franklin';
+      porPessoa[p] = (porPessoa[p]||0) + num(i.valor);
+    }
+  });
 
   el.innerHTML = `
     <div class="sec">
@@ -681,7 +668,7 @@ window.setFiltroTipo = function(f, btn) {
 setTipo('saida');
 setPessoaLanc('Franklin');
 atualizarMesLabels();
-carregarPatrimonio().then(() => carregarItems());
+carregarItems();
 </script>
 
 </body>
