@@ -259,6 +259,8 @@
         <div class="card-amount red" id="saidas-amount">—</div>
       </div>
     </div>
+
+    <div id="home-categorias" style="margin-top:8px;"></div>
   </section>
 
   <!-- ===== EXTRATO ===== -->
@@ -321,16 +323,6 @@
     <button class="btn-primary" onclick="addItem()" id="btn-add">Adicionar lançamento</button>
   </section>
 
-  <!-- ===== RESUMO ===== -->
-  <section class="screen" id="screen-resumo">
-    <div class="month-bar">
-      <button onclick="mudarMes(-1)" aria-label="Mês anterior">‹</button>
-      <span class="month-label" id="ml-resumo">—</span>
-      <button onclick="mudarMes(1)" aria-label="Próximo mês">›</button>
-    </div>
-    <div id="resumo-content"><div class="loading">Carregando...</div></div>
-  </section>
-
 </main>
 
 <nav class="tabbar">
@@ -338,17 +330,13 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     <span>Home</span>
   </button>
-  <button class="tab" id="tab-extrato" onclick="setScreen('extrato', this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-    <span>Extrato</span>
-  </button>
   <button class="tab add-tab" id="tab-add" onclick="setScreen('add', this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     <span>Adicionar</span>
   </button>
-  <button class="tab" id="tab-resumo" onclick="setScreen('resumo', this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    <span>Resumo</span>
+  <button class="tab" id="tab-extrato" onclick="setScreen('extrato', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <span>Extrato</span>
   </button>
 </nav>
 
@@ -438,7 +426,7 @@ window.mudarMes = function(delta) {
 };
 function atualizarMesLabels() {
   const l = mesLabel(mesAtual);
-  ['home','extrato','add','resumo'].forEach(s => {
+  ['home','extrato','add'].forEach(s => {
     const el = document.getElementById('ml-' + s);
     if (el) el.textContent = l;
   });
@@ -462,7 +450,7 @@ window.setPessoaFiltro = function(p) {
     o.classList.toggle('sel', o.textContent.trim() === p);
   });
   renderHome();
-  renderResumo();
+  renderCategoriasHome();
 };
 
 // ===== TIPO / PESSOA (Adicionar) =====
@@ -503,6 +491,7 @@ window.toggleConsolidado = async function() {
     monthBar.style.pointerEvents = 'auto';
   }
   renderHome();
+  renderCategoriasHome();
 };
 
 // ===== ADD / DELETE =====
@@ -590,7 +579,7 @@ async function carregarItems() {
 }
 
 // ===== RENDER =====
-function renderTudo() { renderHome(); renderExtrato(); renderResumo(); }
+function renderTudo() { renderHome(); renderExtrato(); renderCategoriasHome(); }
 
 function filtrarPorPessoa(lista) {
   if (pessoaFiltro === 'Todos') return lista;
@@ -661,53 +650,22 @@ function renderExtrato() {
   }).join('');
 }
 
-function renderResumo() {
-  const el = document.getElementById('resumo-content');
-  const base = filtrarPorPessoa(items);
-  if (base.length === 0) {
-    el.innerHTML = '<div class="empty"><span>○</span>Sem dados neste mês.</div>';
-    return;
-  }
-  const t = totaisPorTipo(base);
-  const totalEntradas = t.entrada;
-  const totalSaidas = t.saida;
-  const totalInvest = t.investimento;
-  // saldo = entradas - saidas (investimento não afeta saldo)
-  const saldo = totalEntradas - totalSaidas;
-  // taxa de poupança = quanto da entrada foi destinado a investimento
-  const taxa = totalEntradas > 0 ? ((totalInvest/totalEntradas)*100).toFixed(0) : 0;
+function renderCategoriasHome() {
+  const el = document.getElementById('home-categorias');
+  let base = consolidado ? todosItems : items;
+  base = filtrarPorPessoa(base);
 
   const saidas = base.filter(i => normTipo(i.tipo) === 'saida');
+  const totalSaidas = saidas.reduce((s,i)=>s+num(i.valor),0);
+  if (saidas.length === 0) { el.innerHTML = ''; return; }
+
   const porCat = {};
   saidas.forEach(i => { porCat[i.categoria] = (porCat[i.categoria]||0) + num(i.valor); });
   const cats = Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
 
-  const porPessoa = { Franklin: 0, Airton: 0 };
-  base.forEach(i => {
-    if (normTipo(i.tipo)==='saida') {
-      const p = i.pessoa || 'Franklin';
-      porPessoa[p] = (porPessoa[p]||0) + num(i.valor);
-    }
-  });
-
   el.innerHTML = `
-    <div class="sec">
-      <h3>Visão geral</h3>
-      <div class="line"><span>Entradas</span><span style="color:var(--green);font-weight:600;">${fmt(totalEntradas)}</span></div>
-      <div class="line"><span>Saídas</span><span style="color:var(--red);font-weight:600;">${fmt(totalSaidas)}</span></div>
-      <div class="line"><span>Investido</span><span style="color:var(--blue-soft);font-weight:600;">${fmt(totalInvest)}</span></div>
-      <div class="line"><span>Saldo</span><span style="color:${saldo>=0?'var(--green)':'var(--red)'};font-weight:600;">${fmt(saldo)}</span></div>
-      <div class="line"><span>Taxa de poupança</span><span style="font-weight:600;">${taxa}%</span></div>
-    </div>
-    ${(pessoaFiltro==='Todos') ? `
-    <div class="sec">
-      <h3>Saídas por pessoa</h3>
-      <div class="line"><span>Franklin</span><span style="color:var(--red);font-weight:600;">${fmt(porPessoa.Franklin||0)}</span></div>
-      <div class="line"><span>Airton</span><span style="color:var(--red);font-weight:600;">${fmt(porPessoa.Airton||0)}</span></div>
-    </div>` : ''}
-    ${cats.length>0 ? `
-    <div class="sec">
-      <h3>Saídas por categoria</h3>
+    <div class="card">
+      <div class="card-head"><span class="card-label">Saídas por categoria</span></div>
       ${cats.map(([cat,val])=>{
         const pct = totalSaidas>0 ? ((val/totalSaidas)*100).toFixed(0) : 0;
         return `<div style="padding:12px 0;border-bottom:1px solid var(--border);">
@@ -715,14 +673,14 @@ function renderResumo() {
           <div style="display:flex;align-items:center;gap:8px;margin-top:7px;"><div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div><span style="font-size:11px;color:var(--muted2);min-width:30px;">${pct}%</span></div>
         </div>`;
       }).join('')}
-    </div>` : ''}
+    </div>
   `;
 }
 
 // ===== NAV =====
 window.setScreen = function(s, btn) {
   screenAtiva = s;
-  ['home','extrato','add','resumo'].forEach(x => {
+  ['home','extrato','add'].forEach(x => {
     document.getElementById('screen-'+x).classList.toggle('active', x===s);
   });
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
