@@ -55,10 +55,7 @@
     .saldo-block .amount { font-size: 40px; font-weight: 700; letter-spacing: -1.5px; }
     .saldo-block .amount.pos { color: var(--text); }
     .saldo-block .amount.neg { color: var(--red); }
-    .consolidado-row { display: flex; align-items: center; justify-content: space-between; margin: 12px 0 20px; min-height: 20px; }
-    .consolidado-link { font-size: 14px; color: var(--muted); cursor: pointer; transition: color 0.15s; display: inline-flex; align-items: center; gap: 6px; }
-    .consolidado-link:hover { color: var(--text); }
-    .consolidado-link.ativo { color: var(--blue-soft); }
+    .pessoa-row { display: flex; align-items: center; margin: 12px 0 20px; min-height: 20px; }
     .pessoa-link { position: relative; font-size: 14px; color: var(--muted); cursor: pointer; transition: color 0.15s; display: inline-flex; align-items: center; gap: 5px; }
     .pessoa-link:hover { color: var(--text); }
     .pessoa-link .chev { display: flex; transition: transform 0.2s; }
@@ -130,7 +127,6 @@
     .line:last-child { border-bottom: none; }
     .bar-wrap { width: 100%; background: var(--surface2); border-radius: 4px; height: 5px; margin-top: 7px; }
     .bar { height: 5px; border-radius: 4px; background: var(--red); }
-    .orc-header { margin-bottom: 20px; }
     .orc-hero { background: var(--surface); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; }
     .orc-hero-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
     .orc-hero-label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; }
@@ -179,10 +175,10 @@
       <button onclick="mudarMes(1)">›</button>
     </div>
     <div class="saldo-block">
-      <div class="eyebrow" id="saldo-eyebrow">Saldo do mês</div>
+      <div class="eyebrow">Saldo do mês</div>
       <div class="amount pos" id="saldo-amount">—</div>
     </div>
-    <div class="consolidado-row">
+    <div class="pessoa-row">
       <span class="pessoa-link" id="pessoa-link" onclick="togglePessoaMenu(event)">
         <span id="pessoa-nome">Todos</span>
         <span class="chev"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
@@ -192,7 +188,6 @@
           <div class="pessoa-option" onclick="setPessoaFiltro('Airton',event)">Airton</div>
         </div>
       </span>
-      <span class="consolidado-link" id="consolidado-link" onclick="toggleConsolidado()">Ver consolidado</span>
     </div>
     <div class="card">
       <div class="card-head">
@@ -383,13 +378,11 @@ const ORC_DEFAULT = [
 let tipoAtivo = 'saida', pessoaLanc = 'Franklin';
 let noCartao = false, parcelado = false;
 let pessoaFiltro = 'Todos', filtroTipo = 'todos', screenAtiva = 'home';
-let consolidado = false;
 let mesAtual = new Date(); mesAtual.setDate(1);
-let items = [], todosItems = [];
+let items = [];
 let patrimonio = null, patrimonioAtualizadoEm = null, totalAportado = 0;
 let orcRendaBase = 5000;
 let orcConfig = null;
-let saldoInicialConta = null;
 
 function num(v) {
   if (typeof v === 'number') return isFinite(v) ? v : 0;
@@ -401,14 +394,12 @@ function num(v) {
   return 0;
 }
 function fmt(v) { return 'R$ ' + num(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function fmtPct(v) { return num(v).toFixed(0) + '%'; }
 function mesKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
 function cap(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
 function mesLabel(d) { return cap(d.toLocaleDateString('pt-BR',{month:'long'})) + '/' + d.getFullYear(); }
 function dataFmt(ts) { if(!ts) return ''; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
 function normTipo(t) { if(t==='receita') return 'entrada'; if(t==='gasto') return 'saida'; return t; }
 function ehNeutra(i) { return CATS_NEUTRAS.includes(i.categoria); }
-function ehMovimentoConta(i) { return !!i.fitid; }
 function totaisPorTipo(lista) {
   const t={entrada:0,saida:0,investimento:0};
   lista.forEach(i=>{ if(ehNeutra(i)) return; const tp=normTipo(i.tipo); if(t[tp]!==undefined) t[tp]+=num(i.valor); });
@@ -416,7 +407,6 @@ function totaisPorTipo(lista) {
 }
 
 window.mudarMes = function(delta) {
-  if(consolidado) return;
   mesAtual.setMonth(mesAtual.getMonth()+delta);
   atualizarMesLabels(); carregarItems();
 };
@@ -469,21 +459,6 @@ function atualizarPreviaParcela() {
 window.atualizarPreviaParcela=atualizarPreviaParcela;
 window.setPessoaLanc=function(p){ pessoaLanc=p; ['Franklin','Airton'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===p?' on-invest':''); }); };
 
-window.toggleConsolidado=async function(){
-  consolidado=!consolidado;
-  const link=document.getElementById('consolidado-link'), mb=document.getElementById('home-month-bar');
-  const eyebrow=document.getElementById('saldo-eyebrow');
-  if(consolidado){
-    link.textContent='Ver por mês'; link.classList.add('ativo'); mb.style.opacity='0.3'; mb.style.pointerEvents='none';
-    eyebrow.textContent='Saldo da conta';
-    try{ const snap=await getDocs(collection(db,'lancamentos')); todosItems=snap.docs.map(d=>({id:d.id,...d.data()})); }catch(e){console.error(e);todosItems=[];}
-  } else {
-    link.textContent='Ver consolidado'; link.classList.remove('ativo'); mb.style.opacity='1'; mb.style.pointerEvents='auto';
-    eyebrow.textContent='Saldo do mês';
-  }
-  renderHome(); renderCategoriasHome();
-};
-
 function mesKeyOffset(mk,k){ const[a,m]=mk.split('-').map(Number); return mesKey(new Date(a,(m-1)+k,1)); }
 window.addItem=async function(){
   const desc=document.getElementById('add-desc').value.trim();
@@ -516,7 +491,7 @@ window.addItem=async function(){
   btn.disabled=false; btn.textContent='Adicionar lançamento';
 };
 window.delItem=async function(id){
-  const item=items.find(x=>x.id===id)||todosItems.find(x=>x.id===id);
+  const item=items.find(x=>x.id===id);
   const grupo=item&&item.parcelaGrupoId;
   if(grupo){
     const total=item.parcelaTotal||'?';
@@ -524,7 +499,6 @@ window.delItem=async function(id){
     try{
       if(escolha){const snap=await getDocs(collection(db,'lancamentos'));const doGrupo=snap.docs.filter(d=>d.data().parcelaGrupoId===grupo);for(const d of doGrupo)await deleteDoc(doc(db,'lancamentos',d.id));}
       else{await deleteDoc(doc(db,'lancamentos',id));}
-      if(consolidado){const snap=await getDocs(collection(db,'lancamentos'));todosItems=snap.docs.map(d=>({id:d.id,...d.data()}));}
       await carregarTotalAportado(); await carregarItems();
     }catch(e){alert('Erro ao remover.');console.error(e);}
     return;
@@ -532,7 +506,6 @@ window.delItem=async function(id){
   if(!confirm('Remover este lançamento?')) return;
   try{
     await deleteDoc(doc(db,'lancamentos',id));
-    if(consolidado){const snap=await getDocs(collection(db,'lancamentos'));todosItems=snap.docs.map(d=>({id:d.id,...d.data()}));}
     await carregarTotalAportado(); await carregarItems();
   }catch(e){alert('Erro ao remover.');console.error(e);}
 };
@@ -553,11 +526,6 @@ window.editarPatrimonio=async function(){
   try{await setDoc(doc(db,'config','patrimonio'),{valor:v,atualizadoEm:new Date()});patrimonio=v;patrimonioAtualizadoEm=new Date();renderHome();}
   catch(e){alert('Erro ao salvar.');console.error(e);}
 };
-
-async function carregarSaldoInicial(){
-  try{ const d=await getDoc(doc(db,'config','saldoConta')); if(d.exists()) saldoInicialConta=num(d.data().saldoInicial); }
-  catch(e){console.error(e);}
-}
 
 async function carregarOrcConfig(){
   try{
@@ -596,27 +564,10 @@ function renderTudo(){ renderHome(); renderExtrato(); renderCategoriasHome(); re
 function filtrarPorPessoa(lista){ if(pessoaFiltro==='Todos') return lista; return lista.filter(i=>(i.pessoa||'Franklin')===pessoaFiltro); }
 
 function renderHome(){
-  let base=consolidado?todosItems:items; base=filtrarPorPessoa(base);
+  const base=filtrarPorPessoa(items);
   const t=totaisPorTipo(base);
+  const saldo=t.entrada-t.saida;
   const sa=document.getElementById('saldo-amount');
-  let saldo;
-  if(consolidado){
-    // saldo real da conta = saldo inicial + movimentos da conta corrente (com fitid).
-    // O golpe (neutra) É incluído aqui porque o dinheiro saiu de verdade da conta —
-    // a exclusão de "neutra" vale só para os totais de gasto, não para o saldo bancário.
-    const mov=base.filter(i=>ehMovimentoConta(i));
-    let liq=0;
-    mov.forEach(i=>{
-      const tp=normTipo(i.tipo);
-      if(ehNeutra(i)) { liq-=num(i.valor); return; } // golpe = saída real da conta
-      if(tp==='entrada') liq+=num(i.valor);
-      else if(tp==='saida') liq-=num(i.valor);
-      else if(tp==='investimento') liq-=num(i.valor);
-    });
-    saldo=(saldoInicialConta!=null?saldoInicialConta:0)+liq;
-  } else {
-    saldo=t.entrada-t.saida;
-  }
   sa.textContent=fmt(saldo); sa.className='amount '+(saldo>=0?'pos':'neg');
   document.getElementById('entradas-amount').textContent=fmt(t.entrada);
   document.getElementById('saidas-amount').textContent=fmt(t.saida);
@@ -651,7 +602,7 @@ function renderExtrato(){
 
 function renderCategoriasHome(){
   const el=document.getElementById('home-categorias');
-  let base=consolidado?todosItems:items; base=filtrarPorPessoa(base);
+  const base=filtrarPorPessoa(items);
   const saidas=base.filter(i=>normTipo(i.tipo)==='saida'&&!ehNeutra(i));
   const totalSaidas=saidas.reduce((s,i)=>s+num(i.valor),0);
   if(saidas.length===0){el.innerHTML='';return;}
@@ -662,14 +613,10 @@ function renderCategoriasHome(){
 }
 
 function renderOrcamento(){
-  const renda = orcRendaBase;
   const t = totaisPorTipo(filtrarPorPessoa(items));
-  const rendaReal = t.entrada > 0 ? t.entrada : renda;
-  const rendaUsada = rendaReal;
-  const rvEl = document.getElementById('orc-renda-val');
-  const rsEl = document.getElementById('orc-renda-sub');
-  rvEl.textContent = fmt(rendaUsada);
-  rsEl.textContent = t.entrada > 0 ? `entrada real do mês` : `renda base configurada`;
+  const rendaUsada = t.entrada > 0 ? t.entrada : orcRendaBase;
+  document.getElementById('orc-renda-val').textContent = fmt(rendaUsada);
+  document.getElementById('orc-renda-sub').textContent = t.entrada > 0 ? 'entrada real do mês' : 'renda base configurada';
   const saldoLivre = t.entrada - t.saida;
   const slEl = document.getElementById('orc-livre-val');
   slEl.textContent = fmt(saldoLivre);
@@ -680,24 +627,17 @@ function renderOrcamento(){
     if(normTipo(i.tipo) !== 'saida' || ehNeutra(i)) return;
     gastosCat[i.categoria] = (gastosCat[i.categoria]||0) + num(i.valor);
   });
-  const investMes = t.investimento;
   const linhas = ORC_DEFAULT.map(l => {
-    let gasto = 0;
-    if(l.nome === 'Investimentos') { gasto = investMes; }
-    else { l.cats.forEach(c => { gasto += gastosCat[c] || 0; }); }
+    let gasto = l.nome === 'Investimentos' ? t.investimento : l.cats.reduce((s,c)=>s+(gastosCat[c]||0),0);
     const limite = rendaUsada * l.pct / 100;
     const pctGasto = limite > 0 ? gasto / limite : 0;
     const status = pctGasto > 1 ? 'over' : pctGasto > 0.8 ? 'warn' : 'ok';
-    const barW = Math.min(pctGasto * 100, 100).toFixed(1);
-    return { ...l, gasto, limite, pctGasto, status, barW };
+    return { ...l, gasto, limite, pctGasto, status, barW: Math.min(pctGasto*100,100).toFixed(1) };
   });
-  const lista = document.getElementById('orc-lista');
-  lista.innerHTML = linhas.map(l => {
-    if(l.pct === 0) {
-      return `<div class="orc-item"><div class="orc-item-top"><div class="orc-item-left"><span class="orc-item-nome">${l.nome}</span><span class="orc-item-pct">sem teto definido · informativo</span></div><div class="orc-item-right"><div class="orc-item-gasto ok">${fmt(l.gasto)}</div></div></div></div>`;
-    }
-    return `<div class="orc-item"><div class="orc-item-top"><div class="orc-item-left"><span class="orc-item-nome">${l.nome}</span><span class="orc-item-pct">${l.pct}% da renda · limite ${fmt(l.limite)}</span></div><div class="orc-item-right"><div class="orc-item-gasto ${l.status}">${fmt(l.gasto)}</div><div class="orc-item-limite">${(l.pctGasto*100).toFixed(0)}% do limite</div></div></div><div class="orc-bar-wrap"><div class="orc-bar ${l.status}" style="width:${l.barW}%"></div></div></div>`;
-  }).join('');
+  document.getElementById('orc-lista').innerHTML = linhas.map(l => l.pct === 0
+    ? `<div class="orc-item"><div class="orc-item-top"><div class="orc-item-left"><span class="orc-item-nome">${l.nome}</span><span class="orc-item-pct">sem teto definido · informativo</span></div><div class="orc-item-right"><div class="orc-item-gasto ok">${fmt(l.gasto)}</div></div></div></div>`
+    : `<div class="orc-item"><div class="orc-item-top"><div class="orc-item-left"><span class="orc-item-nome">${l.nome}</span><span class="orc-item-pct">${l.pct}% da renda · limite ${fmt(l.limite)}</span></div><div class="orc-item-right"><div class="orc-item-gasto ${l.status}">${fmt(l.gasto)}</div><div class="orc-item-limite">${(l.pctGasto*100).toFixed(0)}% do limite</div></div></div><div class="orc-bar-wrap"><div class="orc-bar ${l.status}" style="width:${l.barW}%"></div></div></div>`
+  ).join('');
 }
 
 window.setScreen=function(s,btn){
@@ -713,7 +653,7 @@ window.setFiltroTipo=function(f,btn){
 };
 
 setTipo('saida'); setPessoaLanc('Franklin'); atualizarMesLabels();
-Promise.all([carregarPatrimonio(), carregarTotalAportado(), carregarOrcConfig(), carregarSaldoInicial()])
+Promise.all([carregarPatrimonio(), carregarTotalAportado(), carregarOrcConfig()])
   .then(() => carregarItems());
 </script>
 </body>
