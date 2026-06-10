@@ -421,10 +421,11 @@ const ORC_MAP = {
 const ORC_DEFAULT = [
   { nome: 'Moradia',           pct: 55, cats: ['Moradia'] },
   { nome: 'Internet & Celular',pct:  6, cats: ['Celulares','Assinaturas'] },
-  { nome: 'Saúde',             pct:  3, cats: ['Saúde'] },
+  { nome: 'Saúde & Academia',  pct:  3, cats: ['Saúde'] },
   { nome: 'Transporte',        pct:  5, cats: ['Transporte'] },
-  { nome: 'Lazer & Pessoal',   pct:  7, cats: ['Lazer','Alimentação','Vestuário','Pix','Outros'] },
-  { nome: 'Investimentos',     pct: 20, cats: [] }, // monitorado separado
+  { nome: 'Lazer & Pessoal',   pct:  7, cats: ['Lazer','Alimentação','Vestuário','Outros'] },
+  { nome: 'Pix',               pct:  0, cats: ['Pix'] },
+  { nome: 'Investimentos',     pct: 20, cats: [] },
   { nome: 'Fatura do cartão',  pct:  4, cats: ['Cartão de crédito'] },
 ];
 
@@ -744,7 +745,23 @@ function renderOrcamento(){
   });
 
   const lista = document.getElementById('orc-lista');
-  lista.innerHTML = linhas.map(l => `
+  lista.innerHTML = linhas.map(l => {
+    if(l.pct === 0) {
+      // linha informativa sem teto (ex: Pix)
+      return `
+      <div class="orc-item">
+        <div class="orc-item-top">
+          <div class="orc-item-left">
+            <span class="orc-item-nome">${l.nome}</span>
+            <span class="orc-item-pct">sem teto definido · informativo</span>
+          </div>
+          <div class="orc-item-right">
+            <div class="orc-item-gasto ok">${fmt(l.gasto)}</div>
+          </div>
+        </div>
+      </div>`;
+    }
+    return `
     <div class="orc-item">
       <div class="orc-item-top">
         <div class="orc-item-left">
@@ -759,8 +776,8 @@ function renderOrcamento(){
       <div class="orc-bar-wrap">
         <div class="orc-bar ${l.status}" style="width:${l.barW}%"></div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 // ===== NAV =====
