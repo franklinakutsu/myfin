@@ -127,20 +127,6 @@
     .line:last-child { border-bottom: none; }
     .bar-wrap { width: 100%; background: var(--surface2); border-radius: 4px; height: 5px; margin-top: 7px; }
     .bar { height: 5px; border-radius: 4px; background: var(--red); }
-    .orc-hero { background: var(--surface); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; }
-    .orc-hero-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-    .orc-hero-label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; }
-    .orc-hero-edit { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px; font-family: inherit; padding: 0; transition: color 0.15s; }
-    .orc-hero-edit:hover { color: var(--text); }
-    .orc-renda-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-    .orc-renda-val { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; }
-    .orc-renda-sub { font-size: 13px; color: var(--muted2); }
-    .orc-livre { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    .orc-livre-label { font-size: 13px; color: var(--muted); }
-    .orc-livre-val { font-size: 16px; font-weight: 700; }
-    .orc-livre-val.ok { color: var(--green); }
-    .orc-livre-val.warn { color: var(--amber); }
-    .orc-livre-val.over { color: var(--red); }
     .orc-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
     .orc-item:last-child { border-bottom: none; }
     .orc-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -217,20 +203,6 @@
       <button onclick="mudarMes(-1)">‹</button>
       <span class="month-label" id="ml-orc">—</span>
       <button onclick="mudarMes(1)">›</button>
-    </div>
-    <div class="orc-hero">
-      <div class="orc-hero-top">
-        <span class="orc-hero-label">Renda do mês</span>
-        <button class="orc-hero-edit" onclick="editarRendaOrc()">Editar renda base</button>
-      </div>
-      <div class="orc-renda-row">
-        <span class="orc-renda-val" id="orc-renda-val">—</span>
-        <span class="orc-renda-sub" id="orc-renda-sub"></span>
-      </div>
-      <div class="orc-livre">
-        <span class="orc-livre-label">Saldo livre (entradas − saídas)</span>
-        <span class="orc-livre-val ok" id="orc-livre-val">—</span>
-      </div>
     </div>
     <div class="card" id="orc-lista">
       <div class="loading">Carregando...</div>
@@ -382,7 +354,6 @@ let mesAtual = new Date(); mesAtual.setDate(1);
 let items = [];
 let patrimonio = null, patrimonioAtualizadoEm = null, totalAportado = 0;
 let orcRendaBase = 5000;
-let orcConfig = null;
 
 function num(v) {
   if (typeof v === 'number') return isFinite(v) ? v : 0;
@@ -527,24 +498,6 @@ window.editarPatrimonio=async function(){
   catch(e){alert('Erro ao salvar.');console.error(e);}
 };
 
-async function carregarOrcConfig(){
-  try{
-    const d=await getDoc(doc(db,'config','orcamento'));
-    if(d.exists()){ orcConfig=d.data(); orcRendaBase=num(orcConfig.rendaBase)||5000; }
-  }catch(e){console.error(e);}
-}
-async function salvarOrcConfig(){
-  try{ await setDoc(doc(db,'config','orcamento'),{rendaBase:orcRendaBase,linhas:ORC_DEFAULT,atualizadoEm:new Date()}); }
-  catch(e){console.error(e);}
-}
-window.editarRendaOrc=async function(){
-  const atual=orcRendaBase.toLocaleString('pt-BR',{minimumFractionDigits:2});
-  const novo=prompt('Renda base deste mês (R$):\n(use o total que entrou — salário + benefícios + freelas)',atual);
-  if(novo===null) return;
-  const v=num(novo); if(v<=0){alert('Informe um valor maior que zero.');return;}
-  orcRendaBase=v; await salvarOrcConfig(); renderOrcamento();
-};
-
 async function carregarItems(){
   try{
     const mk=mesKey(mesAtual);
@@ -615,13 +568,6 @@ function renderCategoriasHome(){
 function renderOrcamento(){
   const t = totaisPorTipo(filtrarPorPessoa(items));
   const rendaUsada = t.entrada > 0 ? t.entrada : orcRendaBase;
-  document.getElementById('orc-renda-val').textContent = fmt(rendaUsada);
-  document.getElementById('orc-renda-sub').textContent = t.entrada > 0 ? 'entrada real do mês' : 'renda base configurada';
-  const saldoLivre = t.entrada - t.saida;
-  const slEl = document.getElementById('orc-livre-val');
-  slEl.textContent = fmt(saldoLivre);
-  const pctUsado = rendaUsada > 0 ? t.saida / rendaUsada : 0;
-  slEl.className = 'orc-livre-val ' + (pctUsado > 1 ? 'over' : pctUsado > 0.85 ? 'warn' : 'ok');
   const gastosCat = {};
   filtrarPorPessoa(items).forEach(i => {
     if(normTipo(i.tipo) !== 'saida' || ehNeutra(i)) return;
@@ -653,7 +599,7 @@ window.setFiltroTipo=function(f,btn){
 };
 
 setTipo('saida'); setPessoaLanc('Franklin'); atualizarMesLabels();
-Promise.all([carregarPatrimonio(), carregarTotalAportado(), carregarOrcConfig()])
+Promise.all([carregarPatrimonio(), carregarTotalAportado()])
   .then(() => carregarItems());
 </script>
 </body>
