@@ -358,7 +358,7 @@ const db = getFirestore(app);
 
 // tipos internos: 'entrada' (receita), 'saida' (gasto), 'investimento'
 const CATS = {
-  saida: ['Moradia','Alimentação','Transporte','Saúde','Lazer','Assinaturas','Cartão de crédito','Pix','Vestuário','Outros'],
+  saida: ['Moradia','Celulares','Alimentação','Transporte','Saúde','Lazer','Assinaturas','Cartão de crédito','Pix','Vestuário','Estorno/Golpe','Outros'],
   entrada: ['Salário','Pix','Resgate Cofrinho','Vale alimentação','Vale home office','Freela','Outros'],
   investimento: ['Tesouro Direto','CDB','FII','Ações','Cofrinho Itaú','Outros']
 };
@@ -406,10 +406,16 @@ function normTipo(t) {
   return t;
 }
 
-// Totaliza uma lista por tipo, sempre como número.
+// Categorias que NÃO contam como gasto real (ex: estorno de golpe/fraude).
+// Ficam visíveis no extrato, mas são excluídas de saldo, totais e gráficos.
+const CATS_NEUTRAS = ['Estorno/Golpe'];
+function ehNeutra(i) { return CATS_NEUTRAS.includes(i.categoria); }
+
+// Totaliza uma lista por tipo, sempre como número. Ignora categorias neutras.
 function totaisPorTipo(lista) {
   const t = { entrada: 0, saida: 0, investimento: 0 };
   lista.forEach(i => {
+    if (ehNeutra(i)) return;
     const tp = normTipo(i.tipo);
     if (t[tp] === undefined) return;
     t[tp] += num(i.valor);
@@ -634,15 +640,19 @@ function renderExtrato() {
     const tp = normTipo(i.tipo);
     const pessoa = i.pessoa || 'Franklin';
     const tag = pessoa === 'Airton' ? `<span class="tx-pessoa">${pessoa}</span>` : '';
+    const neutra = ehNeutra(i);
+    const estilo = neutra ? ' style="opacity:0.5;"' : '';
+    const valStyle = neutra ? ' style="text-decoration:line-through;"' : '';
+    const selo = neutra ? ' <span class="tx-pessoa" style="background:rgba(255,69,58,0.15);color:var(--red);">não conta</span>' : '';
     return `
-    <div class="tx">
+    <div class="tx"${estilo}>
       <div class="tx-dot ${DOTCLASS[tp]}">${ICONS[tp]}</div>
       <div class="tx-body">
         <div class="tx-desc">${i.descricao}</div>
-        <div class="tx-meta">${i.categoria}${tag}</div>
+        <div class="tx-meta">${i.categoria}${tag}${selo}</div>
       </div>
       <div class="tx-right">
-        <div class="tx-val ${DOTCLASS[tp]}">${fmt(i.valor)}</div>
+        <div class="tx-val ${DOTCLASS[tp]}"${valStyle}>${fmt(i.valor)}</div>
         <div class="tx-date">${dataFmt(i.criadoEm)}</div>
       </div>
       <button class="tx-del" onclick="delItem('${i.id}')" aria-label="Remover">×</button>
@@ -655,7 +665,7 @@ function renderCategoriasHome() {
   let base = consolidado ? todosItems : items;
   base = filtrarPorPessoa(base);
 
-  const saidas = base.filter(i => normTipo(i.tipo) === 'saida');
+  const saidas = base.filter(i => normTipo(i.tipo) === 'saida' && !ehNeutra(i));
   const totalSaidas = saidas.reduce((s,i)=>s+num(i.valor),0);
   if (saidas.length === 0) { el.innerHTML = ''; return; }
 
