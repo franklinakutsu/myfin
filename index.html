@@ -191,9 +191,9 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
   </div>
   <div class="lock-title">Olá, Franklin</div>
-  <div class="lock-sub">Digite a senha para acessar</div>
+  <div class="lock-sub">Digite seu PIN de 6 dígitos</div>
   <div class="lock-dots" id="lock-dots">
-    <div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div>
+    <div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div>
   </div>
   <div class="keypad" id="keypad">
     <button class="key" onclick="lockDigit('1')">1</button>
@@ -210,20 +210,7 @@
     <button class="key back" onclick="lockBack()">⌫</button>
   </div>
 </div>
-<script>
-  const SENHA='3252'; let lockBuffer='';
-  function lockRender(){ document.querySelectorAll('#lock-dots .lock-dot').forEach((d,i)=>{ d.classList.toggle('filled', i<lockBuffer.length); d.classList.remove('err'); }); }
-  window.lockDigit=function(n){
-    if(lockBuffer.length>=4) return;
-    lockBuffer+=n; lockRender();
-    if(lockBuffer.length===4){
-      if(lockBuffer===SENHA){ sessionStorage.setItem('fin_unlocked','1'); document.getElementById('lock').classList.add('hidden'); }
-      else{ const w=document.getElementById('lock-dots'); document.querySelectorAll('#lock-dots .lock-dot').forEach(d=>d.classList.add('err')); w.classList.add('shake'); setTimeout(()=>{ lockBuffer=''; lockRender(); w.classList.remove('shake'); },500); }
-    }
-  };
-  window.lockBack=function(){ lockBuffer=lockBuffer.slice(0,-1); lockRender(); };
-  if(sessionStorage.getItem('fin_unlocked')==='1'){ document.getElementById('lock').classList.add('hidden'); }
-</script>
+
 
 <main>
 
@@ -422,6 +409,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, getDoc, setDoc, query, where, getDocs, writeBatch, orderBy, increment } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDws4F_Jb-5ZvB92MN_hDJyYnh9Y76h4-8",
@@ -434,6 +422,10 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+// >>> TROQUE pelo e-mail que você vai usar pra entrar (pode ser seu e-mail normal) <<<
+const EMAIL_LOGIN = "troque_aqui@seuemail.com";
 
 const CATS_SAIDA_INICIAIS = [
   { nome:'Moradia',             pct:18, ordem:1 },
@@ -911,10 +903,43 @@ function renderDetalheCategoria(cat){
   el.innerHTML=`<div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Total: <strong style="color:var(--text)">${fmt(total)}</strong></div>`+txHTML(base);
 }
 
+// setup que não depende do banco (pode rodar antes do login)
 document.getElementById('add-data').value=hojeISO();
 setTipo('saida'); setPessoaLanc('Franklin'); atualizarMesLabels();
-Promise.all([carregarPatrimonio(), carregarTotalAportado(), carregarCategorias()])
-  .then(()=>{ setTipo('saida'); carregarItems(); });
+
+let appIniciado=false;
+function iniciarApp(){
+  if(appIniciado) return; appIniciado=true;
+  Promise.all([carregarPatrimonio(), carregarTotalAportado(), carregarCategorias()])
+    .then(()=>{ setTipo('saida'); carregarItems(); });
+}
+
+// ===== TELA DE BLOQUEIO + LOGIN (o PIN é a chave de verdade do banco) =====
+let lockBuffer='';
+function lockRender(){ document.querySelectorAll('#lock-dots .lock-dot').forEach((d,i)=>{ d.classList.toggle('filled', i<lockBuffer.length); d.classList.remove('err'); }); }
+window.lockBack=function(){ lockBuffer=lockBuffer.slice(0,-1); lockRender(); };
+window.lockDigit=function(n){
+  if(lockBuffer.length>=6) return;
+  lockBuffer+=n; lockRender();
+  if(lockBuffer.length===6) tentarLogin(lockBuffer);
+};
+async function tentarLogin(pin){
+  document.querySelector('.lock-sub').textContent='Verificando...';
+  try{
+    await setPersistence(auth, browserSessionPersistence);
+    await signInWithEmailAndPassword(auth, EMAIL_LOGIN, pin);
+    document.getElementById('lock').classList.add('hidden');
+    document.querySelector('.lock-sub').textContent='Digite seu PIN de 6 dígitos';
+    iniciarApp();
+  }catch(e){
+    console.error(e);
+    document.querySelector('.lock-sub').textContent='PIN incorreto';
+    const w=document.getElementById('lock-dots');
+    document.querySelectorAll('#lock-dots .lock-dot').forEach(d=>d.classList.add('err'));
+    w.classList.add('shake');
+    setTimeout(()=>{ lockBuffer=''; lockRender(); w.classList.remove('shake'); document.querySelector('.lock-sub').textContent='Digite seu PIN de 6 dígitos'; },800);
+  }
+}
 </script>
 </body>
 </html>
