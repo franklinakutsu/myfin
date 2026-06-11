@@ -546,7 +546,14 @@ window.addItem=async function(){
     document.getElementById('add-desc').value=''; document.getElementById('add-valor').value='';
     document.getElementById('add-cartao').checked=false; noCartao=false;
     document.getElementById('add-parcelado').checked=false; setParcelado(false);
-    if(tipoAtivo==='investimento') await carregarTotalAportado();
+    if(tipoAtivo==='investimento'){
+      // aporte soma direto ao patrimônio do card (e resgate negativo subtrairia)
+      if(patrimonio!=null){
+        patrimonio=Math.round((patrimonio+valor)*100)/100;
+        await setDoc(doc(db,'config','patrimonio'),{valor:patrimonio,atualizadoEm:new Date()});
+      }
+      await carregarTotalAportado();
+    }
     mesAtual=new Date(); mesAtual.setDate(1); atualizarMesLabels();
     await carregarItems(); setScreen('home',document.getElementById('tab-home'));
   }catch(e){alert('Erro ao salvar. Verifique sua conexão.');console.error(e);}
@@ -708,8 +715,8 @@ function filtrarPorPessoa(lista){ if(pessoaFiltro==='Todos') return lista; retur
 function renderHome(){
   const base=filtrarPorPessoa(items);
   const t=totaisPorTipo(base);
-  // saldo do mês = entradas - saídas (investimento não afeta)
-  const saldo=t.entrada-t.saida;
+  // saldo do mês = entradas - saídas - investimentos (aporte sai do saldo do mês)
+  const saldo=t.entrada-t.saida-t.investimento;
   const sa=document.getElementById('saldo-amount');
   sa.textContent=fmt(saldo); sa.className='amount '+(saldo>=0?'pos':'neg');
   document.getElementById('entradas-amount').textContent=fmt(t.entrada);
