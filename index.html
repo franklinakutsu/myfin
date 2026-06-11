@@ -708,18 +708,21 @@ function filtrarPorPessoa(lista){ if(pessoaFiltro==='Todos') return lista; retur
 function renderHome(){
   const base=filtrarPorPessoa(items);
   const t=totaisPorTipo(base);
-  const saldo=t.entrada-t.saida;
+  // investimento debita do saldo
+  const saldo=t.entrada-t.saida-t.investimento;
   const sa=document.getElementById('saldo-amount');
   sa.textContent=fmt(saldo); sa.className='amount '+(saldo>=0?'pos':'neg');
   document.getElementById('entradas-amount').textContent=fmt(t.entrada);
   document.getElementById('saidas-amount').textContent=fmt(t.saida);
   const invAmount=document.getElementById('invest-amount'), invSub=document.getElementById('invest-sub');
   if(patrimonio!=null){
+    // patrimônio real + recalcula rendido com totalAportado atualizado
     invAmount.textContent=fmt(patrimonio);
     const rendido=patrimonio-totalAportado, positivo=rendido>=0;
     invSub.innerHTML=`<span style="color:${positivo?'var(--green)':'var(--red)'};font-weight:600;">${positivo?'↑':'↓'} ${fmt(Math.abs(rendido))}</span> <span style="color:var(--muted2);">rendido</span>`;
   } else {
-    invAmount.textContent=fmt(t.investimento);
+    // sem patrimônio informado: mostra o total aportado calculado do banco
+    invAmount.textContent=fmt(totalAportado);
     invSub.textContent='Toque no lápis para informar o saldo real';
   }
 }
