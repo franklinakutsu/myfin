@@ -264,8 +264,12 @@
 
   <!-- ORÇAMENTO -->
   <section class="screen" id="screen-orc">
-    <div class="orc-header">
-      <span class="orc-header-title" id="ml-orc">—</span>
+    <div class="month-bar">
+      <button onclick="mudarMes(-1)">‹</button>
+      <span class="month-label" id="ml-orc">—</span>
+      <button onclick="mudarMes(1)">›</button>
+    </div>
+    <div class="orc-header" style="padding-top:0;justify-content:flex-end;">
       <button class="orc-add-btn" onclick="novaCategoria()">+ Categoria</button>
     </div>
     <div id="orc-alloc-bar" style="margin-bottom:20px;"></div>
@@ -425,7 +429,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // >>> TROQUE pelo e-mail que você vai usar pra entrar (pode ser seu e-mail normal) <<<
-const EMAIL_LOGIN = "franklinakutsu@gmail.com";
+const EMAIL_LOGIN = "troque_aqui@seuemail.com";
 
 const CATS_SAIDA_INICIAIS = [
   { nome:'Moradia',             pct:18, ordem:1 },
