@@ -93,9 +93,10 @@
     .seg-btn.on-entrada { background:rgba(52,199,89,0.12); color:var(--green); border-color:rgba(52,199,89,0.3); }
     .seg-btn.on-saida { background:rgba(255,69,58,0.12); color:var(--red); border-color:rgba(255,69,58,0.3); }
     .seg-btn.on-invest { background:rgba(108,99,255,0.14); color:var(--blue-soft); border-color:rgba(108,99,255,0.35); }
-    select, input[type=text], input[type=number] { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-size:16px; padding:14px 16px; outline:none; transition:border-color 0.15s; -webkit-appearance:none; font-family:inherit; }
+    select, input[type=text], input[type=number], input[type=date] { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-size:16px; padding:14px 16px; outline:none; transition:border-color 0.15s; -webkit-appearance:none; font-family:inherit; }
     select:focus, input:focus { border-color:var(--blue); }
     select { cursor:pointer; }
+    input[type=date] { color-scheme:dark; cursor:pointer; }
     .cartao-toggle { display:flex; align-items:center; gap:12px; cursor:pointer; font-size:15px; color:var(--text); user-select:none; }
     .cartao-toggle input { display:none; }
     .cartao-box { width:24px; height:24px; border-radius:7px; border:1.5px solid var(--border); background:var(--surface); display:flex; align-items:center; justify-content:center; transition:all 0.15s; flex-shrink:0; }
@@ -338,6 +339,10 @@
       </div>
     </div>
     <div class="field">
+      <div class="field-label">Data</div>
+      <input type="date" id="add-data" />
+    </div>
+    <div class="field">
       <div class="field-label">Categoria</div>
       <select id="add-categoria"></select>
     </div>
@@ -416,7 +421,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, getDoc, setDoc, query, where, getDocs, writeBatch, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, getDoc, setDoc, query, where, getDocs, writeBatch, orderBy, increment } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDws4F_Jb-5ZvB92MN_hDJyYnh9Y76h4-8",
@@ -468,6 +473,7 @@ function num(v){ if(typeof v==='number') return isFinite(v)?v:0; if(typeof v==='
 function fmtReal(v){ return 'R$ '+num(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmt(v){ return saldosOcultos ? 'R$ ••••' : fmtReal(v); }
 function mesKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function hojeISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 function mesLabel(d){ return cap(d.toLocaleDateString('pt-BR',{month:'long'}))+'/'+d.getFullYear(); }
 function dataFmt(ts){ if(!ts) return ''; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
@@ -579,33 +585,48 @@ window.addItem=async function(){
   if(parcelado&&tipoAtivo==='saida'){nParc=parseInt(document.getElementById('add-nparcelas').value,10);if(!nParc||nParc<2){alert('Número de parcelas deve ser 2 ou mais.');return;}}
   const btn=document.getElementById('btn-add'); btn.disabled=true; btn.textContent='Salvando...';
   try{
-    const agora=new Date();
     const tipoLancado=tipoAtivo;
     const valorLancado=valor;
+    // ===== 1.3: usa a DATA escolhida no formulário (padrão = hoje) =====
+    const dataStr=document.getElementById('add-data').value;
+    const dataLanc=dataStr?new Date(dataStr+'T12:00:00'):new Date();
+    let mesParaVer;
+
     if(parcelado&&tipoAtivo==='saida'&&nParc>=2){
-      const mesInicio=document.getElementById('add-mesinicio').value||mesKey(agora);
+      const mesInicio=document.getElementById('add-mesinicio').value||mesKey(dataLanc);
       const grupoId='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
       const base=Math.floor((valor/nParc)*100)/100, ultima=Math.round((valor-base*(nParc-1))*100)/100;
+      // grava todas as parcelas de uma vez (tudo-ou-nada): se cair a internet no meio, nada fica pela metade
+      const batch=writeBatch(db);
       for(let k=0;k<nParc;k++){
         const vParc=(k===nParc-1)?ultima:base;
-        await addDoc(collection(db,'lancamentos'),{tipo:'saida',categoria:cat,descricao:`${desc} (${k+1}/${nParc})`,valor:vParc,pessoa:pessoaLanc,mes:mesKeyOffset(mesInicio,k),criadoEm:agora,noCartao,parcelaGrupoId:grupoId,parcelaNum:k+1,parcelaTotal:nParc,parcelaValorTotal:valor});
+        const mk=mesKeyOffset(mesInicio,k);
+        const [ay,am]=mk.split('-').map(Number);
+        const dataParc=new Date(ay,am-1,1,12,0,0);
+        const ref=doc(collection(db,'lancamentos'));
+        batch.set(ref,{tipo:'saida',categoria:cat,descricao:`${desc} (${k+1}/${nParc})`,valor:vParc,pessoa:pessoaLanc,mes:mk,data:dataParc,criadoEm:dataParc,noCartao,parcelaGrupoId:grupoId,parcelaNum:k+1,parcelaTotal:nParc,parcelaValorTotal:valor});
       }
+      await batch.commit();
+      const [py,pm]=mesInicio.split('-').map(Number);
+      mesParaVer=new Date(py,pm-1,1);
     } else {
-      await addDoc(collection(db,'lancamentos'),{tipo:tipoLancado,categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mesKey(agora),criadoEm:agora,noCartao});
+      await addDoc(collection(db,'lancamentos'),{tipo:tipoLancado,categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,noCartao});
+      mesParaVer=new Date(dataLanc.getFullYear(),dataLanc.getMonth(),1);
     }
 
-    if(tipoLancado==='investimento'){
-      const baseAtual=(patrimonio!=null)?patrimonio:0;
-      patrimonio=Math.round((baseAtual+valorLancado)*100)/100;
-      await setDoc(doc(db,'config','patrimonio'),{valor:patrimonio,atualizadoEm:new Date()});
-      patrimonioAtualizadoEm=new Date();
-      await carregarTotalAportado();
+    // ===== 1.2: aporte ajusta o patrimônio de forma ATÔMICA (sem perder atualizações / sem corroer) =====
+    // só mexe no patrimônio se você já informou o saldo real alguma vez (lápis). Senão, a Home mostra o total aportado.
+    if(tipoLancado==='investimento' && patrimonio!=null){
+      await setDoc(doc(db,'config','patrimonio'),{valor:increment(valorLancado),atualizadoEm:new Date()},{merge:true});
+      await carregarPatrimonio();
     }
+    if(tipoLancado==='investimento'){ await carregarTotalAportado(); }
 
     document.getElementById('add-desc').value=''; document.getElementById('add-valor').value='';
     document.getElementById('add-cartao').checked=false; noCartao=false;
     document.getElementById('add-parcelado').checked=false; setParcelado(false);
-    mesAtual=new Date(); mesAtual.setDate(1); atualizarMesLabels();
+    document.getElementById('add-data').value=hojeISO();
+    mesAtual=mesParaVer; mesAtual.setDate(1); atualizarMesLabels();
     await carregarItems();
     setScreen('home',document.getElementById('tab-home'));
   }catch(e){alert('Erro ao salvar. Verifique sua conexão.');console.error(e);}
@@ -620,7 +641,7 @@ window.delItem=async function(id){
     const total=item.parcelaTotal||'?';
     const escolha=confirm(`Esta é a parcela ${item.parcelaNum}/${total} de "${(item.descricao||'').replace(/\s*\(\d+\/\d+\)$/,'')}". \n\nOK = apagar TODAS as ${total} parcelas\nCancelar = apagar só esta`);
     try{
-      if(escolha){const snap=await getDocs(collection(db,'lancamentos'));const doGrupo=snap.docs.filter(d=>d.data().parcelaGrupoId===grupo);for(const d of doGrupo)await deleteDoc(doc(db,'lancamentos',d.id));}
+      if(escolha){const snap=await getDocs(query(collection(db,'lancamentos'),where('parcelaGrupoId','==',grupo)));for(const d of snap.docs)await deleteDoc(doc(db,'lancamentos',d.id));}
       else{await deleteDoc(doc(db,'lancamentos',id));}
       await carregarTotalAportado(); await carregarItems();
     }catch(e){alert('Erro ao remover.');console.error(e);}
@@ -630,17 +651,17 @@ window.delItem=async function(id){
   try{
     await deleteDoc(doc(db,'lancamentos',id));
     if(eraInvest && patrimonio!=null){
-      patrimonio=Math.round((patrimonio-valorItem)*100)/100;
-      if(patrimonio<0) patrimonio=0;
-      await setDoc(doc(db,'config','patrimonio'),{valor:patrimonio,atualizadoEm:new Date()});
-      patrimonioAtualizadoEm=new Date();
+      // tira o aporte do patrimônio de forma atômica
+      await setDoc(doc(db,'config','patrimonio'),{valor:increment(-valorItem),atualizadoEm:new Date()},{merge:true});
+      await carregarPatrimonio();
+      if(patrimonio<0){ await setDoc(doc(db,'config','patrimonio'),{valor:0,atualizadoEm:new Date()},{merge:true}); patrimonio=0; }
     }
     await carregarTotalAportado(); await carregarItems();
   }catch(e){alert('Erro ao remover.');console.error(e);}
 };
 
 async function carregarTotalAportado(){
-  try{ const snap=await getDocs(collection(db,'lancamentos')); totalAportado=snap.docs.reduce((s,d)=>{ const i=d.data(); return normTipo(i.tipo)==='investimento'?s+num(i.valor):s; },0); }
+  try{ const snap=await getDocs(query(collection(db,'lancamentos'),where('tipo','==','investimento'))); totalAportado=snap.docs.reduce((s,d)=>s+num(d.data().valor),0); }
   catch(e){console.error(e);totalAportado=0;}
 }
 async function carregarPatrimonio(){
@@ -774,7 +795,7 @@ function renderHome(){
   if(patrimonio!=null){
     invAmount.textContent=fmt(patrimonio);
     const rendido=patrimonio-totalAportado, positivo=rendido>=0;
-    invSub.innerHTML=`<span style="color:${positivo?'var(--green)':'var(--red)'};font-weight:600;">${positivo?'↑':'↓'} ${fmt(Math.abs(rendido))}</span> <span style="color:var(--muted2);">rendido</span>`;
+    invSub.innerHTML=`<span style="color:var(--muted2);">Aportado ${fmt(totalAportado)}</span> · <span style="color:${positivo?'var(--green)':'var(--red)'};font-weight:600;">${positivo?'↑':'↓'} ${fmt(Math.abs(rendido))}</span> <span style="color:var(--muted2);">rendido</span>`;
   } else {
     invAmount.textContent=fmt(totalAportado);
     invSub.textContent='Toque no lápis para informar o saldo real';
@@ -799,7 +820,7 @@ function txHTML(lista){
     const selo=neutra?` <span class="tx-pessoa" style="background:rgba(255,69,58,0.15);color:var(--red);">não conta</span>`:'';
     const seloCartao=(i.noCartao&&!neutra)?` <span class="tx-pessoa" style="background:rgba(108,99,255,0.15);color:var(--blue-soft);">cartão</span>`:'';
     const seloParcela=i.parcelaGrupoId?` <span class="tx-pessoa" style="background:rgba(255,255,255,0.08);color:var(--muted);">${i.parcelaNum}/${i.parcelaTotal}</span>`:'';
-    return `<div class="tx"${estilo}><div class="tx-dot ${DOTCLASS[tp]}">${ICONS[tp]}</div><div class="tx-body"><div class="tx-desc">${i.descricao}</div><div class="tx-meta">${i.categoria}${tag}${selo}${seloCartao}${seloParcela}</div></div><div class="tx-right"><div class="tx-val ${DOTCLASS[tp]}"${valStyle}>${fmt(i.valor)}</div><div class="tx-date">${dataFmt(i.criadoEm)}</div></div><button class="tx-del" onclick="delItem('${i.id}')">×</button></div>`;
+    return `<div class="tx"${estilo}><div class="tx-dot ${DOTCLASS[tp]}">${ICONS[tp]}</div><div class="tx-body"><div class="tx-desc">${i.descricao}</div><div class="tx-meta">${i.categoria}${tag}${selo}${seloCartao}${seloParcela}</div></div><div class="tx-right"><div class="tx-val ${DOTCLASS[tp]}"${valStyle}>${fmt(i.valor)}</div><div class="tx-date">${dataFmt(i.data||i.criadoEm)}</div></div><button class="tx-del" onclick="delItem('${i.id}')">×</button></div>`;
   }).join('');
 }
 
@@ -890,6 +911,7 @@ function renderDetalheCategoria(cat){
   el.innerHTML=`<div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Total: <strong style="color:var(--text)">${fmt(total)}</strong></div>`+txHTML(base);
 }
 
+document.getElementById('add-data').value=hojeISO();
 setTipo('saida'); setPessoaLanc('Franklin'); atualizarMesLabels();
 Promise.all([carregarPatrimonio(), carregarTotalAportado(), carregarCategorias()])
   .then(()=>{ setTipo('saida'); carregarItems(); });
