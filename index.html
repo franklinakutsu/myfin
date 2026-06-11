@@ -517,10 +517,12 @@ window.addItem=async function(){
     // === INVESTIMENTO: soma ao patrimônio do card (lógica nova, não-retroativa) ===
     if(tipoLancado==='investimento'){
       const baseAtual=(patrimonio!=null)?patrimonio:0;   // se nunca informou, parte de 0
+      const antes=patrimonio;
       patrimonio=Math.round((baseAtual+valorLancado)*100)/100;
       await setDoc(doc(db,'config','patrimonio'),{valor:patrimonio,atualizadoEm:new Date()});
       patrimonioAtualizadoEm=new Date();
       await carregarTotalAportado();   // re-soma todos os aportes do histórico
+      alert('DEBUG investimento:\nantes='+antes+'\nvalor lançado='+valorLancado+'\ndepois='+patrimonio);
     }
 
     document.getElementById('add-desc').value=''; document.getElementById('add-valor').value='';
