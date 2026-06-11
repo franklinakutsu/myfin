@@ -21,14 +21,10 @@
     main { padding:0; max-width:640px; margin:0 auto; }
     .screen { display:none; padding:0 var(--pad); }
     .screen.active { display:block; }
-
-    /* MONTH BAR */
     .month-bar { display:flex; align-items:center; justify-content:space-between; padding:20px 0 28px; }
     .month-bar button { background:none; border:none; color:var(--muted); cursor:pointer; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:28px; transition:color 0.15s; line-height:1; border-radius:50%; }
     .month-bar button:hover { color:var(--text); }
     .month-label { font-size:26px; font-weight:600; letter-spacing:-0.5px; }
-
-    /* BACK BAR (detalhe categoria) */
     .back-bar { display:flex; align-items:center; gap:10px; padding:20px 0 24px; }
     .back-btn { background:none; border:none; color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; transition:color 0.15s; font-size:22px; }
     .back-btn:hover { color:var(--text); }
@@ -36,15 +32,11 @@
     .gear-btn { background:none; border:none; color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; transition:color 0.15s, background 0.15s; }
     .gear-btn:hover { color:var(--text); background:var(--surface2); }
     .gear-btn svg { width:20px; height:20px; }
-
-    /* PESSOA DROPDOWN */
     .pessoa-menu { position:absolute; top:28px; left:0; z-index:30; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px; min-width:150px; box-shadow:0 10px 40px rgba(0,0,0,0.5); display:none; text-align:left; }
     .pessoa-menu.show { display:block; }
     .pessoa-option { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; cursor:pointer; font-size:15px; font-weight:500; color:var(--text); transition:background 0.12s; }
     .pessoa-option:hover { background:var(--surface2); }
     .pessoa-option.sel { color:var(--blue-soft); }
-
-    /* SALDO */
     .saldo-block { margin-bottom:8px; }
     .saldo-block .eyebrow { font-size:13px; color:var(--muted); letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px; font-weight:500; }
     .saldo-block .amount { font-size:40px; font-weight:700; letter-spacing:-1.5px; }
@@ -56,8 +48,6 @@
     .pessoa-link .chev { display:flex; transition:transform 0.2s; }
     .pessoa-link.open { color:var(--text); }
     .pessoa-link.open .chev { transform:rotate(180deg); }
-
-    /* CARDS */
     .card { background:var(--surface); border-radius:var(--radius); padding:20px; margin-bottom:14px; }
     .card .card-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
     .card .card-label { font-size:13px; color:var(--muted); letter-spacing:0.8px; text-transform:uppercase; font-weight:500; }
@@ -72,8 +62,6 @@
     .duo .card { min-width:0; }
     .duo .card-amount { font-size:clamp(15px,5vw,20px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .card-sub { font-size:12px; color:var(--muted2); margin-top:6px; }
-
-    /* FORM */
     .form-title { font-size:22px; font-weight:700; letter-spacing:-0.5px; margin-bottom:24px; }
     .field { margin-bottom:16px; }
     .field-label { font-size:13px; color:var(--muted); margin-bottom:8px; font-weight:500; }
@@ -95,14 +83,10 @@
     .btn-primary { width:100%; padding:16px; border-radius:var(--radius-sm); border:none; background:var(--blue); color:#fff; font-size:16px; font-weight:600; cursor:pointer; margin-top:8px; transition:opacity 0.15s,transform 0.05s; font-family:inherit; }
     .btn-primary:active { transform:scale(0.99); }
     .btn-primary:disabled { opacity:0.4; cursor:not-allowed; }
-
-    /* CHIPS */
     .filter-row { display:flex; gap:8px; margin-bottom:20px; overflow-x:auto; scrollbar-width:none; }
     .filter-row::-webkit-scrollbar { display:none; }
     .chip { padding:7px 16px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--muted); font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap; transition:all 0.15s; font-family:inherit; }
     .chip.active { background:var(--text); color:var(--bg); border-color:var(--text); }
-
-    /* EXTRATO */
     .empty { text-align:center; color:var(--muted2); font-size:14px; padding:60px 20px; }
     .empty span { display:block; font-size:36px; margin-bottom:12px; opacity:0.5; }
     .tx { display:flex; align-items:center; gap:14px; padding:16px 0; border-bottom:1px solid var(--border); }
@@ -126,8 +110,6 @@
     .loading { text-align:center; color:var(--muted); font-size:13px; padding:40px 0; }
     .bar-wrap { width:100%; background:var(--surface2); border-radius:4px; height:5px; margin-top:7px; }
     .bar { height:5px; border-radius:4px; background:var(--red); }
-
-    /* ORÇAMENTO */
     .orc-header { display:flex; align-items:center; justify-content:space-between; padding:20px 0 16px; }
     .orc-header-title { font-size:26px; font-weight:600; letter-spacing:-0.5px; }
     .orc-add-btn { display:flex; align-items:center; gap:6px; background:none; border:1px solid var(--border); border-radius:20px; color:var(--muted); font-size:13px; font-weight:500; padding:7px 14px; cursor:pointer; font-family:inherit; transition:all 0.15s; }
@@ -158,8 +140,6 @@
     .orc-bar.over { background:var(--red); }
     .orc-bar.nolimit { background:var(--muted2); }
     .orc-chevron { color:var(--muted2); display:flex; flex-shrink:0; margin-left:8px; }
-
-    /* CONFIG PAINEL (inline na tela de detalhe) */
     .cfg-panel { background:var(--surface); border-radius:var(--radius); padding:20px; margin-bottom:14px; }
     .cfg-panel h3 { font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:16px; font-weight:500; }
     .cfg-row { display:flex; gap:10px; align-items:flex-end; margin-bottom:12px; }
@@ -171,8 +151,6 @@
     .cfg-actions { display:flex; gap:8px; margin-top:12px; }
     .btn-save { flex:1; padding:12px; border-radius:var(--radius-sm); border:none; background:var(--blue); color:#fff; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
     .btn-danger { padding:12px 16px; border-radius:var(--radius-sm); border:1px solid rgba(255,69,58,0.3); background:rgba(255,69,58,0.08); color:var(--red); font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
-
-    /* TABBAR */
     .tabbar { position:fixed; bottom:0; left:0; right:0; z-index:40; display:flex; background:rgba(18,18,20,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--border); padding-bottom:env(safe-area-inset-bottom); }
     .tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 0 10px; background:none; border:none; color:var(--muted2); cursor:pointer; transition:color 0.15s; font-family:inherit; }
     .tab svg { width:24px; height:24px; stroke-width:1.8; }
@@ -229,7 +207,7 @@
     <div id="home-categorias" style="margin-top:8px;"></div>
   </section>
 
-  <!-- ORÇAMENTO (lista) -->
+  <!-- ORÇAMENTO -->
   <section class="screen" id="screen-orc">
     <div class="orc-header">
       <span class="orc-header-title" id="ml-orc">—</span>
@@ -239,7 +217,7 @@
     <div id="orc-lista"><div class="loading">Carregando...</div></div>
   </section>
 
-  <!-- ORÇAMENTO DETALHE (extrato de uma categoria) -->
+  <!-- ORÇAMENTO DETALHE -->
   <section class="screen" id="screen-orc-detalhe">
     <div class="back-bar">
       <button class="back-btn" onclick="voltarOrc()">‹</button>
@@ -248,7 +226,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
     </div>
-    <!-- Painel de config (oculto por padrão) -->
     <div class="cfg-panel" id="cfg-panel" style="display:none;">
       <h3>Configurar categoria</h3>
       <div class="cfg-row">
@@ -386,7 +363,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Categorias iniciais (usadas apenas na primeira execução)
 const CATS_SAIDA_INICIAIS = [
   { nome:'Moradia',             pct:18, ordem:1 },
   { nome:'Investimentos',       pct:20, ordem:2 },
@@ -410,18 +386,16 @@ const CATS_NEUTRAS = ['Estorno/Golpe'];
 const ICONS   = { entrada:'↑', saida:'↓', investimento:'→' };
 const DOTCLASS= { entrada:'entrada', saida:'saida', investimento:'invest' };
 
-// STATE
 let tipoAtivo='saida', pessoaLanc='Franklin';
 let noCartao=false, parcelado=false;
 let pessoaFiltro='Todos', filtroTipo='todos', screenAtiva='home';
 let mesAtual=new Date(); mesAtual.setDate(1);
 let items=[];
 let patrimonio=null, patrimonioAtualizadoEm=null, totalAportado=0;
-let categoriasSaida=[];      // [{id, nome, pct, ordem}] carregadas do Firestore
-let catDetalheAtiva=null;    // categoria atualmente aberta no detalhe
-let orcRendaBase=5000;       // fallback se não há entradas no mês
+let categoriasSaida=[];
+let catDetalheAtiva=null;
+let orcRendaBase=5000;
 
-// UTILS
 function num(v){ if(typeof v==='number') return isFinite(v)?v:0; if(typeof v==='string'){let s=v.trim(); if(/,\d{1,2}$/.test(s))s=s.replace(/\./g,'').replace(',','.'); const n=parseFloat(s); return isFinite(n)?n:0;} return 0; }
 function fmt(v){ return 'R$ '+num(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function mesKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
@@ -437,7 +411,6 @@ function totaisPorTipo(lista){
 }
 function nomesCategoriaSaida(){ return categoriasSaida.map(c=>c.nome); }
 
-// MÊS
 window.mudarMes=function(delta){
   mesAtual.setMonth(mesAtual.getMonth()+delta);
   atualizarMesLabels(); carregarItems();
@@ -448,7 +421,6 @@ function atualizarMesLabels(){
   const oe=document.getElementById('ml-orc'); if(oe) oe.textContent=l;
 }
 
-// PESSOA DROPDOWN
 window.togglePessoaMenu=function(e){
   e.stopPropagation();
   document.getElementById('pessoa-menu').classList.toggle('show');
@@ -465,12 +437,10 @@ window.setPessoaFiltro=function(p,e){
   renderHome(); renderCategoriasHome();
 };
 
-// TIPO / PESSOA (Adicionar)
 window.setTipo=function(t){
   tipoAtivo=t;
   const map={saida:'on-saida',entrada:'on-entrada',investimento:'on-invest'};
   ['saida','entrada','investimento'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===t?' '+map[x]:''); });
-  // categorias dinâmicas para saída
   let cats;
   if(t==='saida') cats=nomesCategoriaSaida();
   else if(t==='entrada') cats=CATS_ENTRADA;
@@ -499,7 +469,6 @@ function atualizarPreviaParcela(){
 window.atualizarPreviaParcela=atualizarPreviaParcela;
 window.setPessoaLanc=function(p){ pessoaLanc=p; ['Franklin','Airton'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===p?' on-invest':''); }); };
 
-// NAV
 window.setScreen=function(s,btn){
   screenAtiva=s;
   ['home','orc','orc-detalhe','add','extrato'].forEach(x=>{ document.getElementById('screen-'+x).classList.toggle('active',x===s); });
@@ -520,7 +489,6 @@ window.setFiltroTipo=function(f,btn){
   btn.classList.add('active'); renderExtrato();
 };
 
-// ADD / DELETE
 function mesKeyOffset(mk,k){ const[a,m]=mk.split('-').map(Number); return mesKey(new Date(a,(m-1)+k,1)); }
 window.addItem=async function(){
   const desc=document.getElementById('add-desc').value.trim();
@@ -532,6 +500,8 @@ window.addItem=async function(){
   const btn=document.getElementById('btn-add'); btn.disabled=true; btn.textContent='Salvando...';
   try{
     const agora=new Date();
+    const tipoLancado=tipoAtivo;       // guarda antes de qualquer reset
+    const valorLancado=valor;
     if(parcelado&&tipoAtivo==='saida'&&nParc>=2){
       const mesInicio=document.getElementById('add-mesinicio').value||mesKey(agora);
       const grupoId='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
@@ -541,20 +511,32 @@ window.addItem=async function(){
         await addDoc(collection(db,'lancamentos'),{tipo:'saida',categoria:cat,descricao:`${desc} (${k+1}/${nParc})`,valor:vParc,pessoa:pessoaLanc,mes:mesKeyOffset(mesInicio,k),criadoEm:agora,noCartao,parcelaGrupoId:grupoId,parcelaNum:k+1,parcelaTotal:nParc,parcelaValorTotal:valor});
       }
     } else {
-      await addDoc(collection(db,'lancamentos'),{tipo:tipoAtivo,categoria:cat,descricao:desc,valor,pessoa:pessoaLanc,mes:mesKey(agora),criadoEm:agora,noCartao});
+      await addDoc(collection(db,'lancamentos'),{tipo:tipoLancado,categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mesKey(agora),criadoEm:agora,noCartao});
     }
+
+    // === INVESTIMENTO: soma ao patrimônio do card (lógica nova, não-retroativa) ===
+    if(tipoLancado==='investimento'){
+      const baseAtual=(patrimonio!=null)?patrimonio:0;   // se nunca informou, parte de 0
+      patrimonio=Math.round((baseAtual+valorLancado)*100)/100;
+      await setDoc(doc(db,'config','patrimonio'),{valor:patrimonio,atualizadoEm:new Date()});
+      patrimonioAtualizadoEm=new Date();
+      await carregarTotalAportado();   // re-soma todos os aportes do histórico
+    }
+
     document.getElementById('add-desc').value=''; document.getElementById('add-valor').value='';
     document.getElementById('add-cartao').checked=false; noCartao=false;
     document.getElementById('add-parcelado').checked=false; setParcelado(false);
-    if(tipoAtivo==='investimento') await carregarTotalAportado();
     mesAtual=new Date(); mesAtual.setDate(1); atualizarMesLabels();
-    await carregarItems(); setScreen('home',document.getElementById('tab-home'));
+    await carregarItems();   // renderHome roda aqui com patrimônio já atualizado
+    setScreen('home',document.getElementById('tab-home'));
   }catch(e){alert('Erro ao salvar. Verifique sua conexão.');console.error(e);}
   btn.disabled=false; btn.textContent='Adicionar lançamento';
 };
 window.delItem=async function(id){
   const item=items.find(x=>x.id===id);
   const grupo=item&&item.parcelaGrupoId;
+  const eraInvest=item&&normTipo(item.tipo)==='investimento';
+  const valorItem=item?num(item.valor):0;
   if(grupo){
     const total=item.parcelaTotal||'?';
     const escolha=confirm(`Esta é a parcela ${item.parcelaNum}/${total} de "${(item.descricao||'').replace(/\s*\(\d+\/\d+\)$/,'')}". \n\nOK = apagar TODAS as ${total} parcelas\nCancelar = apagar só esta`);
@@ -568,11 +550,17 @@ window.delItem=async function(id){
   if(!confirm('Remover este lançamento?')) return;
   try{
     await deleteDoc(doc(db,'lancamentos',id));
+    // se era investimento, subtrai do patrimônio (espelha a soma do addItem)
+    if(eraInvest && patrimonio!=null){
+      patrimonio=Math.round((patrimonio-valorItem)*100)/100;
+      if(patrimonio<0) patrimonio=0;
+      await setDoc(doc(db,'config','patrimonio'),{valor:patrimonio,atualizadoEm:new Date()});
+      patrimonioAtualizadoEm=new Date();
+    }
     await carregarTotalAportado(); await carregarItems();
   }catch(e){alert('Erro ao remover.');console.error(e);}
 };
 
-// PATRIMÔNIO
 async function carregarTotalAportado(){
   try{ const snap=await getDocs(collection(db,'lancamentos')); totalAportado=snap.docs.reduce((s,d)=>{ const i=d.data(); return normTipo(i.tipo)==='investimento'?s+num(i.valor):s; },0); }
   catch(e){console.error(e);totalAportado=0;}
@@ -590,16 +578,13 @@ window.editarPatrimonio=async function(){
   catch(e){alert('Erro ao salvar.');console.error(e);}
 };
 
-// CATEGORIAS DINÂMICAS
 async function carregarCategorias(){
   try{
     const snap=await getDocs(query(collection(db,'categorias'),orderBy('ordem')));
     if(snap.empty){
-      // primeira execução: criar categorias padrão
       const batch=writeBatch(db);
       CATS_SAIDA_INICIAIS.forEach(c=>{ batch.set(doc(collection(db,'categorias')),c); });
       await batch.commit();
-      // recarregar
       const snap2=await getDocs(query(collection(db,'categorias'),orderBy('ordem')));
       categoriasSaida=snap2.docs.map(d=>({id:d.id,...d.data()}));
     } else {
@@ -615,12 +600,11 @@ window.novaCategoria=async function(){
   try{
     const ref=await addDoc(collection(db,'categorias'),{nome:nome.trim(),pct:0,ordem:maxOrdem+1});
     categoriasSaida.push({id:ref.id,nome:nome.trim(),pct:0,ordem:maxOrdem+1});
-    setTipo(tipoAtivo); // atualiza select de categorias
+    setTipo(tipoAtivo);
     renderOrcamento();
   }catch(e){alert('Erro ao criar categoria.');console.error(e);}
 };
 
-// CONFIG DA CATEGORIA (painel inline)
 window.toggleCfgPanel=function(){
   const panel=document.getElementById('cfg-panel');
   const aberto=panel.style.display!=='none';
@@ -650,22 +634,19 @@ window.salvarCategoria=async function(){
   const renomear=novoNome!==nomeAntigo;
   try{
     await updateDoc(doc(db,'categorias',catDetalheAtiva.id),{nome:novoNome,pct:novoPct});
-    // atualizar estado local
     catDetalheAtiva.nome=novoNome; catDetalheAtiva.pct=novoPct;
     const idx=categoriasSaida.findIndex(c=>c.id===catDetalheAtiva.id);
     if(idx>=0){ categoriasSaida[idx].nome=novoNome; categoriasSaida[idx].pct=novoPct; }
-    // renomear lançamentos se necessário
     if(renomear){
       const snap=await getDocs(query(collection(db,'lancamentos'),where('categoria','==',nomeAntigo)));
       if(!snap.empty){
         let batch=writeBatch(db); let n=0;
         for(const d of snap.docs){ batch.update(doc(db,'lancamentos',d.id),{categoria:novoNome}); n++; if(n%400===0){await batch.commit();batch=writeBatch(db);} }
         await batch.commit();
-        // atualizar items em memória
         items.forEach(i=>{ if(i.categoria===nomeAntigo) i.categoria=novoNome; });
       }
     }
-    setTipo(tipoAtivo); // atualiza select
+    setTipo(tipoAtivo);
     document.getElementById('orc-detalhe-titulo').textContent=novoNome;
     document.getElementById('cfg-panel').style.display='none';
     renderOrcamento();
@@ -685,7 +666,6 @@ window.excluirCategoria=async function(){
   }catch(e){alert('Erro ao excluir.');console.error(e);}
 };
 
-// LOAD
 async function carregarItems(){
   try{
     const mk=mesKey(mesAtual);
@@ -701,27 +681,24 @@ async function carregarItems(){
   renderTudo();
 }
 
-// RENDER
 function renderTudo(){ renderHome(); renderExtrato(); renderCategoriasHome(); if(screenAtiva==='orc') renderOrcamento(); if(screenAtiva==='orc-detalhe'&&catDetalheAtiva) renderDetalheCategoria(catDetalheAtiva); }
 function filtrarPorPessoa(lista){ if(pessoaFiltro==='Todos') return lista; return lista.filter(i=>(i.pessoa||'Franklin')===pessoaFiltro); }
 
 function renderHome(){
   const base=filtrarPorPessoa(items);
   const t=totaisPorTipo(base);
-  // saldo do mês = entradas - saídas (investimento não afeta)
-  const saldo=t.entrada-t.saida;
+  // saldo do mês = entradas - saídas - investimentos (o aporte debita do saldo)
+  const saldo=t.entrada-t.saida-t.investimento;
   const sa=document.getElementById('saldo-amount');
   sa.textContent=fmt(saldo); sa.className='amount '+(saldo>=0?'pos':'neg');
   document.getElementById('entradas-amount').textContent=fmt(t.entrada);
   document.getElementById('saidas-amount').textContent=fmt(t.saida);
   const invAmount=document.getElementById('invest-amount'), invSub=document.getElementById('invest-sub');
   if(patrimonio!=null){
-    // patrimônio real + recalcula rendido com totalAportado atualizado
     invAmount.textContent=fmt(patrimonio);
     const rendido=patrimonio-totalAportado, positivo=rendido>=0;
     invSub.innerHTML=`<span style="color:${positivo?'var(--green)':'var(--red)'};font-weight:600;">${positivo?'↑':'↓'} ${fmt(Math.abs(rendido))}</span> <span style="color:var(--muted2);">rendido</span>`;
   } else {
-    // sem patrimônio informado: mostra o total aportado calculado do banco
     invAmount.textContent=fmt(totalAportado);
     invSub.textContent='Toque no lápis para informar o saldo real';
   }
@@ -764,16 +741,12 @@ function renderCategoriasHome(){
 function renderOrcamento(){
   const t=totaisPorTipo(filtrarPorPessoa(items));
   const rendaUsada=t.entrada>0?t.entrada:orcRendaBase;
-
-  // gastos reais por categoria
   const gastosCat={};
   filtrarPorPessoa(items).forEach(i=>{
     if(normTipo(i.tipo)!=='saida'||ehNeutra(i)) return;
     gastosCat[i.categoria]=(gastosCat[i.categoria]||0)+num(i.valor);
   });
   const investMes=t.investimento;
-
-  // montar linhas com gasto calculado
   const linhas=categoriasSaida.map(cat=>{
     const gasto=cat.nome==='Investimentos'?investMes:(gastosCat[cat.nome]||0);
     const limite=rendaUsada*(cat.pct||0)/100;
@@ -781,9 +754,8 @@ function renderOrcamento(){
     const pctGasto=limite>0?gasto/limite:0;
     const status=pctGasto>1?'over':pctGasto>0.8?'warn':'ok';
     return {cat, gasto, limite, semLimite, pctGasto, status, barW:Math.min(pctGasto*100,100).toFixed(1)};
-  }).sort((a,b)=>b.gasto-a.gasto); // ordenar maior → menor gasto
+  }).sort((a,b)=>b.gasto-a.gasto);
 
-  // === BARRA DE ALOCAÇÃO DE % ===
   const totalPct=categoriasSaida.reduce((s,c)=>s+(c.pct||0),0);
   const fillW=Math.min(totalPct,100);
   const fillColor=totalPct>100?'var(--red)':totalPct===100?'var(--green)':'var(--blue)';
@@ -796,7 +768,6 @@ function renderOrcamento(){
     <div class="orc-alloc-track"><div class="orc-alloc-fill" style="width:${fillW}%;background:${fillColor}"></div></div>
   </div>`;
 
-  // === LISTA ORDENADA ===
   const lista=document.getElementById('orc-lista');
   lista.innerHTML=linhas.map(({cat,gasto,limite,semLimite,pctGasto,status,barW})=>{
     const pctGastoStr=semLimite?'':`${(pctGasto*100).toFixed(0)}%`;
@@ -828,7 +799,6 @@ window.abrirDetalheCategoria=function(catId){
 
 function renderDetalheCategoria(cat){
   const el=document.getElementById('orc-detalhe-list');
-  // lançamentos do mês desta categoria (saídas + investimentos se for "Investimentos")
   let base;
   if(cat.nome==='Investimentos'){
     base=filtrarPorPessoa(items).filter(i=>normTipo(i.tipo)==='investimento');
@@ -843,7 +813,6 @@ function renderDetalheCategoria(cat){
   el.innerHTML=`<div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Total: <strong style="color:var(--text)">${fmt(total)}</strong></div>`+txHTML(base);
 }
 
-// INIT
 setTipo('saida'); setPessoaLanc('Franklin'); atualizarMesLabels();
 Promise.all([carregarPatrimonio(), carregarTotalAportado(), carregarCategorias()])
   .then(()=>{ setTipo('saida'); carregarItems(); });
