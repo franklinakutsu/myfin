@@ -517,12 +517,10 @@ window.addItem=async function(){
     // === INVESTIMENTO: soma ao patrimônio do card (lógica nova, não-retroativa) ===
     if(tipoLancado==='investimento'){
       const baseAtual=(patrimonio!=null)?patrimonio:0;   // se nunca informou, parte de 0
-      const antes=patrimonio;
       patrimonio=Math.round((baseAtual+valorLancado)*100)/100;
       await setDoc(doc(db,'config','patrimonio'),{valor:patrimonio,atualizadoEm:new Date()});
       patrimonioAtualizadoEm=new Date();
       await carregarTotalAportado();   // re-soma todos os aportes do histórico
-      alert('DEBUG investimento:\nantes='+antes+'\nvalor lançado='+valorLancado+'\ndepois='+patrimonio);
     }
 
     document.getElementById('add-desc').value=''; document.getElementById('add-valor').value='';
@@ -689,8 +687,11 @@ function filtrarPorPessoa(lista){ if(pessoaFiltro==='Todos') return lista; retur
 function renderHome(){
   const base=filtrarPorPessoa(items);
   const t=totaisPorTipo(base);
-  // saldo do mês = entradas - saídas (investimento NÃO entra aqui)
-  const saldo=t.entrada-t.saida;
+  // saldo do mês = entradas - saídas - investimentos do mês.
+  // Como o investimento é tipo próprio (não "saída"), ele não está nas saídas;
+  // subtrair aqui faz o saldo cair quando um aporte é cadastrado, e o número
+  // permanece estável nos renders seguintes (sempre o mesmo cálculo).
+  const saldo=t.entrada-t.saida-t.investimento;
   const sa=document.getElementById('saldo-amount');
   sa.textContent=fmt(saldo); sa.className='amount '+(saldo>=0?'pos':'neg');
   document.getElementById('entradas-amount').textContent=fmt(t.entrada);
