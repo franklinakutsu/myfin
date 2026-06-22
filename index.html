@@ -259,7 +259,6 @@
         <div class="card-amount red" id="saidas-amount">—</div>
       </div>
     </div>
-    <div id="home-categorias" style="margin-top:8px;"></div>
   </section>
 
   <!-- ORÇAMENTO -->
@@ -380,11 +379,16 @@
       <span class="month-label" id="ml-extrato">—</span>
       <button onclick="mudarMes(1)">›</button>
     </div>
-    <div class="filter-row">
+    <div class="filter-row" id="ext-tipo-row">
       <button class="chip active" onclick="setFiltroTipo('todos',this)">Todos</button>
       <button class="chip" onclick="setFiltroTipo('entrada',this)">Entradas</button>
       <button class="chip" onclick="setFiltroTipo('saida',this)">Saídas</button>
       <button class="chip" onclick="setFiltroTipo('investimento',this)">Investimentos</button>
+    </div>
+    <div class="filter-row" id="ext-extra-row">
+      <button class="chip" onclick="toggleFiltroCartaoExt(this)">Cartão</button>
+      <button class="chip ext-pessoa-chip" onclick="setFiltroPessoaExt('Franklin',this)">Franklin</button>
+      <button class="chip ext-pessoa-chip" onclick="setFiltroPessoaExt('Airton',this)">Airton</button>
     </div>
     <div id="extrato-list"><div class="loading">Carregando...</div></div>
   </section>
@@ -429,7 +433,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // >>> TROQUE pelo e-mail que você vai usar pra entrar (pode ser seu e-mail normal) <<<
-const EMAIL_LOGIN = "franklinakutsu@gmail.com";
+const EMAIL_LOGIN = "troque_aqui@seuemail.com";
 
 const CATS_SAIDA_INICIAIS = [
   { nome:'Moradia',             pct:18, ordem:1 },
@@ -457,6 +461,7 @@ const DOTCLASS= { entrada:'entrada', saida:'saida', investimento:'invest' };
 let tipoAtivo='saida', pessoaLanc='Franklin';
 let noCartao=false, parcelado=false;
 let pessoaFiltro='Todos', filtroTipo='todos', screenAtiva='home';
+let filtroPessoaExt='todos', filtroCartaoExt=false;
 let mesAtual=new Date(); mesAtual.setDate(1);
 let items=[];
 let patrimonio=null, patrimonioAtualizadoEm=null, totalAportado=0;
@@ -567,8 +572,19 @@ window.voltarOrc=function(){
 };
 window.setFiltroTipo=function(f,btn){
   filtroTipo=f;
-  document.querySelectorAll('#screen-extrato .chip').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#ext-tipo-row .chip').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); renderExtrato();
+};
+window.toggleFiltroCartaoExt=function(btn){
+  filtroCartaoExt=!filtroCartaoExt;
+  btn.classList.toggle('active',filtroCartaoExt);
+  renderExtrato();
+};
+window.setFiltroPessoaExt=function(p,btn){
+  filtroPessoaExt=(filtroPessoaExt===p)?'todos':p;
+  document.querySelectorAll('.ext-pessoa-chip').forEach(b=>b.classList.remove('active'));
+  if(filtroPessoaExt!=='todos') btn.classList.add('active');
+  renderExtrato();
 };
 
 function mesKeyOffset(mk,k){ const[a,m]=mk.split('-').map(Number); return mesKey(new Date(a,(m-1)+k,1)); }
@@ -800,9 +816,12 @@ function renderHome(){
 
 function renderExtrato(){
   const el=document.getElementById('extrato-list');
-  let base=filtrarPorPessoa(items);
+  const ehCartao=i=>i.noCartao===true||['cartão de crédito','cartao de credito'].includes((i.categoria||'').toLowerCase());
+  let base=items.slice();
+  if(filtroPessoaExt!=='todos') base=base.filter(i=>(i.pessoa||'Franklin')===filtroPessoaExt);
+  if(filtroCartaoExt) base=base.filter(ehCartao);
   if(filtroTipo!=='todos') base=base.filter(i=>normTipo(i.tipo)===filtroTipo);
-  if(base.length===0){el.innerHTML='<div class="empty"><span>○</span>Nenhum lançamento neste mês.</div>';return;}
+  if(base.length===0){el.innerHTML='<div class="empty"><span>○</span>Nenhum lançamento com esses filtros.</div>';return;}
   el.innerHTML=txHTML(base);
 }
 
@@ -822,6 +841,7 @@ function txHTML(lista){
 
 function renderCategoriasHome(){
   const el=document.getElementById('home-categorias');
+  if(!el) return;
   const base=filtrarPorPessoa(items);
   const saidas=base.filter(i=>normTipo(i.tipo)==='saida'&&!ehNeutra(i));
   const totalSaidas=saidas.reduce((s,i)=>s+num(i.valor),0);
