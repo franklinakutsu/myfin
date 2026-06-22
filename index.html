@@ -111,6 +111,12 @@
     .filter-row::-webkit-scrollbar { display:none; }
     .chip { padding:7px 16px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--muted); font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap; transition:all 0.15s; font-family:inherit; }
     .chip.active { background:var(--text); color:var(--bg); border-color:var(--text); }
+    .ext-resumo { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
+    .ext-resumo-item { background:var(--surface); border-radius:var(--radius); padding:14px 16px; }
+    .ext-resumo-lbl { display:block; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px; font-weight:500; }
+    .ext-resumo-val { font-size:20px; font-weight:700; letter-spacing:-0.5px; }
+    .ext-resumo-val.green { color:var(--green); }
+    .ext-resumo-val.red { color:var(--red); }
     .empty { text-align:center; color:var(--muted2); font-size:14px; padding:60px 20px; }
     .empty span { display:block; font-size:36px; margin-bottom:12px; opacity:0.5; }
     .tx { display:flex; align-items:center; gap:14px; padding:16px 0; border-bottom:1px solid var(--border); }
@@ -390,6 +396,7 @@
       <button class="chip ext-pessoa-chip" onclick="setFiltroPessoaExt('Franklin',this)">Franklin</button>
       <button class="chip ext-pessoa-chip" onclick="setFiltroPessoaExt('Airton',this)">Airton</button>
     </div>
+    <div id="extrato-resumo"></div>
     <div id="extrato-list"><div class="loading">Carregando...</div></div>
   </section>
 
@@ -433,7 +440,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // >>> TROQUE pelo e-mail que você vai usar pra entrar (pode ser seu e-mail normal) <<<
-const EMAIL_LOGIN = "franklinakutsu@gmail.com";
+const EMAIL_LOGIN = "troque_aqui@seuemail.com";
 
 const CATS_SAIDA_INICIAIS = [
   { nome:'Moradia',             pct:18, ordem:1 },
@@ -816,11 +823,23 @@ function renderHome(){
 
 function renderExtrato(){
   const el=document.getElementById('extrato-list');
+  const resumoEl=document.getElementById('extrato-resumo');
   const ehCartao=i=>i.noCartao===true||['cartão de crédito','cartao de credito'].includes((i.categoria||'').toLowerCase());
   let base=items.slice();
   if(filtroPessoaExt!=='todos') base=base.filter(i=>(i.pessoa||'Franklin')===filtroPessoaExt);
   if(filtroCartaoExt) base=base.filter(ehCartao);
   if(filtroTipo!=='todos') base=base.filter(i=>normTipo(i.tipo)===filtroTipo);
+
+  // totais respeitando os filtros (ignora neutras tipo Estorno/Golpe)
+  let totEnt=0, totSai=0;
+  base.forEach(i=>{ if(ehNeutra(i)) return; const tp=normTipo(i.tipo); if(tp==='entrada') totEnt+=num(i.valor); else if(tp==='saida') totSai+=num(i.valor); });
+  if(resumoEl){
+    resumoEl.innerHTML=`<div class="ext-resumo">
+      <div class="ext-resumo-item"><span class="ext-resumo-lbl">Entradas</span><span class="ext-resumo-val green">${fmt(totEnt)}</span></div>
+      <div class="ext-resumo-item"><span class="ext-resumo-lbl">Saídas</span><span class="ext-resumo-val red">${fmt(totSai)}</span></div>
+    </div>`;
+  }
+
   if(base.length===0){el.innerHTML='<div class="empty"><span>○</span>Nenhum lançamento com esses filtros.</div>';return;}
   el.innerHTML=txHTML(base);
 }
