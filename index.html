@@ -22,7 +22,7 @@
     .screen { display:none; padding:0 var(--pad); }
     .screen.active { display:block; }
 
-    /* ===== LOCK SCREEN ===== */
+    /* LOCK */
     #lock { position:fixed; inset:0; z-index:100; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 32px; }
     #lock.hidden { display:none; }
     .lock-icon { width:64px; height:64px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; margin-bottom:24px; }
@@ -85,6 +85,15 @@
     .duo .card { min-width:0; }
     .duo .card-amount { font-size:clamp(15px,5vw,20px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .card-sub { font-size:12px; color:var(--muted2); margin-top:6px; }
+    /* BACKUP CARD */
+    .backup-card { background:var(--surface); border-radius:var(--radius); padding:16px 20px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .backup-info { flex:1; }
+    .backup-info .lbl { font-size:13px; color:var(--muted); letter-spacing:0.8px; text-transform:uppercase; font-weight:500; margin-bottom:4px; }
+    .backup-info .sub { font-size:12px; color:var(--muted2); }
+    .backup-btn { background:none; border:1px solid var(--border); border-radius:20px; color:var(--muted); font-size:13px; font-weight:500; padding:7px 14px; cursor:pointer; font-family:inherit; transition:all 0.15s; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+    .backup-btn:hover { color:var(--text); border-color:var(--text); }
+    .backup-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .backup-btn svg { width:14px; height:14px; }
     .form-title { font-size:22px; font-weight:700; letter-spacing:-0.5px; margin-bottom:24px; }
     .field { margin-bottom:16px; }
     .field-label { font-size:13px; color:var(--muted); margin-bottom:8px; font-weight:500; }
@@ -141,7 +150,6 @@
     .bar-wrap { width:100%; background:var(--surface2); border-radius:4px; height:5px; margin-top:7px; }
     .bar { height:5px; border-radius:4px; background:var(--red); }
     .orc-header { display:flex; align-items:center; justify-content:space-between; padding:20px 0 16px; }
-    .orc-header-title { font-size:26px; font-weight:600; letter-spacing:-0.5px; }
     .orc-add-btn { display:flex; align-items:center; gap:6px; background:none; border:1px solid var(--border); border-radius:20px; color:var(--muted); font-size:13px; font-weight:500; padding:7px 14px; cursor:pointer; font-family:inherit; transition:all 0.15s; }
     .orc-add-btn:hover { color:var(--text); border-color:var(--text); }
     .orc-alloc-wrap { background:var(--surface); border-radius:var(--radius); padding:16px 20px; }
@@ -191,7 +199,6 @@
 </head>
 <body>
 
-<!-- ===== LOCK SCREEN ===== -->
 <div id="lock">
   <div class="lock-icon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -199,9 +206,10 @@
   <div class="lock-title">Olá, Franklin</div>
   <div class="lock-sub">Digite seu PIN de 6 dígitos</div>
   <div class="lock-dots" id="lock-dots">
-    <div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div>
+    <div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div>
+    <div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div>
   </div>
-  <div class="keypad" id="keypad">
+  <div class="keypad">
     <button class="key" onclick="lockDigit('1')">1</button>
     <button class="key" onclick="lockDigit('2')">2</button>
     <button class="key" onclick="lockDigit('3')">3</button>
@@ -217,12 +225,11 @@
   </div>
 </div>
 
-
 <main>
 
   <!-- HOME -->
   <section class="screen active" id="screen-home">
-    <div class="month-bar" id="home-month-bar">
+    <div class="month-bar">
       <button onclick="mudarMes(-1)">‹</button>
       <span class="month-label" id="ml-home">—</span>
       <button onclick="mudarMes(1)">›</button>
@@ -241,7 +248,7 @@
           <div class="pessoa-option" onclick="setPessoaFiltro('Airton',event)">Airton</div>
         </div>
       </span>
-      <button class="eye-btn" id="eye-btn" onclick="toggleOcultar()" aria-label="Ocultar/exibir saldos">
+      <button class="eye-btn" onclick="toggleOcultar()">
         <svg id="eye-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
       </button>
     </div>
@@ -265,6 +272,17 @@
         <div class="card-amount red" id="saidas-amount">—</div>
       </div>
     </div>
+    <!-- BACKUP -->
+    <div class="backup-card">
+      <div class="backup-info">
+        <div class="lbl">Backup</div>
+        <div class="sub" id="backup-sub">Exporta todos os lançamentos em CSV</div>
+      </div>
+      <button class="backup-btn" id="backup-btn" onclick="exportarCSV()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Baixar CSV
+      </button>
+    </div>
   </section>
 
   <!-- ORÇAMENTO -->
@@ -286,21 +304,15 @@
     <div class="back-bar">
       <button class="back-btn" onclick="voltarOrc()">‹</button>
       <span class="back-title" id="orc-detalhe-titulo">—</span>
-      <button class="gear-btn" onclick="toggleCfgPanel()" id="gear-btn">
+      <button class="gear-btn" onclick="toggleCfgPanel()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
     </div>
     <div class="cfg-panel" id="cfg-panel" style="display:none;">
       <h3>Configurar categoria</h3>
       <div class="cfg-row">
-        <div class="field">
-          <div class="field-label">Nome</div>
-          <input type="text" id="cfg-nome" placeholder="Nome da categoria" />
-        </div>
-        <div class="field-pct">
-          <div class="field-label">% da renda</div>
-          <input type="number" id="cfg-pct" placeholder="0" min="0" max="100" step="1" inputmode="numeric" oninput="atualizarContadorPct()" />
-        </div>
+        <div class="field"><div class="field-label">Nome</div><input type="text" id="cfg-nome" placeholder="Nome da categoria" /></div>
+        <div class="field-pct"><div class="field-label">% da renda</div><input type="number" id="cfg-pct" placeholder="0" min="0" max="100" step="1" inputmode="numeric" oninput="atualizarContadorPct()" /></div>
       </div>
       <div class="cfg-pct-total" id="cfg-pct-total"></div>
       <div class="cfg-actions">
@@ -423,178 +435,131 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, getDoc, setDoc, query, where, getDocs, writeBatch, orderBy, increment } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, getDoc, setDoc,
+         query, where, getDocs, writeBatch, orderBy, increment }
+  from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence }
+  from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDws4F_Jb-5ZvB92MN_hDJyYnh9Y76h4-8",
-  authDomain: "financas-4ecdd.firebaseapp.com",
-  projectId: "financas-4ecdd",
-  storageBucket: "financas-4ecdd.firebasestorage.app",
-  messagingSenderId: "655131184307",
-  appId: "1:655131184307:web:7320f622b038f9eb82f4c6",
-  measurementId: "G-R66VLQ12K3"
+  apiKey:"AIzaSyDws4F_Jb-5ZvB92MN_hDJyYnh9Y76h4-8", authDomain:"financas-4ecdd.firebaseapp.com",
+  projectId:"financas-4ecdd", storageBucket:"financas-4ecdd.firebasestorage.app",
+  messagingSenderId:"655131184307", appId:"1:655131184307:web:7320f622b038f9eb82f4c6",
+  measurementId:"G-R66VLQ12K3"
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const auth=getAuth(app);
+const EMAIL_LOGIN="franklinakutsu@gmail.com";
 
-// >>> TROQUE pelo e-mail que você vai usar pra entrar (pode ser seu e-mail normal) <<<
-const EMAIL_LOGIN = "franklinakutsu@gmail.com";
-
-const CATS_SAIDA_INICIAIS = [
-  { nome:'Moradia',             pct:18, ordem:1 },
-  { nome:'Investimentos',       pct:20, ordem:2 },
-  { nome:'Alimentação',         pct:10, ordem:3 },
-  { nome:'Assinaturas',         pct:3,  ordem:4 },
-  { nome:'Computador',          pct:3,  ordem:5 },
-  { nome:'Internet & celular',  pct:2,  ordem:6 },
-  { nome:'Saúde & academia',    pct:5,  ordem:7 },
-  { nome:'Roupas & acessórios', pct:5,  ordem:8 },
-  { nome:'Transporte',          pct:5,  ordem:9 },
-  { nome:'Lazer',               pct:7,  ordem:10 },
-  { nome:'Pix',                 pct:0,  ordem:11 },
-  { nome:'Pessoal',             pct:5,  ordem:12 },
-  { nome:'Mãe',                 pct:0,  ordem:13 },
-  { nome:'Fernanda',            pct:0,  ordem:14 },
-  { nome:'Outros',              pct:0,  ordem:15 },
+const CATS_SAIDA_INICIAIS=[
+  {nome:'Moradia',pct:18,ordem:1},{nome:'Investimentos',pct:20,ordem:2},{nome:'Alimentação',pct:10,ordem:3},
+  {nome:'Assinaturas',pct:3,ordem:4},{nome:'Computador',pct:3,ordem:5},{nome:'Internet & celular',pct:2,ordem:6},
+  {nome:'Saúde & academia',pct:5,ordem:7},{nome:'Roupas & acessórios',pct:5,ordem:8},{nome:'Transporte',pct:5,ordem:9},
+  {nome:'Lazer',pct:7,ordem:10},{nome:'Pix',pct:0,ordem:11},{nome:'Pessoal',pct:5,ordem:12},
+  {nome:'Mãe',pct:0,ordem:13},{nome:'Fernanda',pct:0,ordem:14},{nome:'Outros',pct:0,ordem:15},
 ];
-const CATS_ENTRADA = ['Salário','Pix','Resgate Cofrinho','Vale alimentação','Vale home office','Freela','Outros'];
-const CATS_INVEST  = ['Tesouro Direto','CDB','FII','Ações','Cofrinho Itaú','Outros'];
-const CATS_NEUTRAS = ['Estorno/Golpe'];
-const ICONS   = { entrada:'↑', saida:'↓', investimento:'→' };
-const DOTCLASS= { entrada:'entrada', saida:'saida', investimento:'invest' };
+const CATS_ENTRADA=['Salário','Pix','Resgate Cofrinho','Vale alimentação','Vale home office','Freela','Outros'];
+const CATS_INVEST=['Tesouro Direto','CDB','FII','Ações','Cofrinho Itaú','Outros'];
+const CATS_NEUTRAS=['Estorno/Golpe'];
+const ICONS={entrada:'↑',saida:'↓',investimento:'→'};
+const DOTCLASS={entrada:'entrada',saida:'saida',investimento:'invest'};
 
 let tipoAtivo='saida', pessoaLanc='Franklin';
 let noCartao=false, parcelado=false;
 let pessoaFiltro='Todos', filtroTipo='todos', screenAtiva='home';
 let filtroPessoaExt='todos', filtroCartaoExt=false;
 let mesAtual=new Date(); mesAtual.setDate(1);
-let items=[];
-let patrimonio=null, patrimonioAtualizadoEm=null, totalAportado=0;
-let categoriasSaida=[];
-let catDetalheAtiva=null;
-let orcRendaBase=5000;
-let saldosOcultos=true;
+let items=[], patrimonio=null, patrimonioAtualizadoEm=null, totalAportado=0;
+let categoriasSaida=[], catDetalheAtiva=null;
+let orcRendaBase=5000, saldosOcultos=true;
 
-function num(v){ if(typeof v==='number') return isFinite(v)?v:0; if(typeof v==='string'){let s=v.trim(); if(/,\d{1,2}$/.test(s))s=s.replace(/\./g,'').replace(',','.'); const n=parseFloat(s); return isFinite(n)?n:0;} return 0; }
-function fmtReal(v){ return 'R$ '+num(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function fmt(v){ return saldosOcultos ? 'R$ ••••' : fmtReal(v); }
-function mesKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
-function hojeISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-function mesLabel(d){ return cap(d.toLocaleDateString('pt-BR',{month:'long'}))+'/'+d.getFullYear(); }
-function dataFmt(ts){ if(!ts) return ''; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
-function normTipo(t){ if(t==='receita') return 'entrada'; if(t==='gasto') return 'saida'; return t; }
-function ehNeutra(i){ return CATS_NEUTRAS.includes(i.categoria); }
-function totaisPorTipo(lista){
-  const t={entrada:0,saida:0,investimento:0};
-  lista.forEach(i=>{ if(ehNeutra(i)) return; const tp=normTipo(i.tipo); if(t[tp]!==undefined) t[tp]+=num(i.valor); });
-  return t;
-}
-function nomesCategoriaSaida(){ return categoriasSaida.map(c=>c.nome); }
+const num=v=>{ if(typeof v==='number')return isFinite(v)?v:0; if(typeof v==='string'){let s=v.trim();if(/,\d{1,2}$/.test(s))s=s.replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isFinite(n)?n:0;}return 0; };
+const fmtReal=v=>'R$ '+num(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt=v=>saldosOcultos?'R$ ••••':fmtReal(v);
+const mesKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+const hojeISO=()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const mesLabel=d=>cap(d.toLocaleDateString('pt-BR',{month:'long'}))+'/'+d.getFullYear();
+const dataFmt=ts=>{ if(!ts)return ''; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); };
+const normTipo=t=>t==='receita'?'entrada':t==='gasto'?'saida':t;
+const ehNeutra=i=>CATS_NEUTRAS.includes(i.categoria);
+function totaisPorTipo(lista){ const t={entrada:0,saida:0,investimento:0}; lista.forEach(i=>{ if(ehNeutra(i))return; const tp=normTipo(i.tipo); if(t[tp]!==undefined)t[tp]+=num(i.valor); }); return t; }
+const nomesCategoriaSaida=()=>categoriasSaida.map(c=>c.nome);
 
-window.mudarMes=function(delta){
-  mesAtual.setMonth(mesAtual.getMonth()+delta);
-  atualizarMesLabels(); carregarItems();
-};
-function atualizarMesLabels(){
-  const l=mesLabel(mesAtual);
-  ['home','add','extrato'].forEach(s=>{ const el=document.getElementById('ml-'+s); if(el) el.textContent=l; });
-  const oe=document.getElementById('ml-orc'); if(oe) oe.textContent=l;
-}
+window.mudarMes=function(delta){ mesAtual.setMonth(mesAtual.getMonth()+delta); atualizarMesLabels(); carregarItems(); };
+function atualizarMesLabels(){ const l=mesLabel(mesAtual); ['home','add','extrato'].forEach(s=>{ const el=document.getElementById('ml-'+s); if(el)el.textContent=l; }); const oe=document.getElementById('ml-orc'); if(oe)oe.textContent=l; }
 
-window.togglePessoaMenu=function(e){
-  e.stopPropagation();
-  document.getElementById('pessoa-menu').classList.toggle('show');
-  document.getElementById('pessoa-link').classList.toggle('open');
-};
-window.toggleOcultar=function(){
-  saldosOcultos=!saldosOcultos;
-  const svg=document.getElementById('eye-svg');
-  if(saldosOcultos){
-    // ícone de olho cortado (oculto)
-    svg.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
-  } else {
-    svg.innerHTML='<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>';
-  }
-  renderTudo();
-};
+window.togglePessoaMenu=function(e){ e.stopPropagation(); document.getElementById('pessoa-menu').classList.toggle('show'); document.getElementById('pessoa-link').classList.toggle('open'); };
+window.toggleOcultar=function(){ saldosOcultos=!saldosOcultos; const svg=document.getElementById('eye-svg'); if(saldosOcultos){svg.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';}else{svg.innerHTML='<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>'; } renderTudo(); };
 document.addEventListener('click',()=>{ document.getElementById('pessoa-menu').classList.remove('show'); document.getElementById('pessoa-link').classList.remove('open'); });
-window.setPessoaFiltro=function(p,e){
-  if(e) e.stopPropagation();
-  pessoaFiltro=p;
-  document.getElementById('pessoa-nome').textContent=p;
-  document.querySelectorAll('.pessoa-option').forEach(o=>o.classList.toggle('sel',o.textContent.trim()===p));
-  document.getElementById('pessoa-menu').classList.remove('show');
-  document.getElementById('pessoa-link').classList.remove('open');
-  renderHome(); renderCategoriasHome();
-};
+window.setPessoaFiltro=function(p,e){ if(e)e.stopPropagation(); pessoaFiltro=p; document.getElementById('pessoa-nome').textContent=p; document.querySelectorAll('.pessoa-option').forEach(o=>o.classList.toggle('sel',o.textContent.trim()===p)); document.getElementById('pessoa-menu').classList.remove('show'); document.getElementById('pessoa-link').classList.remove('open'); renderHome(); };
 
-window.setTipo=function(t){
-  tipoAtivo=t;
-  const map={saida:'on-saida',entrada:'on-entrada',investimento:'on-invest'};
-  ['saida','entrada','investimento'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===t?' '+map[x]:''); });
-  let cats;
-  if(t==='saida') cats=nomesCategoriaSaida();
-  else if(t==='entrada') cats=CATS_ENTRADA;
-  else cats=CATS_INVEST;
-  document.getElementById('add-categoria').innerHTML=cats.map(c=>`<option>${c}</option>`).join('');
-  const fc=document.getElementById('field-cartao'), fp=document.getElementById('field-parcelado');
-  if(t==='saida'){fc.style.display='';fp.style.display='';}
-  else{fc.style.display='none';fp.style.display='none';setCartao(false);document.getElementById('add-cartao').checked=false;setParcelado(false);document.getElementById('add-parcelado').checked=false;}
-};
+window.setTipo=function(t){ tipoAtivo=t; const map={saida:'on-saida',entrada:'on-entrada',investimento:'on-invest'}; ['saida','entrada','investimento'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===t?' '+map[x]:''); }); let cats; if(t==='saida')cats=nomesCategoriaSaida(); else if(t==='entrada')cats=CATS_ENTRADA; else cats=CATS_INVEST; document.getElementById('add-categoria').innerHTML=cats.map(c=>`<option>${c}</option>`).join(''); const fc=document.getElementById('field-cartao'),fp=document.getElementById('field-parcelado'); if(t==='saida'){fc.style.display='';fp.style.display='';}else{fc.style.display='none';fp.style.display='none';setCartao(false);document.getElementById('add-cartao').checked=false;setParcelado(false);document.getElementById('add-parcelado').checked=false;} };
 window.setCartao=function(v){noCartao=v;};
 window.setParcelado=function(v){ parcelado=v; document.getElementById('parcelado-opts').style.display=v?'block':'none'; if(v){popularMesInicio();atualizarPreviaParcela();} };
-function popularMesInicio(){
-  const sel=document.getElementById('add-mesinicio'); if(sel.options.length) return;
-  const hoje=new Date(); hoje.setDate(1); let html='';
-  for(let k=0;k<12;k++){const d=new Date(hoje.getFullYear(),hoje.getMonth()+k,1);html+=`<option value="${mesKey(d)}">${mesLabel(d)}</option>`;}
-  sel.innerHTML=html;
-}
-function atualizarPreviaParcela(){
-  const prev=document.getElementById('parcela-previa');
-  const total=num(document.getElementById('add-valor').value);
-  let n=parseInt(document.getElementById('add-nparcelas').value,10); if(!n||n<2)n=2;
-  if(total<=0){prev.textContent='Informe o valor total da compra acima.';return;}
-  const base=Math.floor((total/n)*100)/100, ultima=Math.round((total-base*(n-1))*100)/100;
-  prev.textContent=base===ultima?`${n}x de ${fmt(base)} = ${fmt(total)}`:`${n-1}x de ${fmt(base)} + 1x de ${fmt(ultima)} = ${fmt(total)}`;
-}
+function popularMesInicio(){ const sel=document.getElementById('add-mesinicio'); if(sel.options.length)return; const hoje=new Date(); hoje.setDate(1); let html=''; for(let k=0;k<12;k++){const d=new Date(hoje.getFullYear(),hoje.getMonth()+k,1);html+=`<option value="${mesKey(d)}">${mesLabel(d)}</option>`;} sel.innerHTML=html; }
+function atualizarPreviaParcela(){ const prev=document.getElementById('parcela-previa'); const total=num(document.getElementById('add-valor').value); let n=parseInt(document.getElementById('add-nparcelas').value,10); if(!n||n<2)n=2; if(total<=0){prev.textContent='Informe o valor total da compra acima.';return;} const base=Math.floor((total/n)*100)/100,ultima=Math.round((total-base*(n-1))*100)/100; prev.textContent=base===ultima?`${n}x de ${fmt(base)} = ${fmt(total)}`:`${n-1}x de ${fmt(base)} + 1x de ${fmt(ultima)} = ${fmt(total)}`; }
 window.atualizarPreviaParcela=atualizarPreviaParcela;
 window.setPessoaLanc=function(p){ pessoaLanc=p; ['Franklin','Airton'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===p?' on-invest':''); }); };
 
-window.setScreen=function(s,btn){
-  screenAtiva=s;
-  ['home','orc','orc-detalhe','add','extrato'].forEach(x=>{ document.getElementById('screen-'+x).classList.toggle('active',x===s); });
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-};
-window.abrirOrc=function(){
-  setScreen('orc', document.getElementById('tab-orc'));
-  renderOrcamento();
-};
-window.voltarOrc=function(){
-  setScreen('orc', document.getElementById('tab-orc'));
-  document.getElementById('cfg-panel').style.display='none';
-};
-window.setFiltroTipo=function(f,btn){
-  filtroTipo=f;
-  document.querySelectorAll('#ext-tipo-row .chip').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active'); renderExtrato();
-};
-window.toggleFiltroCartaoExt=function(btn){
-  filtroCartaoExt=!filtroCartaoExt;
-  btn.classList.toggle('active',filtroCartaoExt);
-  renderExtrato();
-};
-window.setFiltroPessoaExt=function(p,btn){
-  filtroPessoaExt=(filtroPessoaExt===p)?'todos':p;
-  document.querySelectorAll('.ext-pessoa-chip').forEach(b=>b.classList.remove('active'));
-  if(filtroPessoaExt!=='todos') btn.classList.add('active');
-  renderExtrato();
-};
+window.setScreen=function(s,btn){ screenAtiva=s; ['home','orc','orc-detalhe','add','extrato'].forEach(x=>{ document.getElementById('screen-'+x).classList.toggle('active',x===s); }); document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); if(btn)btn.classList.add('active'); };
+window.abrirOrc=function(){ setScreen('orc',document.getElementById('tab-orc')); renderOrcamento(); };
+window.voltarOrc=function(){ setScreen('orc',document.getElementById('tab-orc')); document.getElementById('cfg-panel').style.display='none'; };
+window.setFiltroTipo=function(f,btn){ filtroTipo=f; document.querySelectorAll('#ext-tipo-row .chip').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderExtrato(); };
+window.toggleFiltroCartaoExt=function(btn){ filtroCartaoExt=!filtroCartaoExt; btn.classList.toggle('active',filtroCartaoExt); renderExtrato(); };
+window.setFiltroPessoaExt=function(p,btn){ filtroPessoaExt=(filtroPessoaExt===p)?'todos':p; document.querySelectorAll('.ext-pessoa-chip').forEach(b=>b.classList.remove('active')); if(filtroPessoaExt!=='todos')btn.classList.add('active'); renderExtrato(); };
 
 function mesKeyOffset(mk,k){ const[a,m]=mk.split('-').map(Number); return mesKey(new Date(a,(m-1)+k,1)); }
+
+// ===== BACKUP / EXPORTAÇÃO CSV =====
+window.exportarCSV=async function(){
+  const btn=document.getElementById('backup-btn');
+  const sub=document.getElementById('backup-sub');
+  btn.disabled=true; btn.textContent='Baixando...';
+  try{
+    const snap=await getDocs(collection(db,'lancamentos'));
+    const todos=snap.docs.map(d=>({id:d.id,...d.data()}));
+    todos.sort((a,b)=>{
+      const ma=a.mes||'', mb=b.mes||'';
+      if(ma!==mb) return ma.localeCompare(mb);
+      const ta=a.data?.toDate?a.data.toDate():new Date(a.criadoEm||0);
+      const tb=b.data?.toDate?b.data.toDate():new Date(b.criadoEm||0);
+      return ta-tb;
+    });
+    const escCSV=v=>{ const s=String(v??'').replace(/"/g,'""'); return s.includes(',')||s.includes('"')||s.includes('\n')?`"${s}"`:s; };
+    const dataStr=ts=>{ if(!ts)return ''; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('pt-BR'); };
+    const cabecalho='ID,Mês,Data,Tipo,Categoria,Descrição,Valor,Pessoa,Cartão,Parcela,Grupo Parcela';
+    const linhas=todos.map(i=>[
+      escCSV(i.id),
+      escCSV(i.mes||''),
+      escCSV(dataStr(i.data||i.criadoEm)),
+      escCSV(normTipo(i.tipo)),
+      escCSV(i.categoria||''),
+      escCSV(i.descricao||''),
+      escCSV(num(i.valor).toFixed(2).replace('.',',')),
+      escCSV(i.pessoa||'Franklin'),
+      escCSV(i.noCartao?'sim':'não'),
+      escCSV(i.parcelaGrupoId?`${i.parcelaNum}/${i.parcelaTotal}`:''),
+      escCSV(i.parcelaGrupoId||''),
+    ].join(','));
+    const csv='\uFEFF'+cabecalho+'\n'+linhas.join('\n'); // BOM pra Excel abrir acentos direto
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const hoje=hojeISO();
+    a.href=url; a.download=`myfin_backup_${hoje}.csv`; a.click();
+    URL.revokeObjectURL(url);
+    const agora=new Date().toLocaleString('pt-BR');
+    sub.textContent=`Último backup: ${agora} · ${todos.length} lançamentos`;
+  }catch(e){
+    console.error(e);
+    alert('Erro ao exportar. Verifique sua conexão.');
+  }
+  btn.disabled=false;
+  btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Baixar CSV`;
+};
+
 window.addItem=async function(){
   const desc=document.getElementById('add-desc').value.trim();
   const valor=num(document.getElementById('add-valor').value);
@@ -604,53 +569,41 @@ window.addItem=async function(){
   if(parcelado&&tipoAtivo==='saida'){nParc=parseInt(document.getElementById('add-nparcelas').value,10);if(!nParc||nParc<2){alert('Número de parcelas deve ser 2 ou mais.');return;}}
   const btn=document.getElementById('btn-add'); btn.disabled=true; btn.textContent='Salvando...';
   try{
-    const tipoLancado=tipoAtivo;
-    const valorLancado=valor;
-    // ===== 1.3: usa a DATA escolhida no formulário (padrão = hoje) =====
+    const tipoLancado=tipoAtivo, valorLancado=valor;
     const dataStr=document.getElementById('add-data').value;
     const dataLanc=dataStr?new Date(dataStr+'T12:00:00'):new Date();
     let mesParaVer;
-
     if(parcelado&&tipoAtivo==='saida'&&nParc>=2){
       const mesInicio=document.getElementById('add-mesinicio').value||mesKey(dataLanc);
       const grupoId='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
       const base=Math.floor((valor/nParc)*100)/100, ultima=Math.round((valor-base*(nParc-1))*100)/100;
-      // grava todas as parcelas de uma vez (tudo-ou-nada): se cair a internet no meio, nada fica pela metade
       const batch=writeBatch(db);
       for(let k=0;k<nParc;k++){
         const vParc=(k===nParc-1)?ultima:base;
         const mk=mesKeyOffset(mesInicio,k);
-        const [ay,am]=mk.split('-').map(Number);
+        const[ay,am]=mk.split('-').map(Number);
         const dataParc=new Date(ay,am-1,1,12,0,0);
         const ref=doc(collection(db,'lancamentos'));
         batch.set(ref,{tipo:'saida',categoria:cat,descricao:`${desc} (${k+1}/${nParc})`,valor:vParc,pessoa:pessoaLanc,mes:mk,data:dataParc,criadoEm:dataParc,noCartao,parcelaGrupoId:grupoId,parcelaNum:k+1,parcelaTotal:nParc,parcelaValorTotal:valor});
       }
       await batch.commit();
-      const [py,pm]=mesInicio.split('-').map(Number);
-      mesParaVer=new Date(py,pm-1,1);
-    } else {
+      const[py,pm]=mesInicio.split('-').map(Number); mesParaVer=new Date(py,pm-1,1);
+    }else{
       await addDoc(collection(db,'lancamentos'),{tipo:tipoLancado,categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,noCartao});
       mesParaVer=new Date(dataLanc.getFullYear(),dataLanc.getMonth(),1);
     }
-
-    // ===== 1.2: aporte ajusta o patrimônio de forma ATÔMICA (sem perder atualizações / sem corroer) =====
-    // só mexe no patrimônio se você já informou o saldo real alguma vez (lápis). Senão, a Home mostra o total aportado.
-    if(tipoLancado==='investimento' && patrimonio!=null){
-      await setDoc(doc(db,'config','patrimonio'),{valor:increment(valorLancado),atualizadoEm:new Date()},{merge:true});
-      await carregarPatrimonio();
-    }
-    if(tipoLancado==='investimento'){ await carregarTotalAportado(); }
-
+    if(tipoLancado==='investimento'&&patrimonio!=null){ await setDoc(doc(db,'config','patrimonio'),{valor:increment(valorLancado),atualizadoEm:new Date()},{merge:true}); await carregarPatrimonio(); }
+    if(tipoLancado==='investimento')await carregarTotalAportado();
     document.getElementById('add-desc').value=''; document.getElementById('add-valor').value='';
     document.getElementById('add-cartao').checked=false; noCartao=false;
     document.getElementById('add-parcelado').checked=false; setParcelado(false);
     document.getElementById('add-data').value=hojeISO();
     mesAtual=mesParaVer; mesAtual.setDate(1); atualizarMesLabels();
-    await carregarItems();
-    setScreen('home',document.getElementById('tab-home'));
+    await carregarItems(); setScreen('home',document.getElementById('tab-home'));
   }catch(e){alert('Erro ao salvar. Verifique sua conexão.');console.error(e);}
   btn.disabled=false; btn.textContent='Adicionar lançamento';
 };
+
 window.delItem=async function(id){
   const item=items.find(x=>x.id===id);
   const grupo=item&&item.parcelaGrupoId;
@@ -661,328 +614,61 @@ window.delItem=async function(id){
     const escolha=confirm(`Esta é a parcela ${item.parcelaNum}/${total} de "${(item.descricao||'').replace(/\s*\(\d+\/\d+\)$/,'')}". \n\nOK = apagar TODAS as ${total} parcelas\nCancelar = apagar só esta`);
     try{
       if(escolha){const snap=await getDocs(query(collection(db,'lancamentos'),where('parcelaGrupoId','==',grupo)));for(const d of snap.docs)await deleteDoc(doc(db,'lancamentos',d.id));}
-      else{await deleteDoc(doc(db,'lancamentos',id));}
+      else await deleteDoc(doc(db,'lancamentos',id));
       await carregarTotalAportado(); await carregarItems();
     }catch(e){alert('Erro ao remover.');console.error(e);}
     return;
   }
-  if(!confirm('Remover este lançamento?')) return;
+  if(!confirm('Remover este lançamento?'))return;
   try{
     await deleteDoc(doc(db,'lancamentos',id));
-    if(eraInvest && patrimonio!=null){
-      // tira o aporte do patrimônio de forma atômica
-      await setDoc(doc(db,'config','patrimonio'),{valor:increment(-valorItem),atualizadoEm:new Date()},{merge:true});
-      await carregarPatrimonio();
-      if(patrimonio<0){ await setDoc(doc(db,'config','patrimonio'),{valor:0,atualizadoEm:new Date()},{merge:true}); patrimonio=0; }
-    }
+    if(eraInvest&&patrimonio!=null){ await setDoc(doc(db,'config','patrimonio'),{valor:increment(-valorItem),atualizadoEm:new Date()},{merge:true}); await carregarPatrimonio(); if(patrimonio<0){await setDoc(doc(db,'config','patrimonio'),{valor:0,atualizadoEm:new Date()},{merge:true});patrimonio=0;} }
     await carregarTotalAportado(); await carregarItems();
   }catch(e){alert('Erro ao remover.');console.error(e);}
 };
 
-async function carregarTotalAportado(){
-  try{ const snap=await getDocs(query(collection(db,'lancamentos'),where('tipo','==','investimento'))); totalAportado=snap.docs.reduce((s,d)=>s+num(d.data().valor),0); }
-  catch(e){console.error(e);totalAportado=0;}
-}
-async function carregarPatrimonio(){
-  try{ const d=await getDoc(doc(db,'config','patrimonio')); if(d.exists()){patrimonio=num(d.data().valor);const upd=d.data().atualizadoEm;patrimonioAtualizadoEm=upd?(upd.toDate?upd.toDate():new Date(upd)):null;} }
-  catch(e){console.error(e);}
-}
-window.editarPatrimonio=async function(){
-  const atual=patrimonio!=null?patrimonio.toLocaleString('pt-BR',{minimumFractionDigits:2}):'';
-  const novo=prompt('Saldo real investido hoje (R$):\n(inclui rendimentos — veja no app do banco)',atual);
-  if(novo===null) return;
-  const v=num(novo); if(v<0){alert('Valor inválido.');return;}
-  try{await setDoc(doc(db,'config','patrimonio'),{valor:v,atualizadoEm:new Date()});patrimonio=v;patrimonioAtualizadoEm=new Date();renderHome();}
-  catch(e){alert('Erro ao salvar.');console.error(e);}
-};
+async function carregarTotalAportado(){ try{const snap=await getDocs(query(collection(db,'lancamentos'),where('tipo','==','investimento')));totalAportado=snap.docs.reduce((s,d)=>s+num(d.data().valor),0);}catch(e){console.error(e);totalAportado=0;} }
+async function carregarPatrimonio(){ try{const d=await getDoc(doc(db,'config','patrimonio'));if(d.exists()){patrimonio=num(d.data().valor);const upd=d.data().atualizadoEm;patrimonioAtualizadoEm=upd?(upd.toDate?upd.toDate():new Date(upd)):null;}}catch(e){console.error(e);} }
+window.editarPatrimonio=async function(){ const atual=patrimonio!=null?patrimonio.toLocaleString('pt-BR',{minimumFractionDigits:2}):''; const novo=prompt('Saldo real investido hoje (R$):\n(inclui rendimentos — veja no app do banco)',atual); if(novo===null)return; const v=num(novo); if(v<0){alert('Valor inválido.');return;} try{await setDoc(doc(db,'config','patrimonio'),{valor:v,atualizadoEm:new Date()});patrimonio=v;patrimonioAtualizadoEm=new Date();renderHome();}catch(e){alert('Erro ao salvar.');console.error(e);} };
 
-async function carregarCategorias(){
-  try{
-    const snap=await getDocs(query(collection(db,'categorias'),orderBy('ordem')));
-    if(snap.empty){
-      const batch=writeBatch(db);
-      CATS_SAIDA_INICIAIS.forEach(c=>{ batch.set(doc(collection(db,'categorias')),c); });
-      await batch.commit();
-      const snap2=await getDocs(query(collection(db,'categorias'),orderBy('ordem')));
-      categoriasSaida=snap2.docs.map(d=>({id:d.id,...d.data()}));
-    } else {
-      categoriasSaida=snap.docs.map(d=>({id:d.id,...d.data()}));
-    }
-  }catch(e){console.error(e); categoriasSaida=CATS_SAIDA_INICIAIS.map((c,i)=>({id:'local'+i,...c}));}
-}
+async function carregarCategorias(){ try{ const snap=await getDocs(query(collection(db,'categorias'),orderBy('ordem'))); if(snap.empty){const batch=writeBatch(db);CATS_SAIDA_INICIAIS.forEach(c=>{batch.set(doc(collection(db,'categorias')),c);});await batch.commit();const snap2=await getDocs(query(collection(db,'categorias'),orderBy('ordem')));categoriasSaida=snap2.docs.map(d=>({id:d.id,...d.data()}));}else{categoriasSaida=snap.docs.map(d=>({id:d.id,...d.data()}));} }catch(e){console.error(e);categoriasSaida=CATS_SAIDA_INICIAIS.map((c,i)=>({id:'local'+i,...c}));} }
 
-window.novaCategoria=async function(){
-  const nome=prompt('Nome da nova categoria:');
-  if(!nome||!nome.trim()) return;
-  const maxOrdem=categoriasSaida.reduce((m,c)=>Math.max(m,c.ordem||0),0);
-  try{
-    const ref=await addDoc(collection(db,'categorias'),{nome:nome.trim(),pct:0,ordem:maxOrdem+1});
-    categoriasSaida.push({id:ref.id,nome:nome.trim(),pct:0,ordem:maxOrdem+1});
-    setTipo(tipoAtivo);
-    renderOrcamento();
-  }catch(e){alert('Erro ao criar categoria.');console.error(e);}
-};
+window.novaCategoria=async function(){ const nome=prompt('Nome da nova categoria:'); if(!nome||!nome.trim())return; const maxOrdem=categoriasSaida.reduce((m,c)=>Math.max(m,c.ordem||0),0); try{const ref=await addDoc(collection(db,'categorias'),{nome:nome.trim(),pct:0,ordem:maxOrdem+1});categoriasSaida.push({id:ref.id,nome:nome.trim(),pct:0,ordem:maxOrdem+1});setTipo(tipoAtivo);renderOrcamento();}catch(e){alert('Erro ao criar categoria.');console.error(e);} };
 
-window.toggleCfgPanel=function(){
-  const panel=document.getElementById('cfg-panel');
-  const aberto=panel.style.display!=='none';
-  panel.style.display=aberto?'none':'block';
-  if(!aberto && catDetalheAtiva){
-    document.getElementById('cfg-nome').value=catDetalheAtiva.nome;
-    document.getElementById('cfg-pct').value=catDetalheAtiva.pct||0;
-    atualizarContadorPct();
-  }
-};
-window.atualizarContadorPct=function(){
-  if(!catDetalheAtiva) return;
-  const novoPct=parseInt(document.getElementById('cfg-pct').value)||0;
-  const totalOutras=categoriasSaida.reduce((s,c)=>c.id===catDetalheAtiva.id?s:s+(c.pct||0),0);
-  const total=totalOutras+novoPct;
-  const el=document.getElementById('cfg-pct-total');
-  if(total===100){ el.textContent=`Total: 100% ✓`; el.className='cfg-pct-total ok'; }
-  else if(total>100){ el.textContent=`Total: ${total}% — ${total-100}% acima de 100`; el.className='cfg-pct-total over'; }
-  else { el.textContent=`Total: ${total}% — faltam ${100-total}% para 100`; el.className='cfg-pct-total'; }
-};
-window.salvarCategoria=async function(){
-  if(!catDetalheAtiva) return;
-  const novoNome=document.getElementById('cfg-nome').value.trim();
-  const novoPct=parseInt(document.getElementById('cfg-pct').value)||0;
-  if(!novoNome){alert('Nome não pode ser vazio.');return;}
-  const nomeAntigo=catDetalheAtiva.nome;
-  const renomear=novoNome!==nomeAntigo;
-  try{
-    await updateDoc(doc(db,'categorias',catDetalheAtiva.id),{nome:novoNome,pct:novoPct});
-    catDetalheAtiva.nome=novoNome; catDetalheAtiva.pct=novoPct;
-    const idx=categoriasSaida.findIndex(c=>c.id===catDetalheAtiva.id);
-    if(idx>=0){ categoriasSaida[idx].nome=novoNome; categoriasSaida[idx].pct=novoPct; }
-    if(renomear){
-      const snap=await getDocs(query(collection(db,'lancamentos'),where('categoria','==',nomeAntigo)));
-      if(!snap.empty){
-        let batch=writeBatch(db); let n=0;
-        for(const d of snap.docs){ batch.update(doc(db,'lancamentos',d.id),{categoria:novoNome}); n++; if(n%400===0){await batch.commit();batch=writeBatch(db);} }
-        await batch.commit();
-        items.forEach(i=>{ if(i.categoria===nomeAntigo) i.categoria=novoNome; });
-      }
-    }
-    setTipo(tipoAtivo);
-    document.getElementById('orc-detalhe-titulo').textContent=novoNome;
-    document.getElementById('cfg-panel').style.display='none';
-    renderOrcamento();
-    renderDetalheCategoria(catDetalheAtiva);
-  }catch(e){alert('Erro ao salvar.');console.error(e);}
-};
-window.excluirCategoria=async function(){
-  if(!catDetalheAtiva) return;
-  if(!confirm(`Excluir a categoria "${catDetalheAtiva.nome}"?\n\nOs lançamentos que usam essa categoria ficam com ela mesmo (sem categoria válida no orçamento).`)) return;
-  try{
-    await deleteDoc(doc(db,'categorias',catDetalheAtiva.id));
-    categoriasSaida=categoriasSaida.filter(c=>c.id!==catDetalheAtiva.id);
-    setTipo(tipoAtivo);
-    catDetalheAtiva=null;
-    voltarOrc();
-    renderOrcamento();
-  }catch(e){alert('Erro ao excluir.');console.error(e);}
-};
+window.toggleCfgPanel=function(){ const panel=document.getElementById('cfg-panel'); const aberto=panel.style.display!=='none'; panel.style.display=aberto?'none':'block'; if(!aberto&&catDetalheAtiva){document.getElementById('cfg-nome').value=catDetalheAtiva.nome;document.getElementById('cfg-pct').value=catDetalheAtiva.pct||0;atualizarContadorPct();} };
+window.atualizarContadorPct=function(){ if(!catDetalheAtiva)return; const novoPct=parseInt(document.getElementById('cfg-pct').value)||0; const totalOutras=categoriasSaida.reduce((s,c)=>c.id===catDetalheAtiva.id?s:s+(c.pct||0),0); const total=totalOutras+novoPct; const el=document.getElementById('cfg-pct-total'); if(total===100){el.textContent='Total: 100% ✓';el.className='cfg-pct-total ok';}else if(total>100){el.textContent=`Total: ${total}% — ${total-100}% acima de 100`;el.className='cfg-pct-total over';}else{el.textContent=`Total: ${total}% — faltam ${100-total}% para 100`;el.className='cfg-pct-total';} };
+window.salvarCategoria=async function(){ if(!catDetalheAtiva)return; const novoNome=document.getElementById('cfg-nome').value.trim(); const novoPct=parseInt(document.getElementById('cfg-pct').value)||0; if(!novoNome){alert('Nome não pode ser vazio.');return;} const nomeAntigo=catDetalheAtiva.nome; const renomear=novoNome!==nomeAntigo; try{await updateDoc(doc(db,'categorias',catDetalheAtiva.id),{nome:novoNome,pct:novoPct});catDetalheAtiva.nome=novoNome;catDetalheAtiva.pct=novoPct;const idx=categoriasSaida.findIndex(c=>c.id===catDetalheAtiva.id);if(idx>=0){categoriasSaida[idx].nome=novoNome;categoriasSaida[idx].pct=novoPct;}if(renomear){const snap=await getDocs(query(collection(db,'lancamentos'),where('categoria','==',nomeAntigo)));if(!snap.empty){let batch=writeBatch(db);let n=0;for(const d of snap.docs){batch.update(doc(db,'lancamentos',d.id),{categoria:novoNome});n++;if(n%400===0){await batch.commit();batch=writeBatch(db);}}await batch.commit();items.forEach(i=>{if(i.categoria===nomeAntigo)i.categoria=novoNome;});}}setTipo(tipoAtivo);document.getElementById('orc-detalhe-titulo').textContent=novoNome;document.getElementById('cfg-panel').style.display='none';renderOrcamento();renderDetalheCategoria(catDetalheAtiva);}catch(e){alert('Erro ao salvar.');console.error(e);} };
+window.excluirCategoria=async function(){ if(!catDetalheAtiva)return; if(!confirm(`Excluir a categoria "${catDetalheAtiva.nome}"?\n\nOs lançamentos que usam essa categoria ficam com ela mesmo.`))return; try{await deleteDoc(doc(db,'categorias',catDetalheAtiva.id));categoriasSaida=categoriasSaida.filter(c=>c.id!==catDetalheAtiva.id);setTipo(tipoAtivo);catDetalheAtiva=null;voltarOrc();renderOrcamento();}catch(e){alert('Erro ao excluir.');console.error(e);} };
 
-async function carregarItems(){
-  try{
-    const mk=mesKey(mesAtual);
-    const q=query(collection(db,'lancamentos'),where('mes','==',mk));
-    const snap=await getDocs(q);
-    items=snap.docs.map(d=>({id:d.id,...d.data()}));
-    items.sort((a,b)=>{
-      const ta=a.criadoEm?.toDate?a.criadoEm.toDate():new Date(a.criadoEm||0);
-      const tb=b.criadoEm?.toDate?b.criadoEm.toDate():new Date(b.criadoEm||0);
-      return tb-ta;
-    });
-  }catch(e){console.error(e);items=[];}
-  renderTudo();
-}
+async function carregarItems(){ try{const mk=mesKey(mesAtual);const q=query(collection(db,'lancamentos'),where('mes','==',mk));const snap=await getDocs(q);items=snap.docs.map(d=>({id:d.id,...d.data()}));items.sort((a,b)=>{const ta=a.criadoEm?.toDate?a.criadoEm.toDate():new Date(a.criadoEm||0);const tb=b.criadoEm?.toDate?b.criadoEm.toDate():new Date(b.criadoEm||0);return tb-ta;});}catch(e){console.error(e);items=[];} renderTudo(); }
 
-function renderTudo(){ renderHome(); renderExtrato(); renderCategoriasHome(); if(screenAtiva==='orc') renderOrcamento(); if(screenAtiva==='orc-detalhe'&&catDetalheAtiva) renderDetalheCategoria(catDetalheAtiva); }
-function filtrarPorPessoa(lista){ if(pessoaFiltro==='Todos') return lista; return lista.filter(i=>(i.pessoa||'Franklin')===pessoaFiltro); }
+function renderTudo(){ renderHome(); renderExtrato(); if(screenAtiva==='orc')renderOrcamento(); if(screenAtiva==='orc-detalhe'&&catDetalheAtiva)renderDetalheCategoria(catDetalheAtiva); }
+const filtrarPorPessoa=lista=>pessoaFiltro==='Todos'?lista:lista.filter(i=>(i.pessoa||'Franklin')===pessoaFiltro);
 
-function renderHome(){
-  const base=filtrarPorPessoa(items);
-  const t=totaisPorTipo(base);
-  const saldo=t.entrada-t.saida-t.investimento;
-  const sa=document.getElementById('saldo-amount');
-  sa.textContent=fmt(saldo); sa.className='amount '+(saldo>=0?'pos':'neg');
-  document.getElementById('entradas-amount').textContent=fmt(t.entrada);
-  document.getElementById('saidas-amount').textContent=fmt(t.saida);
-  const invAmount=document.getElementById('invest-amount'), invSub=document.getElementById('invest-sub');
-  if(patrimonio!=null){
-    invAmount.textContent=fmt(patrimonio);
-    const rendido=patrimonio-totalAportado, positivo=rendido>=0;
-    invSub.innerHTML=`<span style="color:var(--muted2);">Aportado ${fmt(totalAportado)}</span> · <span style="color:${positivo?'var(--green)':'var(--red)'};font-weight:600;">${positivo?'↑':'↓'} ${fmt(Math.abs(rendido))}</span> <span style="color:var(--muted2);">rendido</span>`;
-  } else {
-    invAmount.textContent=fmt(totalAportado);
-    invSub.textContent='Toque no lápis para informar o saldo real';
-  }
-}
+function renderHome(){ const base=filtrarPorPessoa(items); const t=totaisPorTipo(base); const saldo=t.entrada-t.saida-t.investimento; const sa=document.getElementById('saldo-amount'); sa.textContent=fmt(saldo); sa.className='amount '+(saldo>=0?'pos':'neg'); document.getElementById('entradas-amount').textContent=fmt(t.entrada); document.getElementById('saidas-amount').textContent=fmt(t.saida); const invAmount=document.getElementById('invest-amount'),invSub=document.getElementById('invest-sub'); if(patrimonio!=null){invAmount.textContent=fmt(patrimonio);const rendido=patrimonio-totalAportado,positivo=rendido>=0;invSub.innerHTML=`<span style="color:var(--muted2);">Aportado ${fmt(totalAportado)}</span> · <span style="color:${positivo?'var(--green)':'var(--red)'};font-weight:600;">${positivo?'↑':'↓'} ${fmt(Math.abs(rendido))}</span> <span style="color:var(--muted2);">rendido</span>`;}else{invAmount.textContent=fmt(totalAportado);invSub.textContent='Toque no lápis para informar o saldo real';} }
 
-function renderExtrato(){
-  const el=document.getElementById('extrato-list');
-  const resumoEl=document.getElementById('extrato-resumo');
-  const ehCartao=i=>i.noCartao===true||['cartão de crédito','cartao de credito'].includes((i.categoria||'').toLowerCase());
-  let base=items.slice();
-  if(filtroPessoaExt!=='todos') base=base.filter(i=>(i.pessoa||'Franklin')===filtroPessoaExt);
-  if(filtroCartaoExt) base=base.filter(ehCartao);
-  if(filtroTipo!=='todos') base=base.filter(i=>normTipo(i.tipo)===filtroTipo);
+function renderExtrato(){ const el=document.getElementById('extrato-list'); const resumoEl=document.getElementById('extrato-resumo'); const ehCartao=i=>i.noCartao===true||['cartão de crédito','cartao de credito'].includes((i.categoria||'').toLowerCase()); let base=items.slice(); if(filtroPessoaExt!=='todos')base=base.filter(i=>(i.pessoa||'Franklin')===filtroPessoaExt); if(filtroCartaoExt)base=base.filter(ehCartao); if(filtroTipo!=='todos')base=base.filter(i=>normTipo(i.tipo)===filtroTipo); let totEnt=0,totSai=0; base.forEach(i=>{if(ehNeutra(i))return;const tp=normTipo(i.tipo);if(tp==='entrada')totEnt+=num(i.valor);else if(tp==='saida')totSai+=num(i.valor);}); if(resumoEl){resumoEl.innerHTML=`<div class="ext-resumo"><div class="ext-resumo-item"><span class="ext-resumo-lbl">Entradas</span><span class="ext-resumo-val green">${fmt(totEnt)}</span></div><div class="ext-resumo-item"><span class="ext-resumo-lbl">Saídas</span><span class="ext-resumo-val red">${fmt(totSai)}</span></div></div>`;} if(base.length===0){el.innerHTML='<div class="empty"><span>○</span>Nenhum lançamento com esses filtros.</div>';return;} el.innerHTML=txHTML(base); }
 
-  // totais respeitando os filtros (ignora neutras tipo Estorno/Golpe)
-  let totEnt=0, totSai=0;
-  base.forEach(i=>{ if(ehNeutra(i)) return; const tp=normTipo(i.tipo); if(tp==='entrada') totEnt+=num(i.valor); else if(tp==='saida') totSai+=num(i.valor); });
-  if(resumoEl){
-    resumoEl.innerHTML=`<div class="ext-resumo">
-      <div class="ext-resumo-item"><span class="ext-resumo-lbl">Entradas</span><span class="ext-resumo-val green">${fmt(totEnt)}</span></div>
-      <div class="ext-resumo-item"><span class="ext-resumo-lbl">Saídas</span><span class="ext-resumo-val red">${fmt(totSai)}</span></div>
-    </div>`;
-  }
+function txHTML(lista){ return lista.map(i=>{ const tp=normTipo(i.tipo),pessoa=i.pessoa||'Franklin'; const tag=pessoa==='Airton'?`<span class="tx-pessoa">${pessoa}</span>`:''; const neutra=ehNeutra(i); const estilo=neutra?' style="opacity:0.5;"':''; const valStyle=neutra?' style="text-decoration:line-through;"':''; const selo=neutra?` <span class="tx-pessoa" style="background:rgba(255,69,58,0.15);color:var(--red);">não conta</span>`:''; const seloCartao=(i.noCartao&&!neutra)?` <span class="tx-pessoa" style="background:rgba(108,99,255,0.15);color:var(--blue-soft);">cartão</span>`:''; const seloParcela=i.parcelaGrupoId?` <span class="tx-pessoa" style="background:rgba(255,255,255,0.08);color:var(--muted);">${i.parcelaNum}/${i.parcelaTotal}</span>`:''; return `<div class="tx"${estilo}><div class="tx-dot ${DOTCLASS[tp]}">${ICONS[tp]}</div><div class="tx-body"><div class="tx-desc">${i.descricao}</div><div class="tx-meta">${i.categoria}${tag}${selo}${seloCartao}${seloParcela}</div></div><div class="tx-right"><div class="tx-val ${DOTCLASS[tp]}"${valStyle}>${fmt(i.valor)}</div><div class="tx-date">${dataFmt(i.data||i.criadoEm)}</div></div><button class="tx-del" onclick="delItem('${i.id}')">×</button></div>`; }).join(''); }
 
-  if(base.length===0){el.innerHTML='<div class="empty"><span>○</span>Nenhum lançamento com esses filtros.</div>';return;}
-  el.innerHTML=txHTML(base);
-}
+function renderOrcamento(){ const t=totaisPorTipo(filtrarPorPessoa(items)); const rendaUsada=t.entrada>0?t.entrada:orcRendaBase; const gastosCat={}; filtrarPorPessoa(items).forEach(i=>{if(normTipo(i.tipo)!=='saida'||ehNeutra(i))return;gastosCat[i.categoria]=(gastosCat[i.categoria]||0)+num(i.valor);}); const investMes=t.investimento; const linhas=categoriasSaida.map(cat=>{const gasto=cat.nome==='Investimentos'?investMes:(gastosCat[cat.nome]||0);const limite=rendaUsada*(cat.pct||0)/100;const semLimite=cat.pct===0;const pctGasto=limite>0?gasto/limite:0;const status=pctGasto>1?'over':pctGasto>0.8?'warn':'ok';return{cat,gasto,limite,semLimite,pctGasto,status,barW:Math.min(pctGasto*100,100).toFixed(1)};}).sort((a,b)=>b.gasto-a.gasto); const totalPct=categoriasSaida.reduce((s,c)=>s+(c.pct||0),0); const fillW=Math.min(totalPct,100); const fillColor=totalPct>100?'var(--red)':totalPct===100?'var(--green)':'var(--blue)'; let labelVal,labelClass; if(totalPct===100){labelVal=`${totalPct}% ✓`;labelClass='ok';}else if(totalPct>100){labelVal=`${totalPct}% — ${totalPct-100}% acima`;labelClass='over';}else{labelVal=`${totalPct}% — faltam ${100-totalPct}%`;labelClass='';} document.getElementById('orc-alloc-bar').innerHTML=`<div class="orc-alloc-wrap"><div class="orc-alloc-label"><span>Alocação do orçamento</span><span class="${labelClass}">${labelVal}</span></div><div class="orc-alloc-track"><div class="orc-alloc-fill" style="width:${fillW}%;background:${fillColor}"></div></div></div>`; const lista=document.getElementById('orc-lista'); lista.innerHTML=linhas.map(({cat,gasto,limite,semLimite,pctGasto,status,barW})=>{const pctGastoStr=semLimite?'':`${(pctGasto*100).toFixed(0)}%`;return `<div class="orc-item" onclick="abrirDetalheCategoria('${cat.id}')"><div class="orc-item-body"><div class="orc-item-top"><span class="orc-item-nome">${cat.nome}</span></div><div class="orc-bar-wrap"><div class="orc-bar ${semLimite?'nolimit':status}" style="width:${semLimite?'0':barW}%"></div></div></div><div class="orc-item-vals"><span class="orc-item-gasto ${semLimite?'ok':status}">${fmt(gasto)}${pctGastoStr?` <span style="font-size:11px;font-weight:400;color:var(--muted2)">${pctGastoStr}</span>`:''}</span><span class="orc-item-limite">${semLimite?'sem teto':fmt(limite)+' ('+cat.pct+'%)'}</span></div><span class="orc-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></div>`;}).join(''); }
 
-function txHTML(lista){
-  return lista.map(i=>{
-    const tp=normTipo(i.tipo), pessoa=i.pessoa||'Franklin';
-    const tag=pessoa==='Airton'?`<span class="tx-pessoa">${pessoa}</span>`:'';
-    const neutra=ehNeutra(i);
-    const estilo=neutra?' style="opacity:0.5;"':'';
-    const valStyle=neutra?' style="text-decoration:line-through;"':'';
-    const selo=neutra?` <span class="tx-pessoa" style="background:rgba(255,69,58,0.15);color:var(--red);">não conta</span>`:'';
-    const seloCartao=(i.noCartao&&!neutra)?` <span class="tx-pessoa" style="background:rgba(108,99,255,0.15);color:var(--blue-soft);">cartão</span>`:'';
-    const seloParcela=i.parcelaGrupoId?` <span class="tx-pessoa" style="background:rgba(255,255,255,0.08);color:var(--muted);">${i.parcelaNum}/${i.parcelaTotal}</span>`:'';
-    return `<div class="tx"${estilo}><div class="tx-dot ${DOTCLASS[tp]}">${ICONS[tp]}</div><div class="tx-body"><div class="tx-desc">${i.descricao}</div><div class="tx-meta">${i.categoria}${tag}${selo}${seloCartao}${seloParcela}</div></div><div class="tx-right"><div class="tx-val ${DOTCLASS[tp]}"${valStyle}>${fmt(i.valor)}</div><div class="tx-date">${dataFmt(i.data||i.criadoEm)}</div></div><button class="tx-del" onclick="delItem('${i.id}')">×</button></div>`;
-  }).join('');
-}
+window.abrirDetalheCategoria=function(catId){ const cat=categoriasSaida.find(c=>c.id===catId); if(!cat)return; catDetalheAtiva=cat; document.getElementById('orc-detalhe-titulo').textContent=cat.nome; document.getElementById('cfg-panel').style.display='none'; setScreen('orc-detalhe',document.getElementById('tab-orc')); renderDetalheCategoria(cat); };
+function renderDetalheCategoria(cat){ const el=document.getElementById('orc-detalhe-list'); let base; if(cat.nome==='Investimentos'){base=filtrarPorPessoa(items).filter(i=>normTipo(i.tipo)==='investimento');}else{base=filtrarPorPessoa(items).filter(i=>normTipo(i.tipo)==='saida'&&i.categoria===cat.nome);} if(base.length===0){el.innerHTML='<div class="empty"><span>○</span>Sem lançamentos nesta categoria neste mês.</div>';return;} const total=base.reduce((s,i)=>s+num(i.valor),0); el.innerHTML=`<div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Total: <strong style="color:var(--text)">${fmt(total)}</strong></div>`+txHTML(base); }
 
-function renderCategoriasHome(){
-  const el=document.getElementById('home-categorias');
-  if(!el) return;
-  const base=filtrarPorPessoa(items);
-  const saidas=base.filter(i=>normTipo(i.tipo)==='saida'&&!ehNeutra(i));
-  const totalSaidas=saidas.reduce((s,i)=>s+num(i.valor),0);
-  if(saidas.length===0){el.innerHTML='';return;}
-  const porCat={};
-  saidas.forEach(i=>{porCat[i.categoria]=(porCat[i.categoria]||0)+num(i.valor);});
-  const cats=Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
-  el.innerHTML=`<div class="card"><div class="card-head"><span class="card-label">Saídas por categoria</span></div>${cats.map(([cat,val])=>{const pct=totalSaidas>0?((val/totalSaidas)*100).toFixed(0):0;return `<div style="padding:12px 0;border-bottom:1px solid var(--border);"><div style="display:flex;justify-content:space-between;font-size:15px;"><span>${cat}</span><span style="color:var(--red);font-weight:600;">${fmt(val)}</span></div><div style="display:flex;align-items:center;gap:8px;margin-top:7px;"><div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div><span style="font-size:11px;color:var(--muted2);min-width:30px;">${pct}%</span></div></div>`;}).join('')}</div>`;
-}
-
-function renderOrcamento(){
-  const t=totaisPorTipo(filtrarPorPessoa(items));
-  const rendaUsada=t.entrada>0?t.entrada:orcRendaBase;
-  const gastosCat={};
-  filtrarPorPessoa(items).forEach(i=>{
-    if(normTipo(i.tipo)!=='saida'||ehNeutra(i)) return;
-    gastosCat[i.categoria]=(gastosCat[i.categoria]||0)+num(i.valor);
-  });
-  const investMes=t.investimento;
-  const linhas=categoriasSaida.map(cat=>{
-    const gasto=cat.nome==='Investimentos'?investMes:(gastosCat[cat.nome]||0);
-    const limite=rendaUsada*(cat.pct||0)/100;
-    const semLimite=cat.pct===0;
-    const pctGasto=limite>0?gasto/limite:0;
-    const status=pctGasto>1?'over':pctGasto>0.8?'warn':'ok';
-    return {cat, gasto, limite, semLimite, pctGasto, status, barW:Math.min(pctGasto*100,100).toFixed(1)};
-  }).sort((a,b)=>b.gasto-a.gasto);
-
-  const totalPct=categoriasSaida.reduce((s,c)=>s+(c.pct||0),0);
-  const fillW=Math.min(totalPct,100);
-  const fillColor=totalPct>100?'var(--red)':totalPct===100?'var(--green)':'var(--blue)';
-  let labelVal, labelClass;
-  if(totalPct===100){ labelVal=`${totalPct}% ✓`; labelClass='ok'; }
-  else if(totalPct>100){ labelVal=`${totalPct}% — ${totalPct-100}% acima`; labelClass='over'; }
-  else { labelVal=`${totalPct}% — faltam ${100-totalPct}%`; labelClass=''; }
-  document.getElementById('orc-alloc-bar').innerHTML=`<div class="orc-alloc-wrap">
-    <div class="orc-alloc-label"><span>Alocação do orçamento</span><span class="${labelClass}">${labelVal}</span></div>
-    <div class="orc-alloc-track"><div class="orc-alloc-fill" style="width:${fillW}%;background:${fillColor}"></div></div>
-  </div>`;
-
-  const lista=document.getElementById('orc-lista');
-  lista.innerHTML=linhas.map(({cat,gasto,limite,semLimite,pctGasto,status,barW})=>{
-    const pctGastoStr=semLimite?'':`${(pctGasto*100).toFixed(0)}%`;
-    return `<div class="orc-item" onclick="abrirDetalheCategoria('${cat.id}')">
-      <div class="orc-item-body">
-        <div class="orc-item-top">
-          <span class="orc-item-nome">${cat.nome}</span>
-        </div>
-        <div class="orc-bar-wrap"><div class="orc-bar ${semLimite?'nolimit':status}" style="width:${semLimite?'0':barW}%"></div></div>
-      </div>
-      <div class="orc-item-vals">
-        <span class="orc-item-gasto ${semLimite?'ok':status}">${fmt(gasto)}${pctGastoStr?` <span style="font-size:11px;font-weight:400;color:var(--muted2)">${pctGastoStr}</span>`:''}</span>
-        <span class="orc-item-limite">${semLimite?'sem teto':fmt(limite)+' ('+cat.pct+'%)'}</span>
-      </div>
-      <span class="orc-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
-    </div>`;
-  }).join('');
-}
-
-window.abrirDetalheCategoria=function(catId){
-  const cat=categoriasSaida.find(c=>c.id===catId);
-  if(!cat) return;
-  catDetalheAtiva=cat;
-  document.getElementById('orc-detalhe-titulo').textContent=cat.nome;
-  document.getElementById('cfg-panel').style.display='none';
-  setScreen('orc-detalhe', document.getElementById('tab-orc'));
-  renderDetalheCategoria(cat);
-};
-
-function renderDetalheCategoria(cat){
-  const el=document.getElementById('orc-detalhe-list');
-  let base;
-  if(cat.nome==='Investimentos'){
-    base=filtrarPorPessoa(items).filter(i=>normTipo(i.tipo)==='investimento');
-  } else {
-    base=filtrarPorPessoa(items).filter(i=>normTipo(i.tipo)==='saida'&&i.categoria===cat.nome);
-  }
-  if(base.length===0){
-    el.innerHTML='<div class="empty"><span>○</span>Sem lançamentos nesta categoria neste mês.</div>';
-    return;
-  }
-  const total=base.reduce((s,i)=>s+num(i.valor),0);
-  el.innerHTML=`<div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Total: <strong style="color:var(--text)">${fmt(total)}</strong></div>`+txHTML(base);
-}
-
-// setup que não depende do banco (pode rodar antes do login)
+// INIT
 document.getElementById('add-data').value=hojeISO();
 setTipo('saida'); setPessoaLanc('Franklin'); atualizarMesLabels();
 
 let appIniciado=false;
-function iniciarApp(){
-  if(appIniciado) return; appIniciado=true;
-  Promise.all([carregarPatrimonio(), carregarTotalAportado(), carregarCategorias()])
-    .then(()=>{ setTipo('saida'); carregarItems(); });
-}
+function iniciarApp(){ if(appIniciado)return; appIniciado=true; Promise.all([carregarPatrimonio(),carregarTotalAportado(),carregarCategorias()]).then(()=>{setTipo('saida');carregarItems();}); }
 
-// ===== TELA DE BLOQUEIO + LOGIN (o PIN é a chave de verdade do banco) =====
+// LOCK + LOGIN
 let lockBuffer='';
-function lockRender(){ document.querySelectorAll('#lock-dots .lock-dot').forEach((d,i)=>{ d.classList.toggle('filled', i<lockBuffer.length); d.classList.remove('err'); }); }
+function lockRender(){ document.querySelectorAll('#lock-dots .lock-dot').forEach((d,i)=>{d.classList.toggle('filled',i<lockBuffer.length);d.classList.remove('err');}); }
 window.lockBack=function(){ lockBuffer=lockBuffer.slice(0,-1); lockRender(); };
-window.lockDigit=function(n){
-  if(lockBuffer.length>=6) return;
-  lockBuffer+=n; lockRender();
-  if(lockBuffer.length===6) tentarLogin(lockBuffer);
-};
-async function tentarLogin(pin){
-  document.querySelector('.lock-sub').textContent='Verificando...';
-  try{
-    await setPersistence(auth, browserSessionPersistence);
-    await signInWithEmailAndPassword(auth, EMAIL_LOGIN, pin);
-    document.getElementById('lock').classList.add('hidden');
-    document.querySelector('.lock-sub').textContent='Digite seu PIN de 6 dígitos';
-    iniciarApp();
-  }catch(e){
-    console.error(e);
-    document.querySelector('.lock-sub').textContent='PIN incorreto';
-    const w=document.getElementById('lock-dots');
-    document.querySelectorAll('#lock-dots .lock-dot').forEach(d=>d.classList.add('err'));
-    w.classList.add('shake');
-    setTimeout(()=>{ lockBuffer=''; lockRender(); w.classList.remove('shake'); document.querySelector('.lock-sub').textContent='Digite seu PIN de 6 dígitos'; },800);
-  }
-}
+window.lockDigit=function(n){ if(lockBuffer.length>=6)return; lockBuffer+=n; lockRender(); if(lockBuffer.length===6)tentarLogin(lockBuffer); };
+async function tentarLogin(pin){ document.querySelector('.lock-sub').textContent='Verificando...'; try{await setPersistence(auth,browserSessionPersistence);await signInWithEmailAndPassword(auth,EMAIL_LOGIN,pin);document.getElementById('lock').classList.add('hidden');document.querySelector('.lock-sub').textContent='Digite seu PIN de 6 dígitos';iniciarApp();}catch(e){console.error(e);document.querySelector('.lock-sub').textContent='PIN incorreto';const w=document.getElementById('lock-dots');document.querySelectorAll('#lock-dots .lock-dot').forEach(d=>d.classList.add('err'));w.classList.add('shake');setTimeout(()=>{lockBuffer='';lockRender();w.classList.remove('shake');document.querySelector('.lock-sub').textContent='Digite seu PIN de 6 dígitos';},800);} }
 </script>
 </body>
 </html>
