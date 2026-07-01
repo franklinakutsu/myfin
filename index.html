@@ -581,7 +581,13 @@ window.addItem=async function(){
       const pessoas=pessoaLanc==='dividir'?['Franklin','Airton']:[pessoaLanc];
       const batch=writeBatch(db);
       for(const pessoa of pessoas){
-        const valorPessoa=pessoaLanc==='dividir'?valor/2:valor;
+        let valorPessoa;
+        if(pessoaLanc==='dividir'){
+          const metadeAirton=Math.floor((valor/2)*100)/100;
+          valorPessoa=pessoa==='Airton'?metadeAirton:Math.round((valor-metadeAirton)*100)/100;
+        }else{
+          valorPessoa=valor;
+        }
         const baseP=Math.floor((valorPessoa/nParc)*100)/100, ultimaP=Math.round((valorPessoa-baseP*(nParc-1))*100)/100;
         const grupoIdP=pessoa==='Airton'&&pessoaLanc==='dividir'?grupoId+'_airton':grupoId;
         for(let k=0;k<nParc;k++){
@@ -598,12 +604,14 @@ window.addItem=async function(){
       const[py,pm]=mesInicio.split('-').map(Number); mesParaVer=new Date(py,pm-1,1);
     }else{
       if(pessoaLanc==='dividir'){
-        // dois lançamentos simples: metade pra cada um
-        const metade=Math.round((valor/2)*100)/100;
+        // dois lançamentos simples: divide sem perder centavo (Franklin fica com a sobra)
+        const metadeAirton=Math.floor((valor/2)*100)/100;
+        const metadeFranklin=Math.round((valor-metadeAirton)*100)/100;
         const batch=writeBatch(db);
-        for(const pessoa of ['Franklin','Airton']){
+        const partes=[['Franklin',metadeFranklin],['Airton',metadeAirton]];
+        for(const [pessoa,vp] of partes){
           const ref=doc(collection(db,'lancamentos'));
-          batch.set(ref,{tipo:tipoLancado,categoria:cat,descricao:`${desc} 50%`,valor:metade,pessoa,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,noCartao});
+          batch.set(ref,{tipo:tipoLancado,categoria:cat,descricao:`${desc} 50%`,valor:vp,pessoa,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,noCartao});
         }
         await batch.commit();
       }else{
