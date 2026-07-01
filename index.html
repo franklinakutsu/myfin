@@ -344,6 +344,7 @@
       <div class="seg">
         <button class="seg-btn on-invest" id="seg-Franklin" onclick="setPessoaLanc('Franklin')">Franklin</button>
         <button class="seg-btn" id="seg-Airton" onclick="setPessoaLanc('Airton')">Airton</button>
+        <button class="seg-btn" id="seg-dividir" onclick="setPessoaLanc('dividir')">50/50</button>
       </div>
     </div>
     <div class="field">
@@ -501,7 +502,7 @@ window.setParcelado=function(v){ parcelado=v; document.getElementById('parcelado
 function popularMesInicio(){ const sel=document.getElementById('add-mesinicio'); if(sel.options.length)return; const hoje=new Date(); hoje.setDate(1); let html=''; for(let k=0;k<12;k++){const d=new Date(hoje.getFullYear(),hoje.getMonth()+k,1);html+=`<option value="${mesKey(d)}">${mesLabel(d)}</option>`;} sel.innerHTML=html; }
 function atualizarPreviaParcela(){ const prev=document.getElementById('parcela-previa'); const total=num(document.getElementById('add-valor').value); let n=parseInt(document.getElementById('add-nparcelas').value,10); if(!n||n<2)n=2; if(total<=0){prev.textContent='Informe o valor total da compra acima.';return;} const base=Math.floor((total/n)*100)/100,ultima=Math.round((total-base*(n-1))*100)/100; prev.textContent=base===ultima?`${n}x de ${fmt(base)} = ${fmt(total)}`:`${n-1}x de ${fmt(base)} + 1x de ${fmt(ultima)} = ${fmt(total)}`; }
 window.atualizarPreviaParcela=atualizarPreviaParcela;
-window.setPessoaLanc=function(p){ pessoaLanc=p; ['Franklin','Airton'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===p?' on-invest':''); }); };
+window.setPessoaLanc=function(p){ pessoaLanc=p; ['Franklin','Airton','dividir'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===p?' on-invest':''); }); };
 
 window.setScreen=function(s,btn){ screenAtiva=s; ['home','orc','orc-detalhe','add','extrato'].forEach(x=>{ document.getElementById('screen-'+x).classList.toggle('active',x===s); }); document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); if(btn)btn.classList.add('active'); };
 window.abrirOrc=function(){ setScreen('orc',document.getElementById('tab-orc')); renderOrcamento(); };
@@ -577,19 +578,37 @@ window.addItem=async function(){
       const mesInicio=document.getElementById('add-mesinicio').value||mesKey(dataLanc);
       const grupoId='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
       const base=Math.floor((valor/nParc)*100)/100, ultima=Math.round((valor-base*(nParc-1))*100)/100;
+      const pessoas=pessoaLanc==='dividir'?['Franklin','Airton']:[pessoaLanc];
       const batch=writeBatch(db);
-      for(let k=0;k<nParc;k++){
-        const vParc=(k===nParc-1)?ultima:base;
-        const mk=mesKeyOffset(mesInicio,k);
-        const[ay,am]=mk.split('-').map(Number);
-        const dataParc=new Date(ay,am-1,1,12,0,0);
-        const ref=doc(collection(db,'lancamentos'));
-        batch.set(ref,{tipo:'saida',categoria:cat,descricao:`${desc} (${k+1}/${nParc})`,valor:vParc,pessoa:pessoaLanc,mes:mk,data:dataParc,criadoEm:dataParc,noCartao,parcelaGrupoId:grupoId,parcelaNum:k+1,parcelaTotal:nParc,parcelaValorTotal:valor});
+      for(const pessoa of pessoas){
+        const valorPessoa=pessoaLanc==='dividir'?valor/2:valor;
+        const baseP=Math.floor((valorPessoa/nParc)*100)/100, ultimaP=Math.round((valorPessoa-baseP*(nParc-1))*100)/100;
+        const grupoIdP=pessoa==='Airton'&&pessoaLanc==='dividir'?grupoId+'_airton':grupoId;
+        for(let k=0;k<nParc;k++){
+          const vParc=(k===nParc-1)?ultimaP:baseP;
+          const mk=mesKeyOffset(mesInicio,k);
+          const[ay,am]=mk.split('-').map(Number);
+          const dataParc=new Date(ay,am-1,1,12,0,0);
+          const ref=doc(collection(db,'lancamentos'));
+          const descLabel=pessoaLanc==='dividir'?`${desc} 50% (${k+1}/${nParc})`:`${desc} (${k+1}/${nParc})`;
+          batch.set(ref,{tipo:'saida',categoria:cat,descricao:descLabel,valor:vParc,pessoa,mes:mk,data:dataParc,criadoEm:dataParc,noCartao,parcelaGrupoId:grupoIdP,parcelaNum:k+1,parcelaTotal:nParc,parcelaValorTotal:valorPessoa});
+        }
       }
       await batch.commit();
       const[py,pm]=mesInicio.split('-').map(Number); mesParaVer=new Date(py,pm-1,1);
     }else{
-      await addDoc(collection(db,'lancamentos'),{tipo:tipoLancado,categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,noCartao});
+      if(pessoaLanc==='dividir'){
+        // dois lançamentos simples: metade pra cada um
+        const metade=Math.round((valor/2)*100)/100;
+        const batch=writeBatch(db);
+        for(const pessoa of ['Franklin','Airton']){
+          const ref=doc(collection(db,'lancamentos'));
+          batch.set(ref,{tipo:tipoLancado,categoria:cat,descricao:`${desc} 50%`,valor:metade,pessoa,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,noCartao});
+        }
+        await batch.commit();
+      }else{
+        await addDoc(collection(db,'lancamentos'),{tipo:tipoLancado,categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,noCartao});
+      }
       mesParaVer=new Date(dataLanc.getFullYear(),dataLanc.getMonth(),1);
     }
     if(tipoLancado==='investimento'&&patrimonio!=null){ await setDoc(doc(db,'config','patrimonio'),{valor:increment(valorLancado),atualizadoEm:new Date()},{merge:true}); await carregarPatrimonio(); }
@@ -598,6 +617,7 @@ window.addItem=async function(){
     document.getElementById('add-cartao').checked=false; noCartao=false;
     document.getElementById('add-parcelado').checked=false; setParcelado(false);
     document.getElementById('add-data').value=hojeISO();
+    setPessoaLanc('Franklin');
     mesAtual=mesParaVer; mesAtual.setDate(1); atualizarMesLabels();
     await carregarItems(); setScreen('home',document.getElementById('tab-home'));
   }catch(e){alert('Erro ao salvar. Verifique sua conexão.');console.error(e);}
