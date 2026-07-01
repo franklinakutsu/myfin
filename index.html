@@ -597,7 +597,7 @@ window.addItem=async function(){
           const dataParc=new Date(ay,am-1,1,12,0,0);
           const ref=doc(collection(db,'lancamentos'));
           const descLabel=pessoaLanc==='dividir'?`${desc} 50% (${k+1}/${nParc})`:`${desc} (${k+1}/${nParc})`;
-          batch.set(ref,{tipo:'saida',categoria:cat,descricao:descLabel,valor:vParc,pessoa,mes:mk,data:dataParc,criadoEm:dataParc,noCartao,parcelaGrupoId:grupoIdP,parcelaNum:k+1,parcelaTotal:nParc,parcelaValorTotal:valorPessoa});
+          batch.set(ref,{tipo:'saida',categoria:cat,descricao:descLabel,valor:vParc,pessoa,mes:mk,data:dataParc,criadoEm:dataParc,registradoEm:new Date(),noCartao,parcelaGrupoId:grupoIdP,parcelaNum:k+1,parcelaTotal:nParc,parcelaValorTotal:valorPessoa});
         }
       }
       await batch.commit();
@@ -611,11 +611,11 @@ window.addItem=async function(){
         const partes=[['Franklin',metadeFranklin],['Airton',metadeAirton]];
         for(const [pessoa,vp] of partes){
           const ref=doc(collection(db,'lancamentos'));
-          batch.set(ref,{tipo:tipoLancado,categoria:cat,descricao:`${desc} 50%`,valor:vp,pessoa,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,noCartao});
+          batch.set(ref,{tipo:tipoLancado,categoria:cat,descricao:`${desc} 50%`,valor:vp,pessoa,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,registradoEm:new Date(),noCartao});
         }
         await batch.commit();
       }else{
-        await addDoc(collection(db,'lancamentos'),{tipo:tipoLancado,categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,noCartao});
+        await addDoc(collection(db,'lancamentos'),{tipo:tipoLancado,categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,registradoEm:new Date(),noCartao});
       }
       mesParaVer=new Date(dataLanc.getFullYear(),dataLanc.getMonth(),1);
     }
@@ -668,7 +668,7 @@ window.atualizarContadorPct=function(){ if(!catDetalheAtiva)return; const novoPc
 window.salvarCategoria=async function(){ if(!catDetalheAtiva)return; const novoNome=document.getElementById('cfg-nome').value.trim(); const novoPct=parseInt(document.getElementById('cfg-pct').value)||0; if(!novoNome){alert('Nome não pode ser vazio.');return;} const nomeAntigo=catDetalheAtiva.nome; const renomear=novoNome!==nomeAntigo; try{await updateDoc(doc(db,'categorias',catDetalheAtiva.id),{nome:novoNome,pct:novoPct});catDetalheAtiva.nome=novoNome;catDetalheAtiva.pct=novoPct;const idx=categoriasSaida.findIndex(c=>c.id===catDetalheAtiva.id);if(idx>=0){categoriasSaida[idx].nome=novoNome;categoriasSaida[idx].pct=novoPct;}if(renomear){const snap=await getDocs(query(collection(db,'lancamentos'),where('categoria','==',nomeAntigo)));if(!snap.empty){let batch=writeBatch(db);let n=0;for(const d of snap.docs){batch.update(doc(db,'lancamentos',d.id),{categoria:novoNome});n++;if(n%400===0){await batch.commit();batch=writeBatch(db);}}await batch.commit();items.forEach(i=>{if(i.categoria===nomeAntigo)i.categoria=novoNome;});}}setTipo(tipoAtivo);document.getElementById('orc-detalhe-titulo').textContent=novoNome;document.getElementById('cfg-panel').style.display='none';renderOrcamento();renderDetalheCategoria(catDetalheAtiva);}catch(e){alert('Erro ao salvar.');console.error(e);} };
 window.excluirCategoria=async function(){ if(!catDetalheAtiva)return; if(!confirm(`Excluir a categoria "${catDetalheAtiva.nome}"?\n\nOs lançamentos que usam essa categoria ficam com ela mesmo.`))return; try{await deleteDoc(doc(db,'categorias',catDetalheAtiva.id));categoriasSaida=categoriasSaida.filter(c=>c.id!==catDetalheAtiva.id);setTipo(tipoAtivo);catDetalheAtiva=null;voltarOrc();renderOrcamento();}catch(e){alert('Erro ao excluir.');console.error(e);} };
 
-async function carregarItems(){ try{const mk=mesKey(mesAtual);const q=query(collection(db,'lancamentos'),where('mes','==',mk));const snap=await getDocs(q);items=snap.docs.map(d=>({id:d.id,...d.data()}));items.sort((a,b)=>{const ta=a.criadoEm?.toDate?a.criadoEm.toDate():new Date(a.criadoEm||0);const tb=b.criadoEm?.toDate?b.criadoEm.toDate():new Date(b.criadoEm||0);return tb-ta;});}catch(e){console.error(e);items=[];} renderTudo(); }
+async function carregarItems(){ try{const mk=mesKey(mesAtual);const q=query(collection(db,'lancamentos'),where('mes','==',mk));const snap=await getDocs(q);items=snap.docs.map(d=>({id:d.id,...d.data()}));const ord=i=>{const t=i.registradoEm||i.criadoEm;return t?.toDate?t.toDate():new Date(t||0);};items.sort((a,b)=>ord(b)-ord(a));}catch(e){console.error(e);items=[];} renderTudo(); }
 
 function renderTudo(){ renderHome(); renderExtrato(); if(screenAtiva==='orc')renderOrcamento(); if(screenAtiva==='orc-detalhe'&&catDetalheAtiva)renderDetalheCategoria(catDetalheAtiva); }
 const filtrarPorPessoa=lista=>pessoaFiltro==='Todos'?lista:lista.filter(i=>(i.pessoa||'Franklin')===pessoaFiltro);
