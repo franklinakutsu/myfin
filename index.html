@@ -617,6 +617,11 @@ window.addItem=async function(){
     }else{
       const investeCaixinha = tipoLancado==='investimento' || cat==='Investimentos';
       const cxId = investeCaixinha ? (document.getElementById('add-caixinha').value||null) : null;
+      if(investeCaixinha && !cxId){
+        alert('Escolha a caixinha para onde vai esse aporte.');
+        btn.disabled=false; btn.textContent='Adicionar lançamento';
+        return;
+      }
       const extra = cxId ? {caixinhaId:cxId} : {};
       if(pessoaLanc==='dividir'){
         // dois lançamentos simples: divide sem perder centavo (Franklin fica com a sobra)
@@ -690,7 +695,7 @@ async function carregarCaixinhas(){
     }
   }catch(e){console.error(e);caixinhas=[];}
 }
-function atualizarSelectCaixinha(){ const sel=document.getElementById('add-caixinha'); if(!sel)return; const atual=sel.value; sel.innerHTML=caixinhas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join(''); if(atual&&caixinhas.some(c=>c.id===atual))sel.value=atual; }
+function atualizarSelectCaixinha(){ const sel=document.getElementById('add-caixinha'); if(!sel)return; const atual=sel.value; sel.innerHTML='<option value="">Selecione a caixinha...</option>'+caixinhas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join(''); sel.value=(atual&&caixinhas.some(c=>c.id===atual))?atual:''; }
 function atualizarCampoCaixinha(){ const fcx=document.getElementById('field-caixinha'); if(!fcx)return; const cat=document.getElementById('add-categoria').value; const mostrar = tipoAtivo==='investimento' || (tipoAtivo==='saida' && cat==='Investimentos'); fcx.style.display = mostrar ? '' : 'none'; if(mostrar) atualizarSelectCaixinha(); }
 window.atualizarCampoCaixinha=atualizarCampoCaixinha;
 window.novaCaixinha=async function(){
