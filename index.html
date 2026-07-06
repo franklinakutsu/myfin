@@ -85,6 +85,13 @@
     .duo .card { min-width:0; }
     .duo .card-amount { font-size:clamp(15px,5vw,20px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .card-sub { font-size:12px; color:var(--muted2); margin-top:6px; }
+    .caixinha-row { display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid var(--border); cursor:pointer; transition:opacity .15s; }
+    .caixinha-row:hover { opacity:.8; }
+    .caixinha-row:first-child { margin-top:10px; }
+    .caixinha-row:last-child { border-bottom:none; padding-bottom:0; }
+    .caixinha-nome { font-size:14px; color:var(--text); display:flex; align-items:center; gap:8px; }
+    .caixinha-nome svg { width:15px; height:15px; color:var(--muted2); }
+    .caixinha-valor { font-size:14px; font-weight:600; color:var(--blue-soft); }
     /* BACKUP CARD */
     .backup-card { background:var(--surface); border-radius:var(--radius); padding:16px 20px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
     .backup-info { flex:1; }
@@ -255,12 +262,12 @@
     <div class="card">
       <div class="card-head">
         <span class="card-label">Investimentos</span>
-        <button class="icon-btn" onclick="editarPatrimonio()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <button class="icon-btn" onclick="novaCaixinha()" title="Nova caixinha">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
       </div>
       <div class="card-amount blue" id="invest-amount">—</div>
-      <div class="card-sub" id="invest-sub"></div>
+      <div id="caixinhas-list"></div>
     </div>
     <div class="duo">
       <div class="card">
@@ -354,6 +361,10 @@
     <div class="field">
       <div class="field-label">Categoria</div>
       <select id="add-categoria"></select>
+    </div>
+    <div class="field" id="field-caixinha" style="display:none;">
+      <div class="field-label">Caixinha (para onde vai o aporte)</div>
+      <select id="add-caixinha"></select>
     </div>
     <div class="field">
       <div class="field-label">Descrição</div>
@@ -472,6 +483,7 @@ let pessoaFiltro='Todos', filtroTipo='todos', screenAtiva='home';
 let filtroPessoaExt='todos', filtroCartaoExt=false;
 let mesAtual=new Date(); mesAtual.setDate(1);
 let items=[], patrimonio=null, patrimonioAtualizadoEm=null, totalAportado=0;
+let caixinhas=[];
 let categoriasSaida=[], catDetalheAtiva=null;
 let orcRendaBase=5000, saldosOcultos=true;
 
@@ -496,7 +508,7 @@ window.toggleOcultar=function(){ saldosOcultos=!saldosOcultos; const svg=documen
 document.addEventListener('click',()=>{ document.getElementById('pessoa-menu').classList.remove('show'); document.getElementById('pessoa-link').classList.remove('open'); });
 window.setPessoaFiltro=function(p,e){ if(e)e.stopPropagation(); pessoaFiltro=p; document.getElementById('pessoa-nome').textContent=p; document.querySelectorAll('.pessoa-option').forEach(o=>o.classList.toggle('sel',o.textContent.trim()===p)); document.getElementById('pessoa-menu').classList.remove('show'); document.getElementById('pessoa-link').classList.remove('open'); renderHome(); };
 
-window.setTipo=function(t){ tipoAtivo=t; const map={saida:'on-saida',entrada:'on-entrada',investimento:'on-invest'}; ['saida','entrada','investimento'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===t?' '+map[x]:''); }); let cats; if(t==='saida')cats=nomesCategoriaSaida(); else if(t==='entrada')cats=CATS_ENTRADA; else cats=CATS_INVEST; document.getElementById('add-categoria').innerHTML=cats.map(c=>`<option>${c}</option>`).join(''); const fc=document.getElementById('field-cartao'),fp=document.getElementById('field-parcelado'); if(t==='saida'){fc.style.display='';fp.style.display='';}else{fc.style.display='none';fp.style.display='none';setCartao(false);document.getElementById('add-cartao').checked=false;setParcelado(false);document.getElementById('add-parcelado').checked=false;} };
+window.setTipo=function(t){ tipoAtivo=t; const map={saida:'on-saida',entrada:'on-entrada',investimento:'on-invest'}; ['saida','entrada','investimento'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===t?' '+map[x]:''); }); let cats; if(t==='saida')cats=nomesCategoriaSaida(); else if(t==='entrada')cats=CATS_ENTRADA; else cats=CATS_INVEST; document.getElementById('add-categoria').innerHTML=cats.map(c=>`<option>${c}</option>`).join(''); const fc=document.getElementById('field-cartao'),fp=document.getElementById('field-parcelado'); if(t==='saida'){fc.style.display='';fp.style.display='';}else{fc.style.display='none';fp.style.display='none';setCartao(false);document.getElementById('add-cartao').checked=false;setParcelado(false);document.getElementById('add-parcelado').checked=false;} const fcx=document.getElementById('field-caixinha'); if(fcx){ if(t==='investimento'){fcx.style.display='';atualizarSelectCaixinha();}else{fcx.style.display='none';} } };
 window.setCartao=function(v){noCartao=v;};
 window.setParcelado=function(v){ parcelado=v; document.getElementById('parcelado-opts').style.display=v?'block':'none'; if(v){popularMesInicio();atualizarPreviaParcela();} };
 function popularMesInicio(){ const sel=document.getElementById('add-mesinicio'); if(sel.options.length)return; const hoje=new Date(); hoje.setDate(1); let html=''; for(let k=0;k<12;k++){const d=new Date(hoje.getFullYear(),hoje.getMonth()+k,1);html+=`<option value="${mesKey(d)}">${mesLabel(d)}</option>`;} sel.innerHTML=html; }
@@ -603,6 +615,8 @@ window.addItem=async function(){
       await batch.commit();
       const[py,pm]=mesInicio.split('-').map(Number); mesParaVer=new Date(py,pm-1,1);
     }else{
+      const cxId = tipoLancado==='investimento' ? (document.getElementById('add-caixinha').value||null) : null;
+      const extra = cxId ? {caixinhaId:cxId} : {};
       if(pessoaLanc==='dividir'){
         // dois lançamentos simples: divide sem perder centavo (Franklin fica com a sobra)
         const metadeAirton=Math.floor((valor/2)*100)/100;
@@ -611,16 +625,19 @@ window.addItem=async function(){
         const partes=[['Franklin',metadeFranklin],['Airton',metadeAirton]];
         for(const [pessoa,vp] of partes){
           const ref=doc(collection(db,'lancamentos'));
-          batch.set(ref,{tipo:tipoLancado,categoria:cat,descricao:`${desc} 50%`,valor:vp,pessoa,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,registradoEm:new Date(),noCartao});
+          batch.set(ref,{tipo:tipoLancado,categoria:cat,descricao:`${desc} 50%`,valor:vp,pessoa,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,registradoEm:new Date(),noCartao,...extra});
         }
         await batch.commit();
       }else{
-        await addDoc(collection(db,'lancamentos'),{tipo:tipoLancado,categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,registradoEm:new Date(),noCartao});
+        await addDoc(collection(db,'lancamentos'),{tipo:tipoLancado,categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,registradoEm:new Date(),noCartao,...extra});
       }
       mesParaVer=new Date(dataLanc.getFullYear(),dataLanc.getMonth(),1);
     }
-    if(tipoLancado==='investimento'&&patrimonio!=null){ await setDoc(doc(db,'config','patrimonio'),{valor:increment(valorLancado),atualizadoEm:new Date()},{merge:true}); await carregarPatrimonio(); }
-    if(tipoLancado==='investimento')await carregarTotalAportado();
+    // aporte soma direto na caixinha escolhida (conserta o bug do investimento que não entrava)
+    if(tipoLancado==='investimento'){
+      const cxId=document.getElementById('add-caixinha').value;
+      if(cxId){ await updateDoc(doc(db,'caixinhas',cxId),{valor:increment(valorLancado)}); await carregarCaixinhas(); }
+    }
     document.getElementById('add-desc').value=''; document.getElementById('add-valor').value='';
     document.getElementById('add-cartao').checked=false; noCartao=false;
     document.getElementById('add-parcelado').checked=false; setParcelado(false);
@@ -650,14 +667,51 @@ window.delItem=async function(id){
   if(!confirm('Remover este lançamento?'))return;
   try{
     await deleteDoc(doc(db,'lancamentos',id));
-    if(eraInvest&&patrimonio!=null){ await setDoc(doc(db,'config','patrimonio'),{valor:increment(-valorItem),atualizadoEm:new Date()},{merge:true}); await carregarPatrimonio(); if(patrimonio<0){await setDoc(doc(db,'config','patrimonio'),{valor:0,atualizadoEm:new Date()},{merge:true});patrimonio=0;} }
-    await carregarTotalAportado(); await carregarItems();
+    if(eraInvest&&item.caixinhaId){ await updateDoc(doc(db,'caixinhas',item.caixinhaId),{valor:increment(-valorItem)}); await carregarCaixinhas(); }
+    await carregarItems();
   }catch(e){alert('Erro ao remover.');console.error(e);}
 };
 
 async function carregarTotalAportado(){ try{const snap=await getDocs(query(collection(db,'lancamentos'),where('tipo','==','investimento')));totalAportado=snap.docs.reduce((s,d)=>s+num(d.data().valor),0);}catch(e){console.error(e);totalAportado=0;} }
 async function carregarPatrimonio(){ try{const d=await getDoc(doc(db,'config','patrimonio'));if(d.exists()){patrimonio=num(d.data().valor);const upd=d.data().atualizadoEm;patrimonioAtualizadoEm=upd?(upd.toDate?upd.toDate():new Date(upd)):null;}}catch(e){console.error(e);} }
 window.editarPatrimonio=async function(){ const atual=patrimonio!=null?patrimonio.toLocaleString('pt-BR',{minimumFractionDigits:2}):''; const novo=prompt('Saldo real investido hoje (R$):\n(inclui rendimentos — veja no app do banco)',atual); if(novo===null)return; const v=num(novo); if(v<0){alert('Valor inválido.');return;} try{await setDoc(doc(db,'config','patrimonio'),{valor:v,atualizadoEm:new Date()});patrimonio=v;patrimonioAtualizadoEm=new Date();renderHome();}catch(e){alert('Erro ao salvar.');console.error(e);} };
+
+// ===== CAIXINHAS (investimentos separados) =====
+async function carregarCaixinhas(){
+  try{
+    const snap=await getDocs(query(collection(db,'caixinhas'),orderBy('ordem')));
+    if(snap.empty){
+      // migra o patrimônio antigo (valor único) para a primeira caixinha
+      let valorReserva=0;
+      try{ const pat=await getDoc(doc(db,'config','patrimonio')); if(pat.exists())valorReserva=num(pat.data().valor); }catch(e){}
+      await addDoc(collection(db,'caixinhas'),{nome:'Reserva de emergência',valor:valorReserva,ordem:1});
+      const snap2=await getDocs(query(collection(db,'caixinhas'),orderBy('ordem')));
+      caixinhas=snap2.docs.map(d=>({id:d.id,...d.data()}));
+    }else{
+      caixinhas=snap.docs.map(d=>({id:d.id,...d.data()}));
+    }
+  }catch(e){console.error(e);caixinhas=[];}
+}
+function atualizarSelectCaixinha(){ const sel=document.getElementById('add-caixinha'); if(!sel)return; const atual=sel.value; sel.innerHTML=caixinhas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join(''); if(atual&&caixinhas.some(c=>c.id===atual))sel.value=atual; }
+window.novaCaixinha=async function(){
+  const nome=prompt('Nome da caixinha (ex: Reserva, Fernanda):'); if(!nome||!nome.trim())return;
+  const v=prompt('Saldo atual dessa caixinha (R$):','0'); if(v===null)return;
+  const valor=num(v); if(valor<0){alert('Valor inválido.');return;}
+  const maxOrdem=caixinhas.reduce((m,c)=>Math.max(m,c.ordem||0),0);
+  try{ const ref=await addDoc(collection(db,'caixinhas'),{nome:nome.trim(),valor,ordem:maxOrdem+1}); caixinhas.push({id:ref.id,nome:nome.trim(),valor,ordem:maxOrdem+1}); renderHome(); atualizarSelectCaixinha(); }
+  catch(e){alert('Erro ao criar caixinha.');console.error(e);}
+};
+window.editarCaixinha=async function(id){
+  const c=caixinhas.find(x=>x.id===id); if(!c)return;
+  const acao=prompt(`Caixinha "${c.nome}"\n\nDigite o novo saldo (R$), ou escreva:\n• renomear\n• excluir`, num(c.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}));
+  if(acao===null)return; const t=acao.trim().toLowerCase();
+  try{
+    if(t==='excluir'){ if(!confirm(`Excluir a caixinha "${c.nome}"?`))return; await deleteDoc(doc(db,'caixinhas',id)); caixinhas=caixinhas.filter(x=>x.id!==id); }
+    else if(t==='renomear'){ const novo=prompt('Novo nome:',c.nome); if(!novo||!novo.trim())return; await updateDoc(doc(db,'caixinhas',id),{nome:novo.trim()}); c.nome=novo.trim(); }
+    else{ const valor=num(acao); if(valor<0){alert('Valor inválido.');return;} await updateDoc(doc(db,'caixinhas',id),{valor}); c.valor=valor; }
+    renderHome(); atualizarSelectCaixinha();
+  }catch(e){alert('Erro ao salvar caixinha.');console.error(e);}
+};
 
 async function carregarCategorias(){ try{ const snap=await getDocs(query(collection(db,'categorias'),orderBy('ordem'))); if(snap.empty){const batch=writeBatch(db);CATS_SAIDA_INICIAIS.forEach(c=>{batch.set(doc(collection(db,'categorias')),c);});await batch.commit();const snap2=await getDocs(query(collection(db,'categorias'),orderBy('ordem')));categoriasSaida=snap2.docs.map(d=>({id:d.id,...d.data()}));}else{categoriasSaida=snap.docs.map(d=>({id:d.id,...d.data()}));} }catch(e){console.error(e);categoriasSaida=CATS_SAIDA_INICIAIS.map((c,i)=>({id:'local'+i,...c}));} }
 
@@ -673,7 +727,7 @@ async function carregarItems(){ try{const mk=mesKey(mesAtual);const q=query(coll
 function renderTudo(){ renderHome(); renderExtrato(); if(screenAtiva==='orc')renderOrcamento(); if(screenAtiva==='orc-detalhe'&&catDetalheAtiva)renderDetalheCategoria(catDetalheAtiva); }
 const filtrarPorPessoa=lista=>pessoaFiltro==='Todos'?lista:lista.filter(i=>(i.pessoa||'Franklin')===pessoaFiltro);
 
-function renderHome(){ const base=filtrarPorPessoa(items); const t=totaisPorTipo(base); const saldo=t.entrada-t.saida-t.investimento; const sa=document.getElementById('saldo-amount'); sa.textContent=fmt(saldo); sa.className='amount '+(saldo>=0?'pos':'neg'); document.getElementById('entradas-amount').textContent=fmt(t.entrada); document.getElementById('saidas-amount').textContent=fmt(t.saida); const invAmount=document.getElementById('invest-amount'),invSub=document.getElementById('invest-sub'); if(patrimonio!=null){invAmount.textContent=fmt(patrimonio);const rendido=patrimonio-totalAportado,positivo=rendido>=0;invSub.innerHTML=`<span style="color:var(--muted2);">Aportado ${fmt(totalAportado)}</span> · <span style="color:${positivo?'var(--green)':'var(--red)'};font-weight:600;">${positivo?'↑':'↓'} ${fmt(Math.abs(rendido))}</span> <span style="color:var(--muted2);">rendido</span>`;}else{invAmount.textContent=fmt(totalAportado);invSub.textContent='Toque no lápis para informar o saldo real';} }
+function renderHome(){ const base=filtrarPorPessoa(items); const t=totaisPorTipo(base); const saldo=t.entrada-t.saida-t.investimento; const sa=document.getElementById('saldo-amount'); sa.textContent=fmt(saldo); sa.className='amount '+(saldo>=0?'pos':'neg'); document.getElementById('entradas-amount').textContent=fmt(t.entrada); document.getElementById('saidas-amount').textContent=fmt(t.saida); const invAmount=document.getElementById('invest-amount'),lista=document.getElementById('caixinhas-list'); const totalInv=caixinhas.reduce((s,c)=>s+num(c.valor),0); invAmount.textContent=fmt(totalInv); if(lista){ lista.innerHTML = caixinhas.length ? caixinhas.map(c=>`<div class="caixinha-row" onclick="editarCaixinha('${c.id}')"><span class="caixinha-nome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4"/></svg>${c.nome}</span><span class="caixinha-valor">${fmt(c.valor)}</span></div>`).join('') : '<div class="card-sub">Toque no + para criar uma caixinha</div>'; } }
 
 function renderExtrato(){ const el=document.getElementById('extrato-list'); const resumoEl=document.getElementById('extrato-resumo'); const ehCartao=i=>i.noCartao===true||['cartão de crédito','cartao de credito'].includes((i.categoria||'').toLowerCase()); let base=items.slice(); if(filtroPessoaExt!=='todos')base=base.filter(i=>(i.pessoa||'Franklin')===filtroPessoaExt); if(filtroCartaoExt)base=base.filter(ehCartao); if(filtroTipo!=='todos')base=base.filter(i=>normTipo(i.tipo)===filtroTipo); let totEnt=0,totSai=0; base.forEach(i=>{if(ehNeutra(i))return;const tp=normTipo(i.tipo);if(tp==='entrada')totEnt+=num(i.valor);else if(tp==='saida')totSai+=num(i.valor);}); if(resumoEl){resumoEl.innerHTML=`<div class="ext-resumo"><div class="ext-resumo-item"><span class="ext-resumo-lbl">Entradas</span><span class="ext-resumo-val green">${fmt(totEnt)}</span></div><div class="ext-resumo-item"><span class="ext-resumo-lbl">Saídas</span><span class="ext-resumo-val red">${fmt(totSai)}</span></div></div>`;} if(base.length===0){el.innerHTML='<div class="empty"><span>○</span>Nenhum lançamento com esses filtros.</div>';return;} el.innerHTML=txHTML(base); }
 
@@ -689,7 +743,7 @@ document.getElementById('add-data').value=hojeISO();
 setTipo('saida'); setPessoaLanc('Franklin'); atualizarMesLabels();
 
 let appIniciado=false;
-function iniciarApp(){ if(appIniciado)return; appIniciado=true; Promise.all([carregarPatrimonio(),carregarTotalAportado(),carregarCategorias()]).then(()=>{setTipo('saida');carregarItems();}); }
+function iniciarApp(){ if(appIniciado)return; appIniciado=true; Promise.all([carregarCaixinhas(),carregarCategorias()]).then(()=>{setTipo('saida');carregarItems();}); }
 
 // LOCK + LOGIN
 let lockBuffer='';
