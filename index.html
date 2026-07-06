@@ -360,7 +360,7 @@
     </div>
     <div class="field">
       <div class="field-label">Categoria</div>
-      <select id="add-categoria"></select>
+      <select id="add-categoria" onchange="atualizarCampoCaixinha()"></select>
     </div>
     <div class="field" id="field-caixinha" style="display:none;">
       <div class="field-label">Caixinha (para onde vai o aporte)</div>
@@ -508,7 +508,7 @@ window.toggleOcultar=function(){ saldosOcultos=!saldosOcultos; const svg=documen
 document.addEventListener('click',()=>{ document.getElementById('pessoa-menu').classList.remove('show'); document.getElementById('pessoa-link').classList.remove('open'); });
 window.setPessoaFiltro=function(p,e){ if(e)e.stopPropagation(); pessoaFiltro=p; document.getElementById('pessoa-nome').textContent=p; document.querySelectorAll('.pessoa-option').forEach(o=>o.classList.toggle('sel',o.textContent.trim()===p)); document.getElementById('pessoa-menu').classList.remove('show'); document.getElementById('pessoa-link').classList.remove('open'); renderHome(); };
 
-window.setTipo=function(t){ tipoAtivo=t; const map={saida:'on-saida',entrada:'on-entrada',investimento:'on-invest'}; ['saida','entrada','investimento'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===t?' '+map[x]:''); }); let cats; if(t==='saida')cats=nomesCategoriaSaida(); else if(t==='entrada')cats=CATS_ENTRADA; else cats=CATS_INVEST; document.getElementById('add-categoria').innerHTML=cats.map(c=>`<option>${c}</option>`).join(''); const fc=document.getElementById('field-cartao'),fp=document.getElementById('field-parcelado'); if(t==='saida'){fc.style.display='';fp.style.display='';}else{fc.style.display='none';fp.style.display='none';setCartao(false);document.getElementById('add-cartao').checked=false;setParcelado(false);document.getElementById('add-parcelado').checked=false;} const fcx=document.getElementById('field-caixinha'); if(fcx){ if(t==='investimento'){fcx.style.display='';atualizarSelectCaixinha();}else{fcx.style.display='none';} } };
+window.setTipo=function(t){ tipoAtivo=t; const map={saida:'on-saida',entrada:'on-entrada',investimento:'on-invest'}; ['saida','entrada','investimento'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===t?' '+map[x]:''); }); let cats; if(t==='saida')cats=nomesCategoriaSaida(); else if(t==='entrada')cats=CATS_ENTRADA; else cats=CATS_INVEST; document.getElementById('add-categoria').innerHTML=cats.map(c=>`<option>${c}</option>`).join(''); const fc=document.getElementById('field-cartao'),fp=document.getElementById('field-parcelado'); if(t==='saida'){fc.style.display='';fp.style.display='';}else{fc.style.display='none';fp.style.display='none';setCartao(false);document.getElementById('add-cartao').checked=false;setParcelado(false);document.getElementById('add-parcelado').checked=false;} const fcx=document.getElementById('field-caixinha'); if(fcx){ atualizarCampoCaixinha(); } };
 window.setCartao=function(v){noCartao=v;};
 window.setParcelado=function(v){ parcelado=v; document.getElementById('parcelado-opts').style.display=v?'block':'none'; if(v){popularMesInicio();atualizarPreviaParcela();} };
 function popularMesInicio(){ const sel=document.getElementById('add-mesinicio'); if(sel.options.length)return; const hoje=new Date(); hoje.setDate(1); let html=''; for(let k=0;k<12;k++){const d=new Date(hoje.getFullYear(),hoje.getMonth()+k,1);html+=`<option value="${mesKey(d)}">${mesLabel(d)}</option>`;} sel.innerHTML=html; }
@@ -615,7 +615,8 @@ window.addItem=async function(){
       await batch.commit();
       const[py,pm]=mesInicio.split('-').map(Number); mesParaVer=new Date(py,pm-1,1);
     }else{
-      const cxId = tipoLancado==='investimento' ? (document.getElementById('add-caixinha').value||null) : null;
+      const investeCaixinha = tipoLancado==='investimento' || cat==='Investimentos';
+      const cxId = investeCaixinha ? (document.getElementById('add-caixinha').value||null) : null;
       const extra = cxId ? {caixinhaId:cxId} : {};
       if(pessoaLanc==='dividir'){
         // dois lançamentos simples: divide sem perder centavo (Franklin fica com a sobra)
@@ -632,10 +633,7 @@ window.addItem=async function(){
         await addDoc(collection(db,'lancamentos'),{tipo:tipoLancado,categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mesKey(dataLanc),data:dataLanc,criadoEm:dataLanc,registradoEm:new Date(),noCartao,...extra});
       }
       mesParaVer=new Date(dataLanc.getFullYear(),dataLanc.getMonth(),1);
-    }
-    // aporte soma direto na caixinha escolhida (conserta o bug do investimento que não entrava)
-    if(tipoLancado==='investimento'){
-      const cxId=document.getElementById('add-caixinha').value;
+      // aporte soma direto na caixinha escolhida (conserta o bug do investimento que não entrava)
       if(cxId){ await updateDoc(doc(db,'caixinhas',cxId),{valor:increment(valorLancado)}); await carregarCaixinhas(); }
     }
     document.getElementById('add-desc').value=''; document.getElementById('add-valor').value='';
@@ -667,7 +665,7 @@ window.delItem=async function(id){
   if(!confirm('Remover este lançamento?'))return;
   try{
     await deleteDoc(doc(db,'lancamentos',id));
-    if(eraInvest&&item.caixinhaId){ await updateDoc(doc(db,'caixinhas',item.caixinhaId),{valor:increment(-valorItem)}); await carregarCaixinhas(); }
+    if(item.caixinhaId){ await updateDoc(doc(db,'caixinhas',item.caixinhaId),{valor:increment(-valorItem)}); await carregarCaixinhas(); }
     await carregarItems();
   }catch(e){alert('Erro ao remover.');console.error(e);}
 };
@@ -693,6 +691,8 @@ async function carregarCaixinhas(){
   }catch(e){console.error(e);caixinhas=[];}
 }
 function atualizarSelectCaixinha(){ const sel=document.getElementById('add-caixinha'); if(!sel)return; const atual=sel.value; sel.innerHTML=caixinhas.map(c=>`<option value="${c.id}">${c.nome}</option>`).join(''); if(atual&&caixinhas.some(c=>c.id===atual))sel.value=atual; }
+function atualizarCampoCaixinha(){ const fcx=document.getElementById('field-caixinha'); if(!fcx)return; const cat=document.getElementById('add-categoria').value; const mostrar = tipoAtivo==='investimento' || (tipoAtivo==='saida' && cat==='Investimentos'); fcx.style.display = mostrar ? '' : 'none'; if(mostrar) atualizarSelectCaixinha(); }
+window.atualizarCampoCaixinha=atualizarCampoCaixinha;
 window.novaCaixinha=async function(){
   const nome=prompt('Nome da caixinha (ex: Reserva, Fernanda):'); if(!nome||!nome.trim())return;
   const v=prompt('Saldo atual dessa caixinha (R$):','0'); if(v===null)return;
