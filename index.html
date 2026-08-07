@@ -114,10 +114,10 @@
     .seg-btn.on-entrada { background:rgba(52,199,89,0.12); color:var(--green); border-color:rgba(52,199,89,0.3); }
     .seg-btn.on-saida { background:rgba(255,69,58,0.12); color:var(--red); border-color:rgba(255,69,58,0.3); }
     .seg-btn.on-invest { background:rgba(108,99,255,0.14); color:var(--blue-soft); border-color:rgba(108,99,255,0.35); }
-    select, input[type=text], input[type=number], input[type=date] { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-size:16px; padding:14px 16px; outline:none; transition:border-color 0.15s; -webkit-appearance:none; font-family:inherit; }
+    select, input[type=text], input[type=number], input[type=date], input[type=month] { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-size:16px; padding:14px 16px; outline:none; transition:border-color 0.15s; -webkit-appearance:none; font-family:inherit; }
     select:focus, input:focus { border-color:var(--blue); }
     select { cursor:pointer; }
-    input[type=date] { color-scheme:dark; cursor:pointer; }
+    input[type=date], input[type=month] { color-scheme:dark; cursor:pointer; }
     .cartao-toggle { display:flex; align-items:center; gap:12px; cursor:pointer; font-size:15px; color:var(--text); user-select:none; }
     .cartao-toggle input { display:none; }
     .cartao-box { width:24px; height:24px; border-radius:7px; border:1.5px solid var(--border); background:var(--surface); display:flex; align-items:center; justify-content:center; transition:all 0.15s; flex-shrink:0; }
@@ -427,6 +427,7 @@
     </div>
     <div class="filter-row" id="ext-extra-row">
       <button class="chip" onclick="toggleFiltroCartaoExt(this)">Cartão</button>
+      <button class="chip" onclick="toggleFiltroParcExt(this)">Parcelamentos</button>
       <button class="chip ext-pessoa-chip" onclick="setFiltroPessoaExt('Franklin',this)">Franklin</button>
       <button class="chip ext-pessoa-chip" onclick="setFiltroPessoaExt('Airton',this)">Airton</button>
     </div>
@@ -451,6 +452,42 @@
     <div class="cfg-actions">
       <button class="btn-save" onclick="salvarCaixinhaModal()">Salvar</button>
       <button class="btn-danger" onclick="excluirCaixinhaModal()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR PARCELAMENTO -->
+<div class="modal-overlay" id="parc-modal" onclick="if(event.target===this)fecharModalParc()">
+  <div class="modal">
+    <h3>Editar parcelamento</h3>
+    <div class="field">
+      <div class="field-label">Nome</div>
+      <input type="text" id="pc-nome" placeholder="Ex: Ryzen 5500X3D" />
+    </div>
+    <div class="field">
+      <div class="field-label">Valor total (R$)</div>
+      <input type="number" id="pc-total" step="0.01" min="0" inputmode="decimal" placeholder="0,00" />
+    </div>
+    <div class="field">
+      <div class="field-label">Número de parcelas</div>
+      <input type="number" id="pc-nparc" step="1" min="1" max="48" inputmode="numeric" />
+    </div>
+    <div class="field">
+      <div class="field-label">Mês da 1ª parcela</div>
+      <input type="month" id="pc-inicio" />
+    </div>
+    <div class="field">
+      <div class="field-label">Categoria</div>
+      <select id="pc-categoria"></select>
+    </div>
+    <div class="field">
+      <div class="field-label">Pessoa</div>
+      <select id="pc-pessoa"><option>Franklin</option><option>Airton</option></select>
+    </div>
+    <div id="pc-previa" class="parcela-previa"></div>
+    <div class="cfg-actions">
+      <button class="btn-save" onclick="salvarParcelamento()">Salvar</button>
+      <button class="btn-danger" onclick="excluirParcelamento()">Excluir tudo</button>
     </div>
   </div>
 </div>
@@ -509,7 +546,7 @@ const DOTCLASS={entrada:'entrada',saida:'saida',investimento:'invest'};
 let tipoAtivo='saida', pessoaLanc='Franklin';
 let noCartao=false, parcelado=false;
 let pessoaFiltro='Todos', filtroTipo='todos', screenAtiva='home';
-let filtroPessoaExt='todos', filtroCartaoExt=false;
+let filtroPessoaExt='todos', filtroCartaoExt=false, filtroParcExt=false;
 let filtroPessoaOrc='Todos';
 let mesAtual=new Date(); mesAtual.setDate(1);
 let items=[], patrimonio=null, patrimonioAtualizadoEm=null, totalAportado=0;
@@ -552,6 +589,7 @@ window.setFiltroPessoaOrc=function(p,btn){ filtroPessoaOrc=p; document.querySele
 window.voltarOrc=function(){ setScreen('orc',document.getElementById('tab-orc')); document.getElementById('cfg-panel').style.display='none'; };
 window.setFiltroTipo=function(f,btn){ filtroTipo=f; document.querySelectorAll('#ext-tipo-row .chip').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderExtrato(); };
 window.toggleFiltroCartaoExt=function(btn){ filtroCartaoExt=!filtroCartaoExt; btn.classList.toggle('active',filtroCartaoExt); renderExtrato(); };
+window.toggleFiltroParcExt=function(btn){ filtroParcExt=!filtroParcExt; btn.classList.toggle('active',filtroParcExt); renderExtrato(); };
 window.setFiltroPessoaExt=function(p,btn){ filtroPessoaExt=(filtroPessoaExt===p)?'todos':p; document.querySelectorAll('.ext-pessoa-chip').forEach(b=>b.classList.remove('active')); if(filtroPessoaExt!=='todos')btn.classList.add('active'); renderExtrato(); };
 
 function mesKeyOffset(mk,k){ const[a,m]=mk.split('-').map(Number); return mesKey(new Date(a,(m-1)+k,1)); }
@@ -768,6 +806,84 @@ window.excluirCaixinhaModal=async function(){
   }catch(e){alert('Erro ao excluir caixinha.');console.error(e);}
 };
 
+// ===== EDITAR PARCELAMENTO (afeta todas as parcelas, em todos os meses) =====
+let parcEditando=null; // {grupoId, docs:[...], noCartao}
+const nomeBaseParcela=d=>(d||'').replace(/\s*\(\d+\/\d+\).*$/,'').replace(/\s*50%\s*$/,'').trim();
+window.editarParcelamento=async function(grupoId){
+  try{
+    const snap=await getDocs(query(collection(db,'lancamentos'),where('parcelaGrupoId','==',grupoId)));
+    if(snap.empty){alert('Parcelamento não encontrado.');return;}
+    const docs=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.parcelaNum||0)-(b.parcelaNum||0));
+    parcEditando={grupoId, docs};
+    const p0=docs[0];
+    const total=p0.parcelaValorTotal!=null?num(p0.parcelaValorTotal):docs.reduce((s,d)=>s+num(d.valor),0);
+    const nParc=p0.parcelaTotal||docs.length;
+    const mesInicio=docs.map(d=>d.mes).sort()[0]||mesKey(mesAtual);
+    document.getElementById('pc-nome').value=nomeBaseParcela(p0.descricao);
+    document.getElementById('pc-total').value=total.toFixed(2);
+    document.getElementById('pc-nparc').value=nParc;
+    document.getElementById('pc-inicio').value=mesInicio;
+    document.getElementById('pc-pessoa').value=p0.pessoa||'Franklin';
+    document.getElementById('pc-categoria').innerHTML=nomesCategoriaSaida().map(c=>`<option${c===p0.categoria?' selected':''}>${c}</option>`).join('');
+    atualizarPreviaParcModal();
+    document.getElementById('parc-modal').classList.add('show');
+  }catch(e){alert('Erro ao carregar parcelamento.');console.error(e);}
+};
+function atualizarPreviaParcModal(){
+  const prev=document.getElementById('pc-previa'); if(!prev)return;
+  const total=num(document.getElementById('pc-total').value);
+  let n=parseInt(document.getElementById('pc-nparc').value,10); if(!n||n<1)n=1;
+  if(total<=0){prev.textContent='Informe o valor total.';return;}
+  const base=Math.floor((total/n)*100)/100, ultima=Math.round((total-base*(n-1))*100)/100;
+  prev.textContent = n===1 ? `1x de ${fmtReal(total)}` : (base===ultima?`${n}x de ${fmtReal(base)} = ${fmtReal(total)}`:`${n-1}x de ${fmtReal(base)} + 1x de ${fmtReal(ultima)} = ${fmtReal(total)}`);
+}
+['pc-total','pc-nparc'].forEach(id=>{ const el=document.getElementById(id); if(el)el.addEventListener('input',atualizarPreviaParcModal); });
+window.fecharModalParc=function(){ document.getElementById('parc-modal').classList.remove('show'); parcEditando=null; };
+window.salvarParcelamento=async function(){
+  if(!parcEditando)return;
+  const nome=document.getElementById('pc-nome').value.trim();
+  const total=num(document.getElementById('pc-total').value);
+  const nParc=parseInt(document.getElementById('pc-nparc').value,10);
+  const mesInicio=document.getElementById('pc-inicio').value;
+  const categoria=document.getElementById('pc-categoria').value;
+  const pessoa=document.getElementById('pc-pessoa').value;
+  if(!nome){alert('Informe o nome.');return;}
+  if(total<=0){alert('Valor total deve ser maior que zero.');return;}
+  if(!nParc||nParc<1){alert('Número de parcelas inválido.');return;}
+  if(!/^\d{4}-\d{2}$/.test(mesInicio)){alert('Mês da 1ª parcela inválido.');return;}
+  if(!confirm(`Reescrever este parcelamento em ${nParc}x? Todas as parcelas antigas (em qualquer mês) serão substituídas.`))return;
+  try{
+    const noCartao=parcEditando.docs[0].noCartao!==false; // parcelamento é do cartão por padrão
+    const base=Math.floor((total/nParc)*100)/100, ultima=Math.round((total-base*(nParc-1))*100)/100;
+    const batch=writeBatch(db);
+    // apaga todas as parcelas antigas do grupo
+    parcEditando.docs.forEach(d=>batch.delete(doc(db,'lancamentos',d.id)));
+    // recria as novas parcelas (mesmo grupoId), mês a mês
+    for(let k=0;k<nParc;k++){
+      const vParc=(k===nParc-1)?ultima:base;
+      const mk=mesKeyOffset(mesInicio,k);
+      const[ay,am]=mk.split('-').map(Number);
+      const dataParc=new Date(ay,am-1,1,12,0,0);
+      const ref=doc(collection(db,'lancamentos'));
+      batch.set(ref,{tipo:'saida',categoria,descricao:`${nome} (${k+1}/${nParc})`,valor:vParc,pessoa,mes:mk,data:dataParc,criadoEm:dataParc,registradoEm:new Date(),noCartao,parcelaGrupoId:parcEditando.grupoId,parcelaNum:k+1,parcelaTotal:nParc,parcelaValorTotal:total});
+    }
+    await batch.commit(); // tudo-ou-nada: apaga e recria numa transação só
+    fecharModalParc();
+    await carregarItems();
+  }catch(e){alert('Erro ao salvar parcelamento. Verifique a conexão.');console.error(e);}
+};
+window.excluirParcelamento=async function(){
+  if(!parcEditando)return;
+  if(!confirm('Excluir TODAS as parcelas deste parcelamento, em todos os meses?'))return;
+  try{
+    const batch=writeBatch(db);
+    parcEditando.docs.forEach(d=>batch.delete(doc(db,'lancamentos',d.id)));
+    await batch.commit();
+    fecharModalParc();
+    await carregarItems();
+  }catch(e){alert('Erro ao excluir. Verifique a conexão.');console.error(e);}
+};
+
 async function carregarCategorias(){ try{ const snap=await getDocs(query(collection(db,'categorias'),orderBy('ordem'))); if(snap.empty){const batch=writeBatch(db);CATS_SAIDA_INICIAIS.forEach(c=>{batch.set(doc(collection(db,'categorias')),c);});await batch.commit();const snap2=await getDocs(query(collection(db,'categorias'),orderBy('ordem')));categoriasSaida=snap2.docs.map(d=>({id:d.id,...d.data()}));}else{categoriasSaida=snap.docs.map(d=>({id:d.id,...d.data()}));} }catch(e){console.error(e);categoriasSaida=CATS_SAIDA_INICIAIS.map((c,i)=>({id:'local'+i,...c}));} }
 
 window.novaCategoria=async function(){ const nome=prompt('Nome da nova categoria:'); if(!nome||!nome.trim())return; const maxOrdem=categoriasSaida.reduce((m,c)=>Math.max(m,c.ordem||0),0); try{const ref=await addDoc(collection(db,'categorias'),{nome:nome.trim(),pct:0,ordem:maxOrdem+1});categoriasSaida.push({id:ref.id,nome:nome.trim(),pct:0,ordem:maxOrdem+1});setTipo(tipoAtivo);renderOrcamento();}catch(e){alert('Erro ao criar categoria.');console.error(e);} };
@@ -785,9 +901,9 @@ const filtrarPorPessoaOrc=lista=>filtroPessoaOrc==='Todos'?lista:lista.filter(i=
 
 function renderHome(){ const base=filtrarPorPessoa(items); const t=totaisPorTipo(base); const saldo=t.entrada-t.saida-t.investimento; const sa=document.getElementById('saldo-amount'); sa.textContent=fmt(saldo); sa.className='amount '+(saldo>=0?'pos':'neg'); document.getElementById('entradas-amount').textContent=fmt(t.entrada); document.getElementById('saidas-amount').textContent=fmt(t.saida); const invAmount=document.getElementById('invest-amount'),lista=document.getElementById('caixinhas-list'); const totalInv=caixinhas.reduce((s,c)=>s+num(c.valor),0); invAmount.textContent=fmt(totalInv); if(lista){ lista.innerHTML = caixinhas.length ? caixinhas.map(c=>`<div class="caixinha-row" onclick="editarCaixinha('${c.id}')"><span class="caixinha-nome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4"/></svg>${c.nome}</span><span class="caixinha-valor">${fmt(c.valor)}</span></div>`).join('') : '<div class="card-sub">Toque no + para criar uma caixinha</div>'; } }
 
-function renderExtrato(){ const el=document.getElementById('extrato-list'); const resumoEl=document.getElementById('extrato-resumo'); const ehCartao=i=>i.noCartao===true||['cartão de crédito','cartao de credito'].includes((i.categoria||'').toLowerCase()); let base=items.slice(); if(filtroPessoaExt!=='todos')base=base.filter(i=>(i.pessoa||'Franklin')===filtroPessoaExt); if(filtroCartaoExt)base=base.filter(ehCartao); if(filtroTipo!=='todos')base=base.filter(i=>normTipo(i.tipo)===filtroTipo); let totEnt=0,totSai=0; base.forEach(i=>{if(ehNeutra(i))return;const tp=normTipo(i.tipo);if(tp==='entrada')totEnt+=num(i.valor);else if(tp==='saida')totSai+=num(i.valor);}); if(resumoEl){resumoEl.innerHTML=`<div class="ext-resumo"><div class="ext-resumo-item"><span class="ext-resumo-lbl">Entradas</span><span class="ext-resumo-val green">${fmt(totEnt)}</span></div><div class="ext-resumo-item"><span class="ext-resumo-lbl">Saídas</span><span class="ext-resumo-val red">${fmt(totSai)}</span></div></div>`;} if(base.length===0){el.innerHTML='<div class="empty"><span>○</span>Nenhum lançamento com esses filtros.</div>';return;} el.innerHTML=txHTML(base); }
+function renderExtrato(){ const el=document.getElementById('extrato-list'); const resumoEl=document.getElementById('extrato-resumo'); const ehCartao=i=>i.noCartao===true||['cartão de crédito','cartao de credito'].includes((i.categoria||'').toLowerCase()); let base=items.slice(); if(filtroPessoaExt!=='todos')base=base.filter(i=>(i.pessoa||'Franklin')===filtroPessoaExt); if(filtroCartaoExt)base=base.filter(ehCartao); if(filtroParcExt)base=base.filter(i=>!!i.parcelaGrupoId); if(filtroTipo!=='todos')base=base.filter(i=>normTipo(i.tipo)===filtroTipo); let totEnt=0,totSai=0; base.forEach(i=>{if(ehNeutra(i))return;const tp=normTipo(i.tipo);if(tp==='entrada')totEnt+=num(i.valor);else if(tp==='saida')totSai+=num(i.valor);}); if(resumoEl){resumoEl.innerHTML=`<div class="ext-resumo"><div class="ext-resumo-item"><span class="ext-resumo-lbl">Entradas</span><span class="ext-resumo-val green">${fmt(totEnt)}</span></div><div class="ext-resumo-item"><span class="ext-resumo-lbl">Saídas</span><span class="ext-resumo-val red">${fmt(totSai)}</span></div></div>`;} if(base.length===0){el.innerHTML='<div class="empty"><span>○</span>Nenhum lançamento com esses filtros.</div>';return;} el.innerHTML=txHTML(base); }
 
-function txHTML(lista){ return lista.map(i=>{ const tp=normTipo(i.tipo),pessoa=i.pessoa||'Franklin'; const tag=pessoa==='Airton'?`<span class="tx-pessoa">${pessoa}</span>`:`<span class="tx-pessoa" style="background:rgba(48,209,200,0.15);color:#30d1c8;">Franklin</span>`; const neutra=ehNeutra(i); const estilo=neutra?' style="opacity:0.5;"':''; const valStyle=neutra?' style="text-decoration:line-through;"':''; const selo=neutra?` <span class="tx-pessoa" style="background:rgba(255,69,58,0.15);color:var(--red);">não conta</span>`:''; const seloCartao=(i.noCartao&&!neutra)?` <span class="tx-pessoa" style="background:rgba(255,159,10,0.15);color:var(--amber);">cartão</span>`:''; const selo5050=(i.descricao||'').includes(' 50%')?` <span class="tx-pessoa" style="background:rgba(255,55,95,0.15);color:#ff375f;">50/50</span>`:''; const seloParcela=i.parcelaGrupoId?` <span class="tx-pessoa" style="background:rgba(255,255,255,0.08);color:var(--muted);">${i.parcelaNum}/${i.parcelaTotal}</span>`:''; return `<div class="tx"${estilo}><div class="tx-dot ${DOTCLASS[tp]}">${ICONS[tp]}</div><div class="tx-body"><div class="tx-desc">${i.descricao}</div><div class="tx-meta">${i.categoria}${tag}${selo}${seloCartao}${selo5050}${seloParcela}</div></div><div class="tx-right"><div class="tx-val ${DOTCLASS[tp]}"${valStyle}>${fmt(i.valor)}</div><div class="tx-date">${dataFmt(i.data||i.criadoEm)}</div></div><button class="tx-del" onclick="delItem('${i.id}')">×</button></div>`; }).join(''); }
+function txHTML(lista){ return lista.map(i=>{ const tp=normTipo(i.tipo),pessoa=i.pessoa||'Franklin'; const tag=pessoa==='Airton'?`<span class="tx-pessoa">${pessoa}</span>`:`<span class="tx-pessoa" style="background:rgba(48,209,200,0.15);color:#30d1c8;">Franklin</span>`; const neutra=ehNeutra(i); const estilo=neutra?' style="opacity:0.5;"':''; const valStyle=neutra?' style="text-decoration:line-through;"':''; const selo=neutra?` <span class="tx-pessoa" style="background:rgba(255,69,58,0.15);color:var(--red);">não conta</span>`:''; const seloCartao=(i.noCartao&&!neutra)?` <span class="tx-pessoa" style="background:rgba(255,159,10,0.15);color:var(--amber);">cartão</span>`:''; const selo5050=(i.descricao||'').includes(' 50%')?` <span class="tx-pessoa" style="background:rgba(255,55,95,0.15);color:#ff375f;">50/50</span>`:''; const seloParcela=i.parcelaGrupoId?` <span class="tx-pessoa" style="background:rgba(255,255,255,0.08);color:var(--muted);">${i.parcelaNum}/${i.parcelaTotal}</span>`:''; const clickParc=i.parcelaGrupoId?` onclick="editarParcelamento('${i.parcelaGrupoId}')" style="cursor:pointer;${neutra?'opacity:0.5;':''}"`:estilo; return `<div class="tx"${clickParc}><div class="tx-dot ${DOTCLASS[tp]}">${ICONS[tp]}</div><div class="tx-body"><div class="tx-desc">${i.descricao}</div><div class="tx-meta">${i.categoria}${tag}${selo}${seloCartao}${selo5050}${seloParcela}</div></div><div class="tx-right"><div class="tx-val ${DOTCLASS[tp]}"${valStyle}>${fmt(i.valor)}</div><div class="tx-date">${dataFmt(i.data||i.criadoEm)}</div></div><button class="tx-del" onclick="event.stopPropagation();delItem('${i.id}')">×</button></div>`; }).join(''); }
 
 function renderOrcamento(){ const t=totaisPorTipo(filtrarPorPessoaOrc(items)); const rendaUsada=t.entrada>0?t.entrada:orcRendaBase; const gastosCat={}; filtrarPorPessoaOrc(items).forEach(i=>{if(normTipo(i.tipo)!=='saida'||ehNeutra(i))return;gastosCat[i.categoria]=(gastosCat[i.categoria]||0)+num(i.valor);}); const investMes=filtrarPorPessoaOrc(items).filter(i=>!ehNeutra(i)&&(normTipo(i.tipo)==='investimento'||i.categoria==='Investimentos')).reduce((s,i)=>s+num(i.valor),0); const linhas=categoriasSaida.map(cat=>{const gasto=cat.nome==='Investimentos'?investMes:(gastosCat[cat.nome]||0);const limite=rendaUsada*(cat.pct||0)/100;const semLimite=cat.pct===0;const pctGasto=limite>0?gasto/limite:0;const status=pctGasto>1?'over':pctGasto>0.8?'warn':'ok';return{cat,gasto,limite,semLimite,pctGasto,status,barW:Math.min(pctGasto*100,100).toFixed(1)};}).sort((a,b)=>b.gasto-a.gasto); const totalPct=categoriasSaida.reduce((s,c)=>s+(c.pct||0),0); const fillW=Math.min(totalPct,100); const fillColor=totalPct>100?'var(--red)':totalPct===100?'var(--green)':'var(--blue)'; let labelVal,labelClass; if(totalPct===100){labelVal=`${totalPct}% ✓`;labelClass='ok';}else if(totalPct>100){labelVal=`${totalPct}% — ${totalPct-100}% acima`;labelClass='over';}else{labelVal=`${totalPct}% — faltam ${100-totalPct}%`;labelClass='';} document.getElementById('orc-alloc-bar').innerHTML=`<div class="orc-alloc-wrap"><div class="orc-alloc-label"><span>Alocação do orçamento</span><span class="${labelClass}">${labelVal}</span></div><div class="orc-alloc-track"><div class="orc-alloc-fill" style="width:${fillW}%;background:${fillColor}"></div></div></div>`; const lista=document.getElementById('orc-lista'); lista.innerHTML=linhas.map(({cat,gasto,limite,semLimite,pctGasto,status,barW})=>{const pctGastoStr=semLimite?'':`${(pctGasto*100).toFixed(0)}%`;return `<div class="orc-item" onclick="abrirDetalheCategoria('${cat.id}')"><div class="orc-item-body"><div class="orc-item-top"><span class="orc-item-nome">${cat.nome}</span></div><div class="orc-bar-wrap"><div class="orc-bar ${semLimite?'nolimit':status}" style="width:${semLimite?'0':barW}%"></div></div></div><div class="orc-item-vals"><span class="orc-item-gasto ${semLimite?'ok':status}">${fmt(gasto)}${pctGastoStr?` <span style="font-size:11px;font-weight:400;color:var(--muted2)">${pctGastoStr}</span>`:''}</span><span class="orc-item-limite">${semLimite?'sem teto':fmt(limite)+' ('+cat.pct+'%)'}</span></div><span class="orc-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></div>`;}).join(''); }
 
