@@ -201,7 +201,7 @@
     .cfg-actions { display:flex; gap:8px; margin-top:12px; }
     .btn-save { flex:1; padding:12px; border-radius:var(--radius-sm); border:none; background:var(--blue); color:#fff; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
     .btn-danger { padding:12px 16px; border-radius:var(--radius-sm); border:1px solid rgba(255,69,58,0.3); background:rgba(255,69,58,0.08); color:var(--red); font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
-    .tabbar { position:fixed; bottom:0; left:0; right:0; z-index:40; display:flex; background:rgba(18,18,20,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--border); padding-bottom:env(safe-area-inset-bottom); }
+    .tabbar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:640px; z-index:40; display:flex; background:rgba(18,18,20,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--border); border-left:1px solid var(--border); border-right:1px solid var(--border); border-radius:16px 16px 0 0; padding-bottom:env(safe-area-inset-bottom); }
     .tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 0 10px; background:none; border:none; color:var(--muted2); cursor:pointer; transition:color 0.15s; font-family:inherit; }
     .tab svg { width:24px; height:24px; stroke-width:1.8; }
     .tab span { font-size:10px; font-weight:500; }
@@ -409,6 +409,24 @@
       </div>
       <div class="parcela-previa" id="parcela-previa"></div>
     </div>
+    <div class="field" id="field-recorrente">
+      <label class="cartao-toggle">
+        <input type="checkbox" id="add-recorrente" onchange="setRecorrente(this.checked)" />
+        <span class="cartao-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <span>Saída recorrente (repete todo mês)</span>
+      </label>
+    </div>
+    <div id="recorrente-opts" style="display:none;">
+      <div class="field">
+        <div class="field-label">Repetir por quantos meses</div>
+        <input type="number" id="add-nrec" value="12" min="2" max="60" step="1" inputmode="numeric" oninput="atualizarPreviaRec()" />
+      </div>
+      <div class="field">
+        <div class="field-label">Mês inicial</div>
+        <select id="add-recinicio"></select>
+      </div>
+      <div class="parcela-previa" id="rec-previa"></div>
+    </div>
     <button class="btn-primary" onclick="addItem()" id="btn-add">Adicionar lançamento</button>
   </section>
 
@@ -544,7 +562,7 @@ const ICONS={entrada:'↑',saida:'↓',investimento:'→'};
 const DOTCLASS={entrada:'entrada',saida:'saida',investimento:'invest'};
 
 let tipoAtivo='saida', pessoaLanc='Franklin';
-let noCartao=false, parcelado=false;
+let noCartao=false, parcelado=false, recorrente=false;
 let pessoaFiltro='Todos', filtroTipo='todos', screenAtiva='home';
 let filtroPessoaExt='todos', filtroCartaoExt=false, filtroParcExt=false;
 let filtroPessoaOrc='Todos';
@@ -575,9 +593,13 @@ window.toggleOcultar=function(){ saldosOcultos=!saldosOcultos; const svg=documen
 document.addEventListener('click',()=>{ document.getElementById('pessoa-menu').classList.remove('show'); document.getElementById('pessoa-link').classList.remove('open'); });
 window.setPessoaFiltro=function(p,e){ if(e)e.stopPropagation(); pessoaFiltro=p; document.getElementById('pessoa-nome').textContent=p; document.querySelectorAll('.pessoa-option').forEach(o=>o.classList.toggle('sel',o.textContent.trim()===p)); document.getElementById('pessoa-menu').classList.remove('show'); document.getElementById('pessoa-link').classList.remove('open'); renderHome(); };
 
-window.setTipo=function(t){ tipoAtivo=t; const map={saida:'on-saida',entrada:'on-entrada',investimento:'on-invest'}; ['saida','entrada','investimento'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===t?' '+map[x]:''); }); let cats; if(t==='saida')cats=nomesCategoriaSaida(); else if(t==='entrada')cats=CATS_ENTRADA; else cats=CATS_INVEST; document.getElementById('add-categoria').innerHTML=cats.map(c=>`<option>${c}</option>`).join(''); const fc=document.getElementById('field-cartao'),fp=document.getElementById('field-parcelado'); if(t==='saida'){fc.style.display='';fp.style.display='';}else{fc.style.display='none';fp.style.display='none';setCartao(false);document.getElementById('add-cartao').checked=false;setParcelado(false);document.getElementById('add-parcelado').checked=false;} const fcx=document.getElementById('field-caixinha'); if(fcx){ atualizarCampoCaixinha(); } };
+window.setTipo=function(t){ tipoAtivo=t; const map={saida:'on-saida',entrada:'on-entrada',investimento:'on-invest'}; ['saida','entrada','investimento'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===t?' '+map[x]:''); }); let cats; if(t==='saida')cats=nomesCategoriaSaida(); else if(t==='entrada')cats=CATS_ENTRADA; else cats=CATS_INVEST; document.getElementById('add-categoria').innerHTML=cats.map(c=>`<option>${c}</option>`).join(''); const fc=document.getElementById('field-cartao'),fp=document.getElementById('field-parcelado'); const frec=document.getElementById('field-recorrente'); if(t==='saida'){fc.style.display='';fp.style.display='';if(frec)frec.style.display='';}else{fc.style.display='none';fp.style.display='none';setCartao(false);document.getElementById('add-cartao').checked=false;setParcelado(false);document.getElementById('add-parcelado').checked=false;if(frec)frec.style.display='none';setRecorrente(false);document.getElementById('add-recorrente').checked=false;} const fcx=document.getElementById('field-caixinha'); if(fcx){ atualizarCampoCaixinha(); } };
 window.setCartao=function(v){noCartao=v;};
-window.setParcelado=function(v){ parcelado=v; document.getElementById('parcelado-opts').style.display=v?'block':'none'; if(v){popularMesInicio();atualizarPreviaParcela();} };
+window.setParcelado=function(v){ parcelado=v; document.getElementById('parcelado-opts').style.display=v?'block':'none'; if(v){ if(recorrente){recorrente=false;document.getElementById('add-recorrente').checked=false;document.getElementById('recorrente-opts').style.display='none';} popularMesInicio();atualizarPreviaParcela();} };
+window.setRecorrente=function(v){ recorrente=v; document.getElementById('recorrente-opts').style.display=v?'block':'none'; if(v){ if(parcelado){parcelado=false;document.getElementById('add-parcelado').checked=false;document.getElementById('parcelado-opts').style.display='none';} popularMesInicioRec();atualizarPreviaRec();} };
+function popularMesInicioRec(){ const sel=document.getElementById('add-recinicio'); if(sel.options.length)return; const hoje=new Date(); hoje.setDate(1); let html=''; for(let k=0;k<12;k++){const d=new Date(hoje.getFullYear(),hoje.getMonth()+k,1);html+=`<option value="${mesKey(d)}">${mesLabel(d)}</option>`;} sel.innerHTML=html; }
+function atualizarPreviaRec(){ const prev=document.getElementById('rec-previa'); const v=num(document.getElementById('add-valor').value); let n=parseInt(document.getElementById('add-nrec').value,10); if(!n||n<2)n=2; if(v<=0){prev.textContent='Informe o valor acima.';return;} prev.textContent=`${fmt(v)} por mês, durante ${n} meses = ${fmt(v*n)} no total`; }
+window.atualizarPreviaRec=atualizarPreviaRec;
 function popularMesInicio(){ const sel=document.getElementById('add-mesinicio'); if(sel.options.length)return; const hoje=new Date(); hoje.setDate(1); let html=''; for(let k=0;k<12;k++){const d=new Date(hoje.getFullYear(),hoje.getMonth()+k,1);html+=`<option value="${mesKey(d)}">${mesLabel(d)}</option>`;} sel.innerHTML=html; }
 function atualizarPreviaParcela(){ const prev=document.getElementById('parcela-previa'); const total=num(document.getElementById('add-valor').value); let n=parseInt(document.getElementById('add-nparcelas').value,10); if(!n||n<2)n=2; if(total<=0){prev.textContent='Informe o valor total da compra acima.';return;} const base=Math.floor((total/n)*100)/100,ultima=Math.round((total-base*(n-1))*100)/100; prev.textContent=base===ultima?`${n}x de ${fmt(base)} = ${fmt(total)}`:`${n-1}x de ${fmt(base)} + 1x de ${fmt(ultima)} = ${fmt(total)}`; }
 window.atualizarPreviaParcela=atualizarPreviaParcela;
@@ -655,7 +677,21 @@ window.addItem=async function(){
     const dataStr=document.getElementById('add-data').value;
     const dataLanc=dataStr?new Date(dataStr+'T12:00:00'):new Date();
     let mesParaVer;
-    if(parcelado&&tipoAtivo==='saida'&&nParc>=2){
+    if(recorrente&&tipoAtivo==='saida'){
+      let nRec=parseInt(document.getElementById('add-nrec').value,10); if(!nRec||nRec<2){alert('Recorrência deve ser 2 meses ou mais.');btn.disabled=false;btn.textContent='Adicionar lançamento';return;}
+      const mesInicio=document.getElementById('add-recinicio').value||mesKey(dataLanc);
+      const grupoId='r_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+      const batch=writeBatch(db);
+      for(let k=0;k<nRec;k++){
+        const mk=mesKeyOffset(mesInicio,k);
+        const[ay,am]=mk.split('-').map(Number);
+        const dataRec=new Date(ay,am-1,1,12,0,0);
+        const ref=doc(collection(db,'lancamentos'));
+        batch.set(ref,{tipo:'saida',categoria:cat,descricao:desc,valor:valorLancado,pessoa:pessoaLanc,mes:mk,data:dataRec,criadoEm:dataRec,registradoEm:new Date(),noCartao,recorrenteGrupoId:grupoId});
+      }
+      await batch.commit();
+      const[ry,rm]=mesInicio.split('-').map(Number); mesParaVer=new Date(ry,rm-1,1);
+    }else if(parcelado&&tipoAtivo==='saida'&&nParc>=2){
       const mesInicio=document.getElementById('add-mesinicio').value||mesKey(dataLanc);
       const grupoId='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
       const base=Math.floor((valor/nParc)*100)/100, ultima=Math.round((valor-base*(nParc-1))*100)/100;
@@ -713,6 +749,7 @@ window.addItem=async function(){
     document.getElementById('add-desc').value=''; document.getElementById('add-valor').value='';
     document.getElementById('add-cartao').checked=false; noCartao=false;
     document.getElementById('add-parcelado').checked=false; setParcelado(false);
+    document.getElementById('add-recorrente').checked=false; setRecorrente(false);
     document.getElementById('add-data').value=hojeISO();
     setPessoaLanc('Franklin');
     mesAtual=mesParaVer; mesAtual.setDate(1); atualizarMesLabels();
