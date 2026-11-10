@@ -30,7 +30,7 @@
       --green:var(--c-green-light-color); --red:var(--c-red-light-color); --blue:var(--c-primary); --blue-soft:var(--c-primary-light-color);
       --amber:var(--c-yellow); --radius:8px; --radius-sm:8px; --pad:16px;
     }
-    body { background:var(--bg); color:var(--text); font-family:'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:15px; min-height:100dvh; -webkit-font-smoothing:antialiased; padding-bottom:calc(80px + env(safe-area-inset-bottom)); }
+    body { background:var(--bg); color:var(--text); font-family:'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:15px; min-height:100dvh; -webkit-font-smoothing:antialiased; padding-bottom:calc(84px + env(safe-area-inset-bottom)); }
     main { padding:0; max-width:640px; margin:0 auto; }
     .screen { display:none; padding:0 var(--pad); }
     .screen.active { display:block; }
@@ -263,12 +263,63 @@
     .cfg-actions { display:flex; gap:8px; margin-top:12px; }
     .btn-save { flex:1; padding:12px; border-radius:var(--radius-sm); border:none; background:var(--blue); color:#fff; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
     .btn-danger { padding:12px 16px; border-radius:var(--radius-sm); border:1px solid rgba(255,69,58,0.3); background:rgba(255,69,58,0.08); color:var(--red); font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
-    .tabbar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:640px; z-index:40; display:flex; background:rgba(18,18,20,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--border); border-left:1px solid var(--border); border-right:1px solid var(--border); border-radius:16px 16px 0 0; padding-bottom:env(safe-area-inset-bottom); }
-    .tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 0 10px; background:none; border:none; color:var(--muted2); cursor:pointer; transition:color 0.15s; font-family:inherit; }
-    .tab svg { width:24px; height:24px; stroke-width:1.8; }
-    .tab span { font-size:10px; font-weight:500; }
-    .tab.active { color:var(--text); }
-    .tab.add-tab.active { color:var(--blue-soft); }
+
+    /* ===== Base Mantine (Figma) ===== */
+    .pg { display:flex; flex-direction:column; gap:24px; padding:16px 0 24px; }
+    .pg-head { display:flex; align-items:center; justify-content:space-between; min-height:36px; }
+    .pg-title { font-size:22px; font-weight:700; color:var(--c-text); }
+    .action-icon { width:36px; height:36px; border-radius:8px; border:none; background:none; color:var(--c-dark-1); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .action-icon:active { background:var(--c-default-hover); }
+    .action-icon svg { width:22px; height:22px; }
+    .mes-sel { display:flex; gap:8px; align-items:center; }
+    .mes-btn { width:40px; height:40px; flex-shrink:0; border-radius:8px; background:var(--c-default); border:1px solid var(--c-default-border); color:var(--c-bright); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .mes-btn svg { width:18px; height:18px; }
+    .mes-btn:disabled { opacity:.5; cursor:default; }
+    .mes-label-btn { flex:1; height:40px; border-radius:8px; background:var(--c-default); border:1px solid var(--c-default-border); color:var(--c-bright); font-family:inherit; font-size:16px; font-weight:500; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; }
+    .mes-label-btn svg { width:16px; height:16px; color:var(--c-dark-1); }
+    .segmented { display:flex; background:var(--c-dark-8); padding:4px; border-radius:8px; }
+    .segmented button { flex:1; height:32px; border:none; border-radius:6px; background:none; color:var(--c-dark-1); font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; transition:background .15s,color .15s; }
+    .segmented button.on { background:var(--c-default-hover); color:var(--c-bright); }
+    .saldo-lbl { font-size:14px; color:var(--c-dimmed); margin-bottom:4px; }
+    .saldo-val { font-size:40px; font-weight:700; color:var(--c-bright); letter-spacing:-.5px; }
+    .saldo-val.neg { color:var(--c-red); }
+    .sec-title { font-size:16px; font-weight:700; color:var(--c-text); margin-bottom:12px; }
+    .ring-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .ring-card { background:var(--c-default); border:1px solid var(--c-default-border); border-radius:8px; padding:16px; display:flex; flex-direction:column; align-items:center; gap:12px; min-width:0; cursor:pointer; }
+    .ring-card .nm { font-size:14px; font-weight:700; color:var(--c-text); }
+    .ring { position:relative; width:96px; height:96px; }
+    .ring svg { width:96px; height:96px; transform:rotate(-90deg); }
+    .ring .pct { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; color:var(--c-bright); }
+    .ring-card .vals { font-size:12px; color:var(--c-dimmed); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+    .ring-card.over .pct, .ring-card.over .vals { color:var(--c-red); }
+    /* Drawer (bottom) */
+    .m-drawer-ov { position:fixed; inset:0; z-index:90; background:rgba(0,0,0,.6); display:none; align-items:flex-end; justify-content:center; }
+    .m-drawer-ov.show { display:flex; }
+    .m-drawer { width:100%; max-width:640px; background:var(--c-default); border-radius:16px 16px 0 0; padding:16px 16px calc(16px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:16px; max-height:90dvh; overflow:auto; }
+    .m-drawer-head { display:flex; align-items:center; justify-content:space-between; }
+    .m-drawer-head .t { font-size:16px; font-weight:700; color:var(--c-text); }
+    .close-btn { width:28px; height:28px; border:none; background:none; color:var(--c-dimmed); border-radius:6px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .close-btn svg { width:18px; height:18px; }
+    .mp-year { display:flex; align-items:center; justify-content:space-between; }
+    .mp-year span { font-size:14px; font-weight:500; color:var(--c-text); }
+    .mp-nav { width:32px; height:32px; border:none; background:none; color:var(--c-text); border-radius:6px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .mp-nav svg { width:16px; height:16px; }
+    .mp-nav:disabled { opacity:.3; cursor:default; }
+    .mp-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px 8px; }
+    .mp-grid button { height:36px; border:none; border-radius:6px; background:none; color:var(--c-text); font-family:inherit; font-size:14px; cursor:pointer; }
+    .mp-grid button.on { background:var(--c-primary); color:var(--c-bright); font-weight:500; }
+    .mp-grid button:disabled { color:var(--c-placeholder); opacity:.5; cursor:default; }
+    /* Tabs (Extrato | Assinaturas) */
+    .m-tabs { display:flex; border-bottom:2px solid var(--c-default-border); }
+    .m-tabs button { flex:1; height:40px; margin-bottom:-2px; border:none; border-bottom:2px solid transparent; background:none; color:var(--c-dimmed); font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; }
+    .m-tabs button.on { color:var(--c-bright); border-bottom-color:var(--c-primary); }
+    .tabbar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:640px; z-index:40; display:flex; align-items:center; height:calc(68px + env(safe-area-inset-bottom)); padding:0 4px env(safe-area-inset-bottom); background:var(--c-body); border-top:1px solid var(--c-default-border); }
+    .tab { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; background:none; border:none; color:var(--c-dimmed); cursor:pointer; font-family:inherit; -webkit-tap-highlight-color:transparent; }
+    .tab .ind { width:56px; height:30px; border-radius:15px; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+    .tab svg { width:22px; height:22px; }
+    .tab span { font-size:12px; font-weight:500; white-space:nowrap; }
+    .tab.active { color:var(--c-primary-light-color); }
+    .tab.active .ind { background:var(--c-primary-light); }
   </style>
 </head>
 <body>
@@ -304,28 +355,41 @@
 
   <!-- HOME -->
   <section class="screen active" id="screen-home">
-    <div class="month-bar">
-      <button onclick="mudarMes(-1)">‹</button>
-      <span class="month-label" id="ml-home">—</span>
-      <button onclick="mudarMes(1)">›</button>
+    <div class="pg">
+      <div class="pg-head">
+        <span class="pg-title">Início</span>
+        <button class="action-icon eye-toggle" onclick="toggleOcultar()" aria-label="Mostrar/ocultar valores"></button>
+      </div>
+      <div class="mes-sel">
+        <button class="mes-btn mes-prev" onclick="mudarMes(-1)" aria-label="Mês anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M15 6l-6 6l6 6" /> </svg></button>
+        <button class="mes-label-btn" onclick="abrirMesPicker()"><span id="ml-home">—</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M6 9l6 6l6 -6" /> </svg></button>
+        <button class="mes-btn mes-next" onclick="mudarMes(1)" aria-label="Próximo mês"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M9 6l6 6l-6 6" /> </svg></button>
+      </div>
+      <div class="segmented" id="seg-pessoa-home">
+        <button class="on" onclick="setPessoaFiltro('Todos')">Todos</button>
+        <button onclick="setPessoaFiltro('Franklin')">Franklin</button>
+        <button onclick="setPessoaFiltro('Airton')">Airton</button>
+      </div>
+      <div>
+        <div class="saldo-lbl" id="saldo-lbl">Saldo do mês</div>
+        <div class="saldo-val" id="saldo-amount">—</div>
+      </div>
+      <div>
+        <div class="sec-title">Orçamento do mês</div>
+        <div class="ring-grid" id="home-rings"></div>
+      </div>
     </div>
-    <div class="saldo-block">
-      <div class="eyebrow">Saldo do mês</div>
-      <div class="amount pos" id="saldo-amount">—</div>
-    </div>
-    <div class="pessoa-row">
-      <span class="pessoa-link" id="pessoa-link" onclick="togglePessoaMenu(event)">
-        <span id="pessoa-nome">Todos</span>
-        <span class="chev"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-        <div class="pessoa-menu" id="pessoa-menu">
-          <div class="pessoa-option sel" onclick="setPessoaFiltro('Todos',event)">Todos</div>
-          <div class="pessoa-option" onclick="setPessoaFiltro('Franklin',event)">Franklin</div>
-          <div class="pessoa-option" onclick="setPessoaFiltro('Airton',event)">Airton</div>
-        </div>
-      </span>
-      <button class="eye-btn" onclick="toggleOcultar()">
-        <svg id="eye-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-      </button>
+  </section>
+
+  <!-- CAIXA (provisório: cards antigos; visual novo na etapa Caixa) -->
+  <section class="screen" id="screen-caixa">
+    <div class="pg" style="gap:16px;">
+      <div class="pg-head"><span class="pg-title">Caixa</span><button class="action-icon eye-toggle" onclick="toggleOcultar()" aria-label="Mostrar/ocultar valores"></button></div>
+      <div class="mes-sel">
+        <button class="mes-btn mes-prev" onclick="mudarMes(-1)" aria-label="Mês anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M15 6l-6 6l6 6" /> </svg></button>
+        <button class="mes-label-btn" onclick="abrirMesPicker()"><span id="ml-caixa">—</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M6 9l6 6l6 -6" /> </svg></button>
+        <button class="mes-btn mes-next" onclick="mudarMes(1)" aria-label="Próximo mês"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M9 6l6 6l-6 6" /> </svg></button>
+      </div>
     </div>
     <div class="card">
       <div class="card-head">
@@ -497,6 +561,8 @@
 
   <!-- EXTRATO -->
   <section class="screen" id="screen-extrato">
+    <div class="pg" style="padding-bottom:0;gap:16px;"><div class="pg-head"><span class="pg-title">Extrato</span></div>
+      <div class="m-tabs"><button class="on" onclick="setScreen('extrato',document.getElementById('tab-extrato'))">Lançamentos</button><button onclick="abrirAssinaturas()">Assinaturas</button></div></div>
     <div class="month-bar">
       <button onclick="mudarMes(-1)">‹</button>
       <span class="month-label" id="ml-extrato">—</span>
@@ -520,6 +586,8 @@
 
   <!-- ASSINATURAS -->
   <section class="screen" id="screen-assin">
+    <div class="pg" style="padding-bottom:0;gap:16px;"><div class="pg-head"><span class="pg-title">Extrato</span></div>
+      <div class="m-tabs"><button onclick="setScreen('extrato',document.getElementById('tab-extrato'))">Lançamentos</button><button class="on" onclick="abrirAssinaturas()">Assinaturas</button></div></div>
     <div class="orc-header">
       <span class="orc-header-title">Assinaturas</span>
       <button class="orc-add-btn" onclick="recarregarAssinaturas()">↻ Atualizar</button>
@@ -683,27 +751,21 @@
   </div>
 </div>
 
+<!-- DRAWER ESCOLHER MÊS -->
+<div class="m-drawer-ov" id="mp-ov" onclick="if(event.target===this)fecharMesPicker()">
+  <div class="m-drawer">
+    <div class="m-drawer-head"><span class="t">Escolher mês</span><button class="close-btn" onclick="fecharMesPicker()" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M18 6l-12 12" /> <path d="M6 6l12 12" /> </svg></button></div>
+    <div class="mp-year"><button class="mp-nav" id="mp-prev" onclick="mpAno(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M15 6l-6 6l6 6" /> </svg></button><span id="mp-ano">—</span><button class="mp-nav" id="mp-next" onclick="mpAno(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M9 6l6 6l-6 6" /> </svg></button></div>
+    <div class="mp-grid" id="mp-grid"></div>
+  </div>
+</div>
+
 <nav class="tabbar">
-  <button class="tab active" id="tab-home" onclick="setScreen('home',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    <span>Home</span>
-  </button>
-  <button class="tab" id="tab-orc" onclick="abrirOrc()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span>Orçamento</span>
-  </button>
-  <button class="tab add-tab" id="tab-add" onclick="setScreen('add',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    <span>Adicionar</span>
-  </button>
-  <button class="tab" id="tab-extrato" onclick="setScreen('extrato',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-    <span>Extrato</span>
-  </button>
-  <button class="tab" id="tab-assin" onclick="abrirAssinaturas()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-    <span>Assinaturas</span>
-  </button>
+  <button class="tab active" id="tab-home" onclick="setScreen('home',this)"><span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M5 12l-2 0l9 -9l9 9l-2 0" /> <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /> <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /> </svg></span><span>Início</span></button>
+  <button class="tab" id="tab-caixa" onclick="setScreen('caixa',this)"><span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M17 8v-3a1 1 0 0 0 -1 -1h-10a2 2 0 0 0 0 4h12a1 1 0 0 1 1 1v3m0 4v3a1 1 0 0 1 -1 1h-12a2 2 0 0 1 -2 -2v-12" /> <path d="M20 12v4h-4a2 2 0 0 1 0 -4h4" /> </svg></span><span>Caixa</span></button>
+  <button class="tab" id="tab-add" onclick="setScreen('add',this)"><span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /> <path d="M9 12h6" /> <path d="M12 9v6" /> </svg></span><span>Novo</span></button>
+  <button class="tab" id="tab-extrato" onclick="setScreen('extrato',this)"><span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M9 6l11 0" /> <path d="M9 12l11 0" /> <path d="M9 18l11 0" /> <path d="M5 6l0 .01" /> <path d="M5 12l0 .01" /> <path d="M5 18l0 .01" /> </svg></span><span>Extrato</span></button>
+  <button class="tab" id="tab-orc" onclick="abrirOrc()"><span class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M10 3.2a9 9 0 1 0 10.8 10.8a1 1 0 0 0 -1 -1h-6.8a2 2 0 0 1 -2 -2v-7a.9 .9 0 0 0 -1 -.8" /> <path d="M15 3.5a9 9 0 0 1 5.5 5.5h-4.5a1 1 0 0 1 -1 -1v-4.5" /> </svg></span><span>Orçamentos</span></button>
 </nav>
 
 <script type="module">
@@ -759,7 +821,7 @@ const PESSOAS=['Franklin','Airton'];
 const pctDe=(c,p)=>{ const v=c?c['pct'+p]:null; return (v!==undefined&&v!==null&&v!=='')?num(v):num(c&&c.pct); };
 const pessoaOrc=()=>pessoaFiltro==='Todos'?'Franklin':pessoaFiltro; // Orçamento não tem "Todos"
 const pessoasDoFiltro=()=>[pessoaOrc()];
-let  saldosOcultos=true;
+let  saldosOcultos=(()=>{ try{ const v=localStorage.getItem('ocultarValores'); return v===null?true:v==='1'; }catch(e){ return true; } })();
 
 const num=v=>{ if(typeof v==='number')return isFinite(v)?v:0; if(typeof v==='string'){let s=v.trim();if(/,\d{1,2}$/.test(s))s=s.replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isFinite(n)?n:0;}return 0; };
 const fmtReal=v=>'R$ '+num(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -767,20 +829,29 @@ const fmt=v=>saldosOcultos?'R$ ••••':fmtReal(v);
 const mesKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 const hojeISO=()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
-const mesLabel=d=>cap(d.toLocaleDateString('pt-BR',{month:'long'}))+'/'+d.getFullYear();
+const mesLabel=d=>cap(d.toLocaleDateString('pt-BR',{month:'long'}))+' de '+d.getFullYear();
 const dataFmt=ts=>{ if(!ts)return ''; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); };
 const normTipo=t=>t==='receita'?'entrada':t==='gasto'?'saida':t;
 const ehNeutra=i=>CATS_NEUTRAS.includes(i.categoria);
 function totaisPorTipo(lista){ const t={entrada:0,saida:0,investimento:0}; lista.forEach(i=>{ if(ehNeutra(i))return; const tp=normTipo(i.tipo); if(t[tp]!==undefined)t[tp]+=num(i.valor); }); return t; }
 const nomesCategoriaSaida=()=>categoriasSaida.map(c=>c.nome);
 
-window.mudarMes=function(delta){ mesAtual.setMonth(mesAtual.getMonth()+delta); atualizarMesLabels(); carregarItems(); };
-function atualizarMesLabels(){ const l=mesLabel(mesAtual); ['home','add','extrato'].forEach(s=>{ const el=document.getElementById('ml-'+s); if(el)el.textContent=l; }); const oe=document.getElementById('ml-orc'); if(oe)oe.textContent=l; }
-
-window.togglePessoaMenu=function(e){ e.stopPropagation(); document.getElementById('pessoa-menu').classList.toggle('show'); document.getElementById('pessoa-link').classList.toggle('open'); };
-window.toggleOcultar=function(){ saldosOcultos=!saldosOcultos; const svg=document.getElementById('eye-svg'); if(saldosOcultos){svg.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';}else{svg.innerHTML='<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>'; } renderTudo(); };
-document.addEventListener('click',()=>{ document.getElementById('pessoa-menu').classList.remove('show'); document.getElementById('pessoa-link').classList.remove('open'); });
-window.setPessoaFiltro=function(p,e){ if(e)e.stopPropagation(); pessoaFiltro=p; document.getElementById('pessoa-nome').textContent=p; document.querySelectorAll('.pessoa-option').forEach(o=>o.classList.toggle('sel',o.textContent.trim()===p)); document.getElementById('pessoa-menu').classList.remove('show'); document.getElementById('pessoa-link').classList.remove('open'); document.querySelectorAll('#orc-pessoa-row .chip').forEach(b=>b.classList.toggle('active',b.textContent.trim()===p)); renderTudo(); };
+const ICO_EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /> <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /> </svg>', ICO_EYE_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" /> <path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87" /> <path d="M3 3l18 18" /> </svg>';
+const MESES_LONGOS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const mesHojeKey=()=>mesKey(new Date());
+window.mudarMes=function(delta){ const d=new Date(mesAtual.getFullYear(),mesAtual.getMonth()+delta,1); if(mesKey(d)>mesHojeKey())return; mesAtual=d; atualizarMesLabels(); carregarItems(); };
+function atualizarMesLabels(){ const l=mesLabel(mesAtual); ['home','caixa','add','extrato','orc'].forEach(s=>{ const el=document.getElementById('ml-'+s); if(el)el.textContent=l; }); const noFim=mesKey(mesAtual)>=mesHojeKey(); document.querySelectorAll('.mes-next').forEach(b=>b.disabled=noFim); }
+// Drawer "Escolher mês" — meses futuros desabilitados
+let mpAnoSel=new Date().getFullYear();
+function renderMesPicker(){ const hoje=new Date(), hk=mesHojeKey(), selK=mesKey(mesAtual); document.getElementById('mp-ano').textContent=mpAnoSel; document.getElementById('mp-next').disabled=mpAnoSel>=hoje.getFullYear(); document.getElementById('mp-grid').innerHTML=MESES_CURTOS.map((m,i)=>{ const k=`${mpAnoSel}-${String(i+1).padStart(2,'0')}`; return `<button class="${k===selK?'on':''}" ${k>hk?'disabled':''} onclick="escolherMes(${mpAnoSel},${i})">${cap(m)}</button>`; }).join(''); }
+window.abrirMesPicker=function(){ mpAnoSel=mesAtual.getFullYear(); renderMesPicker(); document.getElementById('mp-ov').classList.add('show'); };
+window.fecharMesPicker=function(){ document.getElementById('mp-ov').classList.remove('show'); };
+window.mpAno=function(d){ mpAnoSel+=d; renderMesPicker(); };
+window.escolherMes=function(a,m){ mesAtual=new Date(a,m,1); fecharMesPicker(); atualizarMesLabels(); carregarItems(); };
+function atualizarOlho(){ document.querySelectorAll('.eye-toggle').forEach(b=>b.innerHTML=saldosOcultos?ICO_EYE_OFF:ICO_EYE); }
+window.toggleOcultar=function(){ saldosOcultos=!saldosOcultos; try{localStorage.setItem('ocultarValores',saldosOcultos?'1':'0');}catch(e){} atualizarOlho(); renderTudo(); };
+atualizarOlho();
+window.setPessoaFiltro=function(p,e){ if(e)e.stopPropagation(); pessoaFiltro=p; document.querySelectorAll('#seg-pessoa-home button').forEach(b=>b.classList.toggle('on',b.textContent.trim()===p)); document.querySelectorAll('#orc-pessoa-row .chip').forEach(b=>b.classList.toggle('active',b.textContent.trim()===p)); renderTudo(); };
 
 window.setTipo=function(t){ tipoAtivo=t; const map={saida:'on-saida',entrada:'on-entrada',investimento:'on-invest'}; ['saida','entrada','investimento'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===t?' '+map[x]:''); }); let cats; if(t==='saida')cats=nomesCategoriaSaida(); else if(t==='entrada')cats=CATS_ENTRADA; else cats=CATS_INVEST; document.getElementById('add-categoria').innerHTML=cats.map(c=>`<option>${c}</option>`).join(''); const fc=document.getElementById('field-cartao'),fp=document.getElementById('field-parcelado'); const frec=document.getElementById('field-recorrente'); if(t==='saida'){fc.style.display='';fp.style.display='';if(frec)frec.style.display='';}else{fc.style.display='none';fp.style.display='none';setCartao(false);document.getElementById('add-cartao').checked=false;setParcelado(false);document.getElementById('add-parcelado').checked=false;if(frec)frec.style.display='none';setRecorrente(false);document.getElementById('add-recorrente').checked=false;} const fcx=document.getElementById('field-caixinha'); if(fcx){ atualizarCampoCaixinha(); } };
 window.setCartao=function(v){noCartao=v;};
@@ -794,7 +865,7 @@ function atualizarPreviaParcela(){ const prev=document.getElementById('parcela-p
 window.atualizarPreviaParcela=atualizarPreviaParcela;
 window.setPessoaLanc=function(p){ pessoaLanc=p; ['Franklin','Airton','dividir'].forEach(x=>{ document.getElementById('seg-'+x).className='seg-btn'+(x===p?' on-invest':''); }); };
 
-window.setScreen=function(s,btn){ screenAtiva=s; ['home','orc','orc-detalhe','add','extrato','assin'].forEach(x=>{ document.getElementById('screen-'+x).classList.toggle('active',x===s); }); document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); if(btn)btn.classList.add('active'); };
+window.setScreen=function(s,btn){ screenAtiva=s; ['home','caixa','orc','orc-detalhe','add','extrato','assin'].forEach(x=>{ document.getElementById('screen-'+x).classList.toggle('active',x===s); }); document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); if(btn)btn.classList.add('active'); };
 window.abrirOrc=function(){ setScreen('orc',document.getElementById('tab-orc')); renderOrcamento(); };
 window.setFiltroPessoaOrc=function(p){ setPessoaFiltro(p); };
 window.voltarOrc=function(){ setScreen('orc',document.getElementById('tab-orc')); document.getElementById('cfg-panel').style.display='none'; };
@@ -1196,7 +1267,7 @@ async function carregarAssinaturas(){
   assinCarregado=true;
 }
 window.abrirAssinaturas=async function(){
-  setScreen('assin',document.getElementById('tab-assin'));
+  setScreen('assin',document.getElementById('tab-extrato'));
   const ini=document.getElementById('as-ini'), fim=document.getElementById('as-fim');
   if(!ini.value||!fim.value){ const a=new Date().getFullYear(); ini.value=`${a}-01`; fim.value=`${a}-12`; }
   await recarregarAssinaturas();
@@ -1336,11 +1407,15 @@ window.excluirCategoria=async function(){ if(!catDetalheAtiva)return; if(!confir
 
 async function carregarItems(){ try{const mk=mesKey(mesAtual);const q=query(collection(db,'lancamentos'),where('mes','==',mk));const snap=await getDocs(q);items=snap.docs.map(d=>({id:d.id,...d.data()}));const ord=i=>{const t=i.registradoEm||i.criadoEm;return t?.toDate?t.toDate():new Date(t||0);};items.sort((a,b)=>ord(b)-ord(a));}catch(e){console.error(e);items=[];} renderTudo(); }
 
+
+// Anéis de orçamento da Home: sempre um por pessoa (gasto total × teto total do mês)
+const fmtInt=v=>'R$ '+Math.round(num(v)).toLocaleString('pt-BR');
+function renderAneis(){ const el=document.getElementById('home-rings'); if(!el)return; const C=2*Math.PI*43; el.innerHTML=PESSOAS.map(p=>{ const {linhas}=calcOrcamento(items,categoriasSaida,[p]); const gasto=linhas.reduce((s,l)=>s+l.gasto,0), lim=linhas.reduce((s,l)=>s+l.limite,0); const r=lim>0?gasto/lim:0, pc=Math.round(r*100); const cor=r>1?'var(--c-red)':r>=0.8?'var(--c-yellow)':'var(--c-primary)'; const dash=Math.min(r,1)*C; const vals=saldosOcultos?'R$ ••• de R$ •••':`${fmtInt(gasto)} de ${fmtInt(lim)}`; return `<div class="ring-card${r>1?' over':''}" onclick="setPessoaFiltro('${p}');abrirOrc()"><span class="nm">${p}</span><div class="ring"><svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="43" fill="none" stroke="var(--c-default-border)" stroke-width="10"/><circle cx="48" cy="48" r="43" fill="none" stroke="${cor}" stroke-width="10" stroke-linecap="${dash>0?'round':'butt'}" stroke-dasharray="${dash} ${C}"/></svg><span class="pct">${pc}%</span></div><span class="vals">${vals}</span></div>`; }).join(''); }
 function renderTudo(){ renderHome(); renderExtrato(); if(screenAtiva==='orc')renderOrcamento(); if(screenAtiva==='orc-detalhe'&&catDetalheAtiva)renderDetalheCategoria(catDetalheAtiva); }
 const filtrarPorPessoa=lista=>pessoaFiltro==='Todos'?lista:lista.filter(i=>(i.pessoa||'Franklin')===pessoaFiltro);
 const filtrarPorPessoaOrc=lista=>lista.filter(i=>(i.pessoa||'Franklin')===pessoaOrc()); // segue a Home; em Todos usa Franklin
 
-function renderHome(){ const base=filtrarPorPessoa(items); const t=totaisPorTipo(base); const saldo=t.entrada-t.saida-t.investimento; const sa=document.getElementById('saldo-amount'); sa.textContent=fmt(saldo); sa.className='amount '+(saldo>=0?'pos':'neg'); document.getElementById('entradas-amount').textContent=fmt(t.entrada); document.getElementById('saidas-amount').textContent=fmt(t.saida); const invAmount=document.getElementById('invest-amount'),lista=document.getElementById('caixinhas-list'); const totalInv=caixinhas.reduce((s,c)=>s+num(c.valor),0); invAmount.textContent=fmt(totalInv); if(lista){ lista.innerHTML = caixinhas.length ? caixinhas.map(c=>`<div class="caixinha-row" onclick="editarCaixinha('${c.id}')"><span class="caixinha-nome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4"/></svg>${c.nome}</span><span class="caixinha-valor">${fmt(c.valor)}</span></div>`).join('') : '<div class="card-sub">Toque no + para criar uma caixinha</div>'; } }
+function renderHome(){ const base=filtrarPorPessoa(items); const t=totaisPorTipo(base); const saldo=t.entrada-t.saida-t.investimento; const sa=document.getElementById('saldo-amount'); sa.textContent=saldosOcultos?'R$ ••••••':(saldo<0?'−':'')+fmtReal(Math.abs(saldo)); sa.className='saldo-val'+(saldo<0?' neg':''); document.getElementById('saldo-lbl').textContent='Saldo de '+MESES_LONGOS[mesAtual.getMonth()].toLowerCase(); renderAneis(); document.getElementById('entradas-amount').textContent=fmt(t.entrada); document.getElementById('saidas-amount').textContent=fmt(t.saida); const invAmount=document.getElementById('invest-amount'),lista=document.getElementById('caixinhas-list'); const totalInv=caixinhas.reduce((s,c)=>s+num(c.valor),0); invAmount.textContent=fmt(totalInv); if(lista){ lista.innerHTML = caixinhas.length ? caixinhas.map(c=>`<div class="caixinha-row" onclick="editarCaixinha('${c.id}')"><span class="caixinha-nome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4"/></svg>${c.nome}</span><span class="caixinha-valor">${fmt(c.valor)}</span></div>`).join('') : '<div class="card-sub">Toque no + para criar uma caixinha</div>'; } }
 
 function renderExtrato(){ const el=document.getElementById('extrato-list'); const resumoEl=document.getElementById('extrato-resumo'); const ehCartao=i=>i.noCartao===true||['cartão de crédito','cartao de credito'].includes((i.categoria||'').toLowerCase()); let base=items.slice(); if(filtroPessoaExt!=='todos')base=base.filter(i=>(i.pessoa||'Franklin')===filtroPessoaExt); if(filtroCartaoExt)base=base.filter(ehCartao); if(filtroParcExt)base=base.filter(i=>!!i.parcelaGrupoId); if(filtroTipo!=='todos')base=base.filter(i=>normTipo(i.tipo)===filtroTipo); let totEnt=0,totSai=0; base.forEach(i=>{if(ehNeutra(i))return;const tp=normTipo(i.tipo);if(tp==='entrada')totEnt+=num(i.valor);else if(tp==='saida')totSai+=num(i.valor);}); if(resumoEl){resumoEl.innerHTML=`<div class="ext-resumo"><div class="ext-resumo-item"><span class="ext-resumo-lbl">Entradas</span><span class="ext-resumo-val green">${fmt(totEnt)}</span></div><div class="ext-resumo-item"><span class="ext-resumo-lbl">Saídas</span><span class="ext-resumo-val red">${fmt(totSai)}</span></div></div>`;} if(base.length===0){el.innerHTML='<div class="empty"><span>○</span>Nenhum lançamento com esses filtros.</div>';return;} el.innerHTML=txHTML(base); }
 
