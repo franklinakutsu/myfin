@@ -957,11 +957,11 @@ const ICO_CHEV_R='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const ICO_EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /> <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /> </svg>', ICO_EYE_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" /> <path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87" /> <path d="M3 3l18 18" /> </svg>';
 const MESES_LONGOS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const mesHojeKey=()=>mesKey(new Date());
-window.mudarMes=function(delta){ const d=new Date(mesAtual.getFullYear(),mesAtual.getMonth()+delta,1); if(mesKey(d)>mesHojeKey())return; mesAtual=d; atualizarMesLabels(); carregarItems(); };
-function atualizarMesLabels(){ const l=mesLabel(mesAtual); ['home','caixa','add','extrato','orc'].forEach(s=>{ const el=document.getElementById('ml-'+s); if(el)el.textContent=l; }); const noFim=mesKey(mesAtual)>=mesHojeKey(); document.querySelectorAll('.mes-next').forEach(b=>b.disabled=noFim); }
-// Drawer "Escolher mês" — meses futuros desabilitados
+window.mudarMes=function(delta){ const d=new Date(mesAtual.getFullYear(),mesAtual.getMonth()+delta,1); mesAtual=d; atualizarMesLabels(); carregarItems(); };
+function atualizarMesLabels(){ const l=mesLabel(mesAtual); ['home','caixa','add','extrato','orc'].forEach(s=>{ const el=document.getElementById('ml-'+s); if(el)el.textContent=l; });  }
+// Drawer "Escolher mês"
 let mpAnoSel=new Date().getFullYear();
-function renderMesPicker(){ const hoje=new Date(), hk=mesHojeKey(), selK=mesKey(mesAtual); document.getElementById('mp-ano').textContent=mpAnoSel; document.getElementById('mp-next').disabled=mpAnoSel>=hoje.getFullYear(); document.getElementById('mp-grid').innerHTML=MESES_CURTOS.map((m,i)=>{ const k=`${mpAnoSel}-${String(i+1).padStart(2,'0')}`; return `<button class="${k===selK?'on':''}" ${k>hk?'disabled':''} onclick="escolherMes(${mpAnoSel},${i})">${cap(m)}</button>`; }).join(''); }
+function renderMesPicker(){ const hoje=new Date(), hk=mesHojeKey(), selK=mesKey(mesAtual); document.getElementById('mp-ano').textContent=mpAnoSel; document.getElementById('mp-grid').innerHTML=MESES_CURTOS.map((m,i)=>{ const k=`${mpAnoSel}-${String(i+1).padStart(2,'0')}`; return `<button class="${k===selK?'on':''}" onclick="escolherMes(${mpAnoSel},${i})">${cap(m)}</button>`; }).join(''); }
 window.abrirMesPicker=function(){ mpAnoSel=mesAtual.getFullYear(); renderMesPicker(); document.getElementById('mp-ov').classList.add('show'); };
 window.fecharMesPicker=function(){ document.getElementById('mp-ov').classList.remove('show'); };
 window.mpAno=function(d){ mpAnoSel+=d; renderMesPicker(); };
@@ -1146,7 +1146,7 @@ window.addItem=async function(){
     const tipoNome={entrada:'Entrada',saida:'Saída',investimento:'Investimento'}[tipoLancado];
     setTipo('saida'); setPessoaLanc('Franklin');
     mostrarNotif('Lançamento salvo',`${tipoNome} de ${fmtReal(valorLancado)} em ${cat}.`);
-    mesParaVer.setDate(1); if(mesKey(mesParaVer)>mesHojeKey()){ mesParaVer=new Date(); mesParaVer.setDate(1); }
+    mesParaVer.setDate(1);
     mesAtual=mesParaVer; atualizarMesLabels();
     await carregarItems();
   }catch(e){mostrarNotif('Erro ao salvar','Verifique sua conexão e tente de novo.',true);console.error(e);}
