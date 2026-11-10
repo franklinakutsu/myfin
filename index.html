@@ -662,31 +662,18 @@
     </div>
   </section>
 
-  <!-- ASSINATURAS -->
+  <!-- ASSINATURAS (aba do Extrato) -->
   <section class="screen" id="screen-assin">
-    <div class="pg" style="padding-bottom:0;gap:16px;"><div class="pg-head"><span class="pg-title">Extrato</span></div>
-      <div class="m-tabs"><button onclick="setScreen('extrato',document.getElementById('tab-extrato'))">Lançamentos</button><button class="on" onclick="abrirAssinaturas()">Assinaturas</button></div></div>
-    <div class="orc-header">
-      <span class="orc-header-title">Assinaturas</span>
-      <button class="orc-add-btn" onclick="recarregarAssinaturas()">↻ Atualizar</button>
-    </div>
-    <div class="assin-filtros">
-      <div class="field" style="margin-bottom:0;">
-        <div class="field-label">De</div>
-        <input type="month" id="as-ini" onchange="renderAssinaturas()" />
+    <div class="pg" style="gap:16px;">
+      <div class="pg-head"><span class="pg-title">Extrato</span><button class="action-icon eye-toggle" onclick="toggleOcultar()" aria-label="Mostrar/ocultar valores"></button></div>
+      <div class="m-tabs"><button onclick="setScreen('extrato',document.getElementById('tab-extrato'))">Lançamentos</button><button class="on" onclick="abrirAssinaturas()">Assinaturas</button></div>
+      <div class="ext-bar">
+        <button class="m-btn-def periodo-btn" onclick="abrirPeriodo()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /> <path d="M16 3v4" /> <path d="M8 3v4" /> <path d="M4 11h16" /> <path d="M11 15h1" /> <path d="M12 15v3" /> </svg><span class="v as-periodo-txt">—</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M6 9l6 6l6 -6" /> </svg></button>
+        <button class="m-btn-def as-filtros-btn" onclick="abrirFiltros()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M14 6m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /> <path d="M4 6l8 0" /> <path d="M16 6l4 0" /> <path d="M8 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /> <path d="M4 12l2 0" /> <path d="M10 12l10 0" /> <path d="M17 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /> <path d="M4 18l11 0" /> <path d="M19 18l1 0" /> </svg><span>Filtros</span><span class="badge as-filtros-n" style="display:none"></span></button>
       </div>
-      <div class="field" style="margin-bottom:0;">
-        <div class="field-label">Até</div>
-        <input type="month" id="as-fim" onchange="renderAssinaturas()" />
-      </div>
+      <div class="pills" id="as-pills"></div>
+      <div id="assin-list"><div class="loading">Carregando...</div></div>
     </div>
-    <div class="filter-row" id="as-pessoa-row" style="margin-top:14px;">
-      <button class="chip active" onclick="setFiltroPessoaAs('Todos',this)">Ambos</button>
-      <button class="chip" onclick="setFiltroPessoaAs('Franklin',this)">Franklin</button>
-      <button class="chip" onclick="setFiltroPessoaAs('Airton',this)">Airton</button>
-    </div>
-    <div id="assin-resumo"></div>
-    <div id="assin-list"><div class="loading">Carregando...</div></div>
   </section>
 
 </main>
@@ -704,8 +691,8 @@
       <input type="number" id="cx-valor" step="0.01" min="0" inputmode="decimal" placeholder="0,00" />
     </div>
     <div class="cfg-actions">
-      <button class="btn-save" onclick="salvarCaixinhaModal()">Salvar</button>
-      <button class="btn-danger" onclick="excluirCaixinhaModal()">Excluir</button>
+      <button class="btn-save" onclick="salvarCaixinhaModal()">Salvar alterações</button>
+      <button class="btn-danger" onclick="excluirCaixinhaModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /> </svg>Excluir investimento</button>
     </div>
   </div>
 </div>
@@ -822,9 +809,9 @@
     </div>
     <div id="am-previa" class="parcela-previa"></div>
     <div class="cfg-actions">
-      <button class="btn-save" onclick="salvarAssinatura()">Salvar</button>
-      <button class="btn-warn" onclick="encerrarAssinatura()">Encerrar</button>
-      <button class="btn-danger" onclick="excluirAssinatura()">Excluir</button>
+      <button class="btn-save" onclick="salvarAssinatura()">Salvar alterações</button>
+      <button class="btn-warn" onclick="encerrarAssinatura()">Encerrar assinatura</button>
+      <button class="btn-danger" onclick="excluirAssinatura()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /> </svg>Excluir com o histórico</button>
     </div>
   </div>
 </div>
@@ -1392,37 +1379,36 @@ async function carregarAssinaturas(){
 }
 window.abrirAssinaturas=async function(){
   setScreen('assin',document.getElementById('tab-extrato'));
-  const ini=document.getElementById('as-ini'), fim=document.getElementById('as-fim');
-  if(!ini.value||!fim.value){ const a=new Date().getFullYear(); ini.value=`${a}-01`; fim.value=`${a}-12`; }
   await recarregarAssinaturas();
 };
 window.recarregarAssinaturas=async function(){
   assinCarregado=false; renderAssinaturas();
   try{ await carregarAssinaturas(); renderAssinaturas(); }
-  catch(e){ console.error(e); document.getElementById('assin-list').innerHTML='<div class="empty"><span>○</span>Erro ao carregar. Verifique a conexão e toque em Atualizar.</div>'; }
+  catch(e){ console.error(e); document.getElementById('assin-list').innerHTML='<div class="m-paper"><div class="vazio-box"><div class="t">Erro ao carregar</div><div class="m">Verifique a conexão e abra a aba de novo.</div></div></div>'; }
 };
 window.setFiltroPessoaAs=function(p,btn){ filtroPessoaAs=p; document.querySelectorAll('#as-pessoa-row .chip').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderAssinaturas(); };
 window.renderAssinaturas=function(){
-  const el=document.getElementById('assin-list'), res=document.getElementById('assin-resumo');
-  if(!assinCarregado){ el.innerHTML='<div class="loading">Carregando...</div>'; res.innerHTML=''; return; }
-  const ini=document.getElementById('as-ini').value, fim=document.getElementById('as-fim').value;
-  if(ini&&fim&&ini>fim){ res.innerHTML=''; el.innerHTML='<div class="empty"><span>○</span>O mês "De" está depois do "Até".</div>'; return; }
+  const el=document.getElementById('assin-list'); if(!el)return;
+  document.querySelectorAll('.as-periodo-txt').forEach(e=>e.textContent=periodoTxt(extPer.ini,extPer.fim));
+  const ativos=filtrosAtivos(); document.querySelectorAll('.as-filtros-btn').forEach(b=>b.classList.toggle('light',ativos.length>0)); document.querySelectorAll('.as-filtros-n').forEach(n=>{ n.style.display=ativos.length?'':'none'; n.textContent=ativos.length; });
+  document.getElementById('as-pills').innerHTML=ativos.length?ativos.map(([g,l])=>`<span class="m-pill">${l}<button onclick="removerFiltro('${g}')" aria-label="Remover">${ICO_XS}</button></span>`).join('')+`<button class="link-btn" onclick="limparFiltros()">Limpar</button>`:'';
+  if(!assinCarregado){ el.innerHTML='<div class="loading">Carregando...</div>'; return; }
+  const ini=(extPer.ini||'').slice(0,7), fim=(extPer.fim||'').slice(0,7), hoje=mesKey(new Date());
   const noPeriodo=m=>(!ini||m>=ini)&&(!fim||m<=fim);
-  const daPessoa=gruposAssinatura().filter(g=>filtroPessoaAs==='Todos'||g.pessoa===filtroPessoaAs);
-  const mensalAtual=daPessoa.filter(g=>g.status==='ativa').reduce((s,g)=>s+g.valor,0);
+  let grupos=gruposAssinatura();
+  if(filtroPessoaExt==='5050')grupos=grupos.filter(g=>g.meio); else if(filtroPessoaExt!=='todos')grupos=grupos.filter(g=>g.pessoa===filtroPessoaExt);
+  if(filtroCartaoExt)grupos=grupos.filter(g=>g.noCartao);
+  if(filtroParcExt||(filtroTipo!=='todos'&&filtroTipo!=='saida'))grupos=[];
   const ORD={ativa:0,futura:1,encerrada:2};
-  const lista=daPessoa.map(g=>{ const dp=g.docs.filter(d=>noPeriodo(d.mes)); return {...g,nP:dp.length,totalP:dp.reduce((s,d)=>s+num(d.valor),0)}; })
-    .filter(g=>g.nP>0).sort((a,b)=>ORD[a.status]-ORD[b.status]||b.valor-a.valor);
-  const totalP=lista.reduce((s,g)=>s+g.totalP,0);
-  res.innerHTML=`<div class="ext-resumo"><div class="ext-resumo-item"><span class="ext-resumo-lbl">Custo mensal hoje</span><span class="ext-resumo-val red">${fmt(mensalAtual)}</span></div><div class="ext-resumo-item"><span class="ext-resumo-lbl">Total no período</span><span class="ext-resumo-val red">${fmt(totalP)}</span></div></div>`;
-  if(!lista.length){ el.innerHTML='<div class="empty"><span>○</span>Nenhuma assinatura nesse período.<br>Para criar, lance uma saída marcando "Saída recorrente".</div>'; return; }
-  const ST={ativa:'Ativa',futura:'Começa depois',encerrada:'Encerrada'};
-  el.innerHTML=lista.map(g=>{
-    const tagP=g.pessoa==='Airton'?`<span class="tx-pessoa">Airton</span>`:`<span class="tx-pessoa" style="background:rgba(48,209,200,0.15);color:#30d1c8;">Franklin</span>`;
-    const tagC=g.noCartao?`<span class="tx-pessoa" style="background:rgba(255,159,10,0.15);color:var(--amber);">cartão</span>`:'';
-    const tag5=g.meio?`<span class="tx-pessoa" style="background:rgba(255,55,95,0.15);color:#ff375f;">50/50</span>`:'';
-    return `<div class="assin-item" onclick="editarAssinatura('${g.id}')"><div class="tx-dot saida">↻</div><div class="assin-body"><div class="assin-nome">${escH(g.nome)}</div><div class="assin-meta">${escH(g.categoria)}${tagP}${tagC}${tag5}<span class="assin-status ${g.status}">${ST[g.status]}</span></div></div><div class="assin-right"><div class="assin-val">${fmt(g.valor)}<small>/mês</small></div><div class="assin-periodo">${mesCurto(g.ini)} – ${mesCurto(g.fim)} · ${g.nP}x no período</div></div></div>`;
-  }).join('');
+  const lista=grupos.filter(g=>g.docs.some(d=>noPeriodo(d.mes))).sort((a,b)=>ORD[a.status]-ORD[b.status]||b.valor-a.valor);
+  if(!lista.length){ el.innerHTML=`<div class="m-paper"><div class="vazio-box"><span class="theme-icon gray">${ICO_SEARCH}</span><div class="t">Nenhuma assinatura encontrada</div><div class="m">${ativos.length?'Tente outro período ou outra combinação de filtros.':'Para criar, lance uma saída marcando "Assinatura".'}</div>${ativos.length?'<button class="m-btn-def" onclick="limparFiltros()">Limpar filtros</button>':''}</div></div>`; return; }
+  el.innerHTML='<div class="m-paper">'+lista.map(g=>{
+    const ref=fim&&fim<hoje?fim:hoje; let pos=g.docs.filter(d=>d.mes<=ref).length; if(pos<1)pos=1;
+    const prog=g.status==='encerrada'?'encerrada':g.status==='futura'?`começa ${mesCurto(g.ini)}`:`mês ${pos} de ${g.docs.length}`;
+    const dia=String(dataDoItem(g.docs[0]).getDate()).padStart(2,'0');
+    const valor=saldosOcultos?'R$ ••••':'− '+fmtReal(g.valor);
+    return `<div class="lanc${g.status==='encerrada'?' neutra':''}" onclick="editarAssinatura('${g.id}')"><span class="ti saida">${ICO_OUT}</span><div class="inf"><span class="nm">${escH(g.nome)}</span><span class="sb">${escH(g.categoria)} · ${g.meio?'50/50':g.pessoa} · ${prog}</span><span class="sb">Todo dia ${dia} · ${g.noCartao?'Cartão de crédito':'Pix'}</span></div><span class="vl saida">${valor}</span></div>`;
+  }).join('')+'</div>';
 };
 
 // ----- detalhes / edição -----
@@ -1535,7 +1521,7 @@ async function carregarItems(){ try{const mk=mesKey(mesAtual);const q=query(coll
 // Anéis de orçamento da Home: sempre um por pessoa (gasto total × teto total do mês)
 const fmtInt=v=>'R$ '+Math.round(num(v)).toLocaleString('pt-BR');
 function renderAneis(){ const el=document.getElementById('home-rings'); if(!el)return; const C=2*Math.PI*43; el.innerHTML=PESSOAS.map(p=>{ const {linhas}=calcOrcamento(items,categoriasSaida,[p]); const gasto=linhas.reduce((s,l)=>s+l.gasto,0), lim=linhas.reduce((s,l)=>s+l.limite,0); const r=lim>0?gasto/lim:0, pc=Math.round(r*100); const cor=r>1?'var(--c-red)':r>=0.8?'var(--c-yellow)':'var(--c-primary)'; const dash=Math.min(r,1)*C; const vals=saldosOcultos?'R$ ••• de R$ •••':`${fmtInt(gasto)} de ${fmtInt(lim)}`; return `<div class="ring-card${r>1?' over':''}" onclick="setPessoaFiltro('${p}');abrirOrc()"><span class="nm">${p}</span><div class="ring"><svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="43" fill="none" stroke="var(--c-default-border)" stroke-width="10"/><circle cx="48" cy="48" r="43" fill="none" stroke="${cor}" stroke-width="10" stroke-linecap="${dash>0?'round':'butt'}" stroke-dasharray="${dash} ${C}"/></svg><span class="pct">${pc}%</span></div><span class="vals">${vals}</span></div>`; }).join(''); }
-function renderTudo(){ renderHome(); renderExtrato(); if(screenAtiva==='orc')renderOrcamento(); if(screenAtiva==='orc-detalhe'&&catDetalheAtiva)renderDetalheCategoria(catDetalheAtiva); }
+function renderTudo(){ renderHome(); renderExtrato(); if(screenAtiva==='assin')renderAssinaturas(); if(screenAtiva==='orc')renderOrcamento(); if(screenAtiva==='orc-detalhe'&&catDetalheAtiva)renderDetalheCategoria(catDetalheAtiva); }
 const filtrarPorPessoa=lista=>pessoaFiltro==='Todos'?lista:lista.filter(i=>(i.pessoa||'Franklin')===pessoaFiltro);
 const filtrarPorPessoaOrc=lista=>lista.filter(i=>(i.pessoa||'Franklin')===pessoaOrc()); // segue a Home; em Todos usa Franklin
 
@@ -1590,9 +1576,9 @@ function syncChips(){ document.querySelectorAll('#fil-ov .m-chip').forEach(c=>{ 
 window.abrirFiltros=function(){ fTmp={tipo:filtroTipo,pes:filtroPessoaExt,cartao:filtroCartaoExt,parc:filtroParcExt}; syncChips(); document.getElementById('fil-ov').classList.add('show'); };
 window.fecharFiltros=function(){ document.getElementById('fil-ov').classList.remove('show'); };
 window.fChip=function(b){ const g=b.dataset.g,v=b.dataset.v; if(g==='tipo'||g==='pes')fTmp[g]=v; else fTmp[g]=!fTmp[g]; syncChips(); };
-window.aplicarFiltros=function(){ filtroTipo=fTmp.tipo; filtroPessoaExt=fTmp.pes; filtroCartaoExt=fTmp.cartao; filtroParcExt=fTmp.parc; fecharFiltros(); renderExtrato(); };
-window.limparFiltros=function(soGaveta){ if(soGaveta===true){ fTmp={tipo:'todos',pes:'todos',cartao:false,parc:false}; syncChips(); return; } filtroTipo='todos'; filtroPessoaExt='todos'; filtroCartaoExt=false; filtroParcExt=false; renderExtrato(); };
-window.removerFiltro=function(g){ if(g==='tipo')filtroTipo='todos'; else if(g==='pes')filtroPessoaExt='todos'; else if(g==='cartao')filtroCartaoExt=false; else filtroParcExt=false; renderExtrato(); };
+window.aplicarFiltros=function(){ filtroTipo=fTmp.tipo; filtroPessoaExt=fTmp.pes; filtroCartaoExt=fTmp.cartao; filtroParcExt=fTmp.parc; fecharFiltros(); renderExtrato(); renderAssinaturas(); };
+window.limparFiltros=function(soGaveta){ if(soGaveta===true){ fTmp={tipo:'todos',pes:'todos',cartao:false,parc:false}; syncChips(); return; } filtroTipo='todos'; filtroPessoaExt='todos'; filtroCartaoExt=false; filtroParcExt=false; renderExtrato(); renderAssinaturas(); };
+window.removerFiltro=function(g){ if(g==='tipo')filtroTipo='todos'; else if(g==='pes')filtroPessoaExt='todos'; else if(g==='cartao')filtroCartaoExt=false; else filtroParcExt=false; renderExtrato(); renderAssinaturas(); };
 // gaveta de período: 1º toque = início, 2º = fim
 let perTmp={ini:null,fim:null}, perRef=new Date();
 function renderPeriodo(){ const y=perRef.getFullYear(), m=perRef.getMonth(); document.getElementById('per-titulo').textContent=MESES_LONGOS[m]+' de '+y; document.getElementById('per-txt').textContent=periodoTxt(perTmp.ini,perTmp.fim); const off=(new Date(y,m,1).getDay()+6)%7; const start=new Date(y,m,1-off); let h=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].map(w=>`<span class="wd">${w}</span>`).join(''); for(let k=0;k<42;k++){ const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+k); if(k>=35&&d.getMonth()!==m)break; const iso=isoDe(d); const fim=perTmp.fim||perTmp.ini; const ponta=iso===perTmp.ini||iso===perTmp.fim; const dentro=perTmp.ini&&iso>perTmp.ini&&iso<fim; const cls=[d.getMonth()!==m?'fora':'',(k%7>=5&&d.getMonth()===m&&!ponta&&!dentro)?'fds':'',ponta?'ponta':'',dentro?'range':''].join(' '); h+=`<button class="${cls}" onclick="perDia('${iso}')">${d.getDate()}</button>`; } document.getElementById('per-grid').innerHTML=h; }
@@ -1600,7 +1586,7 @@ window.abrirPeriodo=function(){ perTmp={ini:extPer.ini,fim:extPer.fim}; perRef=n
 window.fecharPeriodo=function(){ document.getElementById('per-ov').classList.remove('show'); };
 window.perNav=function(d){ perRef=new Date(perRef.getFullYear(),perRef.getMonth()+d,1); renderPeriodo(); };
 window.perDia=function(iso){ if(!perTmp.ini||perTmp.fim){ perTmp={ini:iso,fim:null}; } else if(iso<perTmp.ini){ perTmp={ini:iso,fim:perTmp.ini}; } else perTmp.fim=iso; renderPeriodo(); };
-window.aplicarPeriodo=async function(){ if(!perTmp.ini)return; extPer={ini:perTmp.ini,fim:perTmp.fim||perTmp.ini,custom:true}; fecharPeriodo(); document.getElementById('extrato-list').innerHTML='<div class="loading">Carregando...</div>'; await carregarExtrato(); renderExtrato(); };
+window.aplicarPeriodo=async function(){ if(!perTmp.ini)return; extPer={ini:perTmp.ini,fim:perTmp.fim||perTmp.ini,custom:true}; fecharPeriodo(); document.getElementById('extrato-list').innerHTML='<div class="loading">Carregando...</div>'; await carregarExtrato(); renderExtrato(); renderAssinaturas(); };
 // confirmação (substitui o confirm() do navegador)
 function confirmar(titulo,msg,botoes){ return new Promise(res=>{ document.getElementById('cf-t').textContent=titulo; document.getElementById('cf-m').textContent=msg; const acts=document.getElementById('cf-acts'); acts.innerHTML=''; botoes.forEach(([lbl,val,estilo])=>{ const b=document.createElement('button'); b.className=estilo==='red'?'m-btn red':estilo==='blue'?'m-btn':'m-btn-def big'; b.textContent=lbl; b.onclick=()=>{ document.getElementById('cf-ov').classList.remove('show'); res(val); }; acts.appendChild(b); }); document.getElementById('cf-ov').classList.add('show'); }); }
 const avisar=m=>mostrarNotif('Atenção',m,true);
