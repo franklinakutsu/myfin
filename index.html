@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="theme-color" content="#242424" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Finanças" />
@@ -12,34 +15,74 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0a0a0a; --surface: #1c1c1e; --surface2: #2a2a2c;
-      --border: rgba(255,255,255,0.07); --text: #f5f5f7; --muted: #8a8a8e; --muted2: #636366;
-      --green: #34c759; --red: #ff453a; --blue: #6c63ff; --blue-soft: #7d76ff;
-      --amber: #ff9f0a; --radius: 16px; --radius-sm: 10px; --pad: 24px;
+      /* Mantine Dark (Figma) */
+      --c-bright:#ffffff; --c-text:#c9c9c9; --c-dimmed:#828282; --c-placeholder:#696969;
+      --c-body:#242424; --c-default:#2e2e2e; --c-default-hover:#3b3b3b; --c-default-border:#424242;
+      --c-dark-1:#b8b8b8; --c-dark-8:#1f1f1f;
+      --c-primary:#1971c2; --c-primary-light:rgba(34,139,230,0.15); --c-primary-light-color:#4dabf7;
+      --c-red:#fa5252; --c-red-light:rgba(250,82,82,0.15); --c-red-light-color:#ff8787;
+      --c-yellow:#fab005; --c-yellow-light:rgba(250,176,5,0.15); --c-yellow-light-color:#ffd43b;
+      --c-green:#40c057; --c-green-light:rgba(64,192,87,0.15); --c-green-light-color:#69db7c;
+      --c-gray-light:rgba(134,142,150,0.15); --c-gray-light-color:#ced4da;
+      /* nomes antigos, apontando pros novos */
+      --bg:var(--c-body); --surface:var(--c-default); --surface2:var(--c-default-hover);
+      --border:var(--c-default-border); --text:var(--c-bright); --muted:var(--c-dimmed); --muted2:var(--c-placeholder);
+      --green:var(--c-green-light-color); --red:var(--c-red-light-color); --blue:var(--c-primary); --blue-soft:var(--c-primary-light-color);
+      --amber:var(--c-yellow); --radius:8px; --radius-sm:8px; --pad:16px;
     }
-    body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:15px; min-height:100dvh; -webkit-font-smoothing:antialiased; padding-bottom:calc(80px + env(safe-area-inset-bottom)); }
+    body { background:var(--bg); color:var(--text); font-family:'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:15px; min-height:100dvh; -webkit-font-smoothing:antialiased; padding-bottom:calc(80px + env(safe-area-inset-bottom)); }
     main { padding:0; max-width:640px; margin:0 auto; }
     .screen { display:none; padding:0 var(--pad); }
     .screen.active { display:block; }
 
-    /* LOCK */
-    #lock { position:fixed; inset:0; z-index:100; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 32px; }
+    /* LOCK (Figma: Login — PIN de 6 dígitos) */
+    #lock { position:fixed; inset:0; z-index:100; background:var(--c-body); display:flex; flex-direction:column; align-items:center; padding-top:env(safe-area-inset-top); }
     #lock.hidden { display:none; }
-    .lock-icon { width:64px; height:64px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; margin-bottom:24px; }
-    .lock-icon svg { width:30px; height:30px; color:var(--blue-soft); }
-    .lock-title { font-size:22px; font-weight:700; letter-spacing:-0.5px; margin-bottom:8px; }
-    .lock-sub { font-size:14px; color:var(--muted); margin-bottom:32px; }
-    .lock-dots { display:flex; gap:14px; margin-bottom:36px; }
-    .lock-dot { width:14px; height:14px; border-radius:50%; border:1.5px solid var(--muted2); transition:all 0.15s; }
-    .lock-dot.filled { background:var(--blue-soft); border-color:var(--blue-soft); }
-    .lock-dot.err { background:var(--red); border-color:var(--red); }
-    .keypad { display:grid; grid-template-columns:repeat(3,72px); gap:18px; justify-content:center; }
-    .key { width:72px; height:72px; border-radius:50%; border:none; background:var(--surface); color:var(--text); font-size:26px; font-weight:500; cursor:pointer; transition:background 0.12s, transform 0.05s; font-family:inherit; display:flex; align-items:center; justify-content:center; }
-    .key:active { background:var(--surface2); transform:scale(0.95); }
-    .key.empty { background:none; cursor:default; }
-    .key.back { font-size:22px; }
+    .lk-content { width:100%; max-width:416px; display:flex; flex-direction:column; align-items:center; gap:24px; padding:56px 16px 0; }
+    .lk-flex { flex:1; }
+    .theme-icon { width:64px; height:64px; border-radius:32px; background:var(--c-primary-light); color:var(--c-primary-light-color); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .2s,color .2s; }
+    .theme-icon svg { width:32px; height:32px; }
+    .theme-icon.red { background:var(--c-red-light); color:var(--c-red-light-color); }
+    .theme-icon.gray { background:var(--c-gray-light); color:var(--c-gray-light-color); }
+    .theme-icon.green { background:var(--c-green-light); color:var(--c-green-light-color); }
+    .lk-textos { display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
+    .lk-title { font-size:22px; font-weight:700; color:var(--c-text); }
+    .lk-sub { font-size:14px; color:var(--c-dimmed); }
+    .pin-input { display:flex; gap:10px; }
+    .pin-field { width:48px; height:48px; border-radius:8px; background:var(--c-default); border:1px solid var(--c-default-border); display:flex; align-items:center; justify-content:center; transition:border-color .12s, opacity .12s; }
+    .pin-field.foco { border-color:var(--c-primary); }
+    .pin-field.foco::after { content:''; width:2px; height:22px; background:var(--c-primary); animation:pinblink 1s steps(1) infinite; }
+    .pin-field.cheio::after { content:''; width:10px; height:10px; border-radius:50%; background:var(--c-bright); }
+    .pin-field.erro { border-color:var(--c-red); background:var(--c-red-light); }
+    .pin-field.erro::after { content:''; width:10px; height:10px; border-radius:50%; background:var(--c-red); }
+    .pin-field.ok { border-color:var(--c-green); background:var(--c-green-light); }
+    .pin-field.ok::after { content:''; width:10px; height:10px; border-radius:50%; background:var(--c-green); }
+    .pin-field.off { opacity:.6; }
+    @keyframes pinblink { 50% { opacity:0; } }
     @keyframes shake { 0%,100%{transform:translateX(0);} 20%,60%{transform:translateX(-8px);} 40%,80%{transform:translateX(8px);} }
-    .lock-dots.shake { animation:shake 0.4s; }
+    .pin-input.shake { animation:shake 0.4s; }
+    .lk-retorno { width:100%; min-height:24px; display:flex; flex-direction:column; gap:12px; align-items:center; }
+    .lk-msg { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--c-dimmed); }
+    .lk-msg svg { width:16px; height:16px; flex-shrink:0; }
+    .lk-msg.red { color:var(--c-red-light-color); }
+    .lk-msg.green { color:var(--c-green-light-color); }
+    .loader { width:20px; height:20px; border-radius:50%; border:2px solid var(--c-primary-light); border-top-color:var(--c-primary-light-color); animation:spin .8s linear infinite; flex-shrink:0; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .m-alert { width:100%; display:flex; gap:12px; align-items:flex-start; padding:12px 16px; border-radius:8px; background:var(--c-red-light); text-align:left; }
+    .m-alert > svg { width:20px; height:20px; flex-shrink:0; color:var(--c-red-light-color); }
+    .m-alert .t { font-size:14px; font-weight:700; line-height:1.45; color:var(--c-red-light-color); }
+    .m-alert .m { font-size:14px; line-height:1.45; color:var(--c-text); margin-top:4px; }
+    .m-alert.yellow { background:var(--c-yellow-light); } .m-alert.yellow > svg, .m-alert.yellow .t { color:var(--c-yellow-light-color); }
+    .m-alert.gray { background:var(--c-gray-light); } .m-alert.gray > svg, .m-alert.gray .t { color:var(--c-gray-light-color); }
+    .m-btn { height:42px; padding:0 18px; border-radius:8px; border:none; background:var(--c-primary); color:var(--c-bright); font-family:inherit; font-size:16px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+    .m-btn:active { transform:translateY(1px); }
+    .m-btn.full { width:100%; }
+    .keypad { width:100%; max-width:416px; display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:8px 16px calc(16px + env(safe-area-inset-bottom)); }
+    .key { height:56px; border-radius:8px; border:1px solid var(--c-default-border); background:var(--c-default); color:var(--c-bright); font-family:inherit; font-size:24px; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; -webkit-tap-highlight-color:transparent; transition:background .08s; }
+    .key svg { width:24px; height:24px; }
+    .key:active { background:var(--c-default-hover); }
+    .key.empty { background:none; border:none; cursor:default; }
+    .keypad.off .key:not(.empty) { border-color:transparent; color:var(--c-placeholder); pointer-events:none; }
 
     .month-bar { display:flex; align-items:center; justify-content:space-between; padding:20px 0 28px; }
     .month-bar button { background:none; border:none; color:var(--muted); cursor:pointer; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:28px; transition:color 0.15s; line-height:1; border-radius:50%; }
@@ -231,16 +274,17 @@
 <body>
 
 <div id="lock">
-  <div class="lock-icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  <div class="lk-content">
+    <div class="theme-icon" id="lk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z" /> <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /> <path d="M8 11v-4a4 4 0 1 1 8 0v4" /> </svg></div>
+    <div class="lk-textos">
+      <div class="lk-title">Digite seu PIN</div>
+      <div class="lk-sub" id="lk-sub">Use os 6 dígitos do seu PIN para entrar.</div>
+    </div>
+    <div class="pin-input" id="lock-dots"></div>
+    <div class="lk-retorno" id="lk-retorno"></div>
   </div>
-  <div class="lock-title">Olá, Franklin</div>
-  <div class="lock-sub">Digite seu PIN de 6 dígitos</div>
-  <div class="lock-dots" id="lock-dots">
-    <div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div>
-    <div class="lock-dot"></div><div class="lock-dot"></div><div class="lock-dot"></div>
-  </div>
-  <div class="keypad">
+  <div class="lk-flex"></div>
+  <div class="keypad" id="keypad">
     <button class="key" onclick="lockDigit('1')">1</button>
     <button class="key" onclick="lockDigit('2')">2</button>
     <button class="key" onclick="lockDigit('3')">3</button>
@@ -250,9 +294,9 @@
     <button class="key" onclick="lockDigit('7')">7</button>
     <button class="key" onclick="lockDigit('8')">8</button>
     <button class="key" onclick="lockDigit('9')">9</button>
-    <button class="key empty"></button>
+    <button class="key empty" tabindex="-1"></button>
     <button class="key" onclick="lockDigit('0')">0</button>
-    <button class="key back" onclick="lockBack()">⌫</button>
+    <button class="key" onclick="lockBack()" aria-label="Apagar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-11l-5 -5a1.5 1.5 0 0 1 0 -2l5 -5z" /> <path d="M12 10l4 4m0 -4l-4 4" /> </svg></button>
   </div>
 </div>
 
@@ -1339,12 +1383,80 @@ let appIniciado=false;
 function iniciarApp(){ if(appIniciado)return; appIniciado=true; Promise.all([carregarCaixinhas(),carregarCategorias()]).then(()=>{setTipo('saida');carregarItems();}); }
 
 // LOCK + LOGIN
-(function(){ const dots=document.getElementById('lock-dots'); if(dots){ dots.innerHTML=Array.from({length:PIN_LEN},()=>'<div class="lock-dot"></div>').join(''); } const sub=document.querySelector('.lock-sub'); if(sub) sub.textContent=`Digite seu PIN de ${PIN_LEN} dígitos`; })();
-let lockBuffer='';
-function lockRender(){ document.querySelectorAll('#lock-dots .lock-dot').forEach((d,i)=>{d.classList.toggle('filled',i<lockBuffer.length);d.classList.remove('err');}); }
-window.lockBack=function(){ lockBuffer=lockBuffer.slice(0,-1); lockRender(); };
-window.lockDigit=function(n){ if(lockBuffer.length>=PIN_LEN)return; lockBuffer+=n; lockRender(); if(lockBuffer.length===PIN_LEN)tentarLogin(lockBuffer); };
-async function tentarLogin(pin){ document.querySelector('.lock-sub').textContent='Verificando...'; try{await setPersistence(auth,browserSessionPersistence);await signInWithEmailAndPassword(auth,EMAIL_LOGIN,pin);document.getElementById('lock').classList.add('hidden');document.querySelector('.lock-sub').textContent=`Digite seu PIN de ${PIN_LEN} dígitos`;iniciarApp();}catch(e){console.error(e);document.querySelector('.lock-sub').textContent='PIN incorreto';const w=document.getElementById('lock-dots');document.querySelectorAll('#lock-dots .lock-dot').forEach(d=>d.classList.add('err'));w.classList.add('shake');setTimeout(()=>{lockBuffer='';lockRender();w.classList.remove('shake');document.querySelector('.lock-sub').textContent=`Digite seu PIN de ${PIN_LEN} dígitos`;},800);} }
+// ===== LOGIN (PIN) — visual Figma; regras: envia no 6º dígito, 3 tentativas, bloqueio 5 min =====
+const LK_ICO={lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z" /> <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /> <path d="M8 11v-4a4 4 0 1 1 8 0v4" /> </svg>',alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /> <path d="M12 8v4" /> <path d="M12 16h.01" /> </svg>',clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /> <path d="M12 7v5l3 3" /> </svg>',wifi:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M12 18l.01 0" /> <path d="M9.172 15.172a4 4 0 0 1 5.656 0" /> <path d="M6.343 12.343a7.963 7.963 0 0 1 3.864 -2.14m4.163 .155a7.965 7.965 0 0 1 3.287 2" /> <path d="M3.515 9.515a12 12 0 0 1 3.544 -2.455m3.101 -.92a12 12 0 0 1 10.325 3.374" /> <path d="M3 3l18 18" /> </svg>',check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M5 12l5 5l10 -10" /> </svg>'};
+const LK_MAX_ERROS=3, LK_BLOQ_MS=5*60*1000;
+const lkGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
+const lkSet=(k,v)=>{try{v===null?localStorage.removeItem(k):localStorage.setItem(k,String(v));}catch(e){}};
+let lockBuffer='', lkEstado='digitando', lkTimer=null;
+document.getElementById('lk-sub').textContent=`Use os ${PIN_LEN} dígitos do seu PIN para entrar.`;
+function lkErros(){ return Number(lkGet('pinErros'))||0; }
+function lkBloqAte(){ return Number(lkGet('pinBloqAte'))||0; }
+function lkUI(){
+  const st=lkEstado, n=lockBuffer.length;
+  const campos=Array.from({length:PIN_LEN},(_,i)=>{
+    let c='pin-field';
+    if(st==='erro'||st==='ultima') c+=' erro';
+    else if(st==='ok') c+=' ok';
+    else if(st==='bloqueado') c+=' off';
+    else if(i<n) c+=' cheio';
+    else if(i===n && st==='digitando') c+=' foco';
+    return `<div class="${c}"></div>`;
+  }).join('');
+  document.getElementById('lock-dots').innerHTML=campos;
+  const icon=document.getElementById('lk-icon');
+  icon.className='theme-icon'+({erro:' red',ultima:' red',bloqueado:' red',offline:' gray',ok:' green'}[st]||'');
+  icon.innerHTML=st==='ok'?LK_ICO.check:LK_ICO.lock;
+  document.getElementById('keypad').classList.toggle('off',['verificando','bloqueado','ok'].includes(st));
+  const r=document.getElementById('lk-retorno'); let h='';
+  if(st==='verificando') h=`<div class="lk-msg"><span class="loader"></span>Verificando PIN…</div>`;
+  else if(st==='erro'){ const rest=LK_MAX_ERROS-lkErros(); h=`<div class="lk-msg red">${LK_ICO.alert}PIN incorreto. Você tem mais ${rest} tentativa${rest>1?'s':''}.</div>`; }
+  else if(st==='ultima') h=`<div class="m-alert yellow">${LK_ICO.alert}<div><div class="t">Última tentativa</div><div class="m">Se o PIN estiver errado de novo, o acesso fica bloqueado por 5 minutos.</div></div></div>`;
+  else if(st==='bloqueado'){ const ms=Math.max(0,lkBloqAte()-Date.now()); const mm=String(Math.floor(ms/60000)).padStart(2,'0'), ss=String(Math.floor(ms%60000/1000)).padStart(2,'0'); h=`<div class="m-alert">${LK_ICO.clock}<div><div class="t">Acesso bloqueado</div><div class="m">Você errou o PIN ${LK_MAX_ERROS} vezes. Tente de novo em ${mm}:${ss}.</div></div></div>`; }
+  else if(st==='offline') h=`<div class="m-alert gray">${LK_ICO.wifi}<div><div class="t">Sem conexão</div><div class="m">Não foi possível verificar o PIN. Confira sua internet e tente de novo.</div></div></div><button class="m-btn full" onclick="lkTentarDeNovo()">Tentar novamente</button>`;
+  else if(st==='ok') h=`<div class="lk-msg green">${LK_ICO.check}PIN correto. Entrando…</div>`;
+  r.innerHTML=h;
+}
+function lkChecarBloqueio(){
+  clearInterval(lkTimer);
+  if(lkBloqAte()>Date.now()){
+    lkEstado='bloqueado'; lockBuffer=''; lkUI();
+    lkTimer=setInterval(()=>{ if(lkBloqAte()<=Date.now()){ clearInterval(lkTimer); lkSet('pinBloqAte',null); lkSet('pinErros',null); lkEstado='digitando'; } lkUI(); },1000);
+    return true;
+  }
+  return false;
+}
+window.lockBack=function(){ if(['verificando','bloqueado','ok'].includes(lkEstado))return; if(['erro','ultima','offline'].includes(lkEstado)) lockBuffer=''; else lockBuffer=lockBuffer.slice(0,-1); lkEstado='digitando'; lkUI(); };
+window.lockDigit=function(n){
+  if(['verificando','bloqueado','ok'].includes(lkEstado))return;
+  if(['erro','ultima','offline'].includes(lkEstado)){ lockBuffer=''; lkEstado='digitando'; }
+  if(lockBuffer.length>=PIN_LEN)return;
+  lockBuffer+=n; lkUI();
+  if(lockBuffer.length===PIN_LEN)tentarLogin(lockBuffer);
+};
+window.lkTentarDeNovo=function(){ if(lockBuffer.length===PIN_LEN)tentarLogin(lockBuffer); };
+async function tentarLogin(pin){
+  if(lkChecarBloqueio())return;
+  lkEstado='verificando'; lkUI();
+  try{
+    await setPersistence(auth,browserSessionPersistence);
+    await signInWithEmailAndPassword(auth,EMAIL_LOGIN,pin);
+    lkSet('pinErros',null); lkSet('pinBloqAte',null);
+    lkEstado='ok'; lkUI();
+    iniciarApp();
+    setTimeout(()=>{ document.getElementById('lock').classList.add('hidden'); lockBuffer=''; lkEstado='digitando'; lkUI(); },600);
+  }catch(e){
+    console.error(e);
+    const code=e&&e.code||'';
+    if(code==='auth/network-request-failed'||!navigator.onLine){ lkEstado='offline'; lkUI(); return; }
+    const erros=lkErros()+1;
+    if(erros>=LK_MAX_ERROS||code==='auth/too-many-requests'){ lkSet('pinErros',null); lkSet('pinBloqAte',Date.now()+LK_BLOQ_MS); lkChecarBloqueio(); return; }
+    lkSet('pinErros',erros);
+    lkEstado=erros===LK_MAX_ERROS-1?'ultima':'erro'; lkUI();
+    const w=document.getElementById('lock-dots'); w.classList.add('shake'); setTimeout(()=>w.classList.remove('shake'),400);
+  }
+}
+if(!lkChecarBloqueio()) lkUI();
 </script>
 </body>
 </html>
