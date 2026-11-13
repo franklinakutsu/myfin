@@ -586,14 +586,15 @@
 
   <!-- ORÇAMENTO DETALHE -->
   <section class="screen" id="screen-orc-detalhe">
-    <div class="back-bar">
-      <button class="back-btn" onclick="voltarOrc()">‹</button>
-      <span class="back-title" id="orc-detalhe-titulo">—</span>
-      <button class="gear-btn" onclick="toggleCfgPanel()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      </button>
+    <div class="pg" style="gap:16px;padding-bottom:0;">
+      <div class="pg-head" style="gap:8px;justify-content:flex-start;">
+        <button class="action-icon" onclick="voltarOrc()" aria-label="Voltar" style="margin-left:-8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M15 6l-6 6l6 6" /> </svg></button>
+        <span class="pg-title" id="orc-detalhe-titulo" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span>
+        <button class="action-icon" onclick="editarOrcDetalhe()" aria-label="Editar orçamento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /> <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /> </svg></button>
+      </div>
+      <div id="orc-detalhe-resumo"></div>
     </div>
-    <div class="cfg-panel" id="cfg-panel" style="display:none;">
+    <div class="cfg-panel" id="cfg-panel" style="display:none !important;">
       <h3>Configurar categoria</h3>
       <div class="cfg-row">
         <div class="field"><div class="field-label">Nome</div><input type="text" id="cfg-nome" placeholder="Nome da categoria" /></div>
@@ -608,7 +609,7 @@
         <button class="btn-danger" onclick="excluirCategoria()">Excluir</button>
       </div>
     </div>
-    <div id="orc-detalhe-list"><div class="loading">Carregando...</div></div>
+    <div id="orc-detalhe-list" style="padding-top:16px"><div class="loading">Carregando...</div></div>
   </section>
 
   <!-- ADICIONAR (Figma: Novo lançamento) -->
@@ -986,7 +987,7 @@ window.setPessoaLanc=function(p){ pessoaLanc=p; ['Franklin','Airton','dividir'].
 window.setScreen=function(s,btn){ screenAtiva=s; ['home','caixa','orc','orc-detalhe','add','extrato','assin'].forEach(x=>{ document.getElementById('screen-'+x).classList.toggle('active',x===s); }); document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); if(btn)btn.classList.add('active'); };
 window.abrirOrc=function(){ setScreen('orc',document.getElementById('tab-orc')); renderOrcamento(); };
 window.setFiltroPessoaOrc=function(p){ setPessoaFiltro(p); };
-window.voltarOrc=function(){ setScreen('orc',document.getElementById('tab-orc')); document.getElementById('cfg-panel').style.display='none'; };
+window.voltarOrc=function(){ setScreen('orc',document.getElementById('tab-orc')); renderOrcamento(); };
 window.setFiltroTipo=function(f,btn){ filtroTipo=f; document.querySelectorAll('#ext-tipo-row .chip').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderExtrato(); };
 window.toggleFiltroCartaoExt=function(btn){ filtroCartaoExt=!filtroCartaoExt; btn.classList.toggle('active',filtroCartaoExt); renderExtrato(); };
 window.toggleFiltroParcExt=function(btn){ filtroParcExt=!filtroParcExt; btn.classList.toggle('active',filtroParcExt); renderExtrato(); };
@@ -1643,7 +1644,7 @@ function renderOrcamento(){
   document.getElementById('orc-total').textContent=saldosOcultos?'R$ •••• de R$ ••••':`${fmtReal(gT)} de ${fmtReal(lT)}`;
   const lista=document.getElementById('orc-lista');
   if(!vis.length){ lista.innerHTML=`<div class="m-paper"><div class="vazio-box"><span class="theme-icon gray">${ICO_PIE}</span><div class="t">Nenhum orçamento em ${MESES_LONGOS[mesAtual.getMonth()].toLowerCase()}</div><div class="m">Toque em Adicionar para criar o primeiro.</div></div></div>`; return; }
-  lista.innerHTML='<div class="m-paper">'+vis.map(({cat,gasto,limite,pctGasto})=>{ const st=pctGasto>1?'over':pctGasto>=0.8?'warn':''; const vals=saldosOcultos?'R$ •••• de R$ ••••':`${fmtReal(gasto)} de ${fmtReal(limite)}`; return `<div class="orc-row ${st}" onclick="abrirEditarOrc('${cat.id}')"><div class="top"><span class="nm">${escH(cat.nome)}</span><span class="pc">${Math.round(pctGasto*100)}%</span>${ICO_CHEV_R}</div><div class="m-progress"><div style="width:${Math.min(pctGasto*100,100).toFixed(1)}%"></div></div><span class="sb">${vals}</span></div>`; }).join('')+'</div>';
+  lista.innerHTML='<div class="m-paper">'+vis.map(({cat,gasto,limite,pctGasto})=>{ const st=pctGasto>1?'over':pctGasto>=0.8?'warn':''; const vals=saldosOcultos?'R$ •••• de R$ ••••':`${fmtReal(gasto)} de ${fmtReal(limite)}`; return `<div class="orc-row ${st}" onclick="abrirDetalheCategoria('${cat.id}')"><div class="top"><span class="nm">${escH(cat.nome)}</span><span class="pc">${Math.round(pctGasto*100)}%</span>${ICO_CHEV_R}</div><div class="m-progress"><div style="width:${Math.min(pctGasto*100,100).toFixed(1)}%"></div></div><span class="sb">${vals}</span></div>`; }).join('')+'</div>';
 }
 // drawer de orçamento: pessoa, nome, limite em % das entradas do mês
 let odCat=null, odP='Franklin';
@@ -1668,25 +1669,34 @@ window.salvarOrcDrawer=async function(){
       // reaproveita a lógica de salvar categoria (inclui renomear nos lançamentos)
       catDetalheAtiva=alvo; document.getElementById('cfg-nome').value=odCat?nome:alvo.nome;
       PESSOAS.forEach(p=>document.getElementById('cfg-pct-'+p).value=p===pess?pct:pctDe(alvo,p));
-      await salvarCategoria(); catDetalheAtiva=null;
+      const antes=(screenAtiva==='orc-detalhe')?alvo:null; await salvarCategoria(); catDetalheAtiva=antes;
     }else{
       const maxOrdem=categoriasSaida.reduce((m,c)=>Math.max(m,c.ordem||0),0);
       const nova={nome,pct:0,pctFranklin:0,pctAirton:0,ordem:maxOrdem+1}; nova['pct'+pess]=pct;
       const ref=await addDoc(collection(db,'categorias'),nova); categoriasSaida.push({id:ref.id,...nova}); setTipo(tipoAtivo);
     }
-    fecharOrcDrawer(); renderOrcamento(); renderHome();
+    fecharOrcDrawer(); renderOrcamento(); renderHome(); if(screenAtiva==='orc-detalhe'&&catDetalheAtiva){ document.getElementById('orc-detalhe-titulo').textContent=catDetalheAtiva.nome; renderDetalheCategoria(catDetalheAtiva); }
     const lim=rendaMes(pess)*pct/100; mostrarNotif('Orçamento salvo',`${nome} · ${pess} · ${fmtPct(pct)}% = ${fmtReal(lim)}.`);
   }catch(e){ avisar('Erro ao salvar orçamento.'); console.error(e); }
 };
 window.excluirOrcDrawer=async function(){
   if(!odCat)return; const c=odCat, p=odP;
   if(!await confirmar('Excluir orçamento?',`O orçamento de ${c.nome} (${p}) será apagado. Os lançamentos não mudam.`,[['Cancelar',false],['Excluir',true,'red']]))return;
-  try{ await updateDoc(doc(db,'categorias',c.id),{['pct'+p]:0}); c['pct'+p]=0; fecharOrcDrawer(); renderOrcamento(); renderHome(); mostrarNotif('Orçamento excluído',`${c.nome} · ${p}`); }
+  try{ await updateDoc(doc(db,'categorias',c.id),{['pct'+p]:0}); c['pct'+p]=0; fecharOrcDrawer(); if(screenAtiva==='orc-detalhe')voltarOrc(); renderOrcamento(); renderHome(); mostrarNotif('Orçamento excluído',`${c.nome} · ${p}`); }
   catch(e){ avisar('Erro ao excluir orçamento.'); console.error(e); }
 };
 
 window.abrirDetalheCategoria=function(catId){ const cat=categoriasSaida.find(c=>c.id===catId); if(!cat)return; catDetalheAtiva=cat; document.getElementById('orc-detalhe-titulo').textContent=cat.nome; document.getElementById('cfg-panel').style.display='none'; setScreen('orc-detalhe',document.getElementById('tab-orc')); renderDetalheCategoria(cat); };
-function renderDetalheCategoria(cat){ const el=document.getElementById('orc-detalhe-list'); let base; if(cat.nome==='Investimentos'){base=filtrarPorPessoaOrc(items).filter(i=>!ehNeutra(i)&&(normTipo(i.tipo)==='investimento'||i.categoria==='Investimentos'));}else{base=filtrarPorPessoaOrc(items).filter(i=>normTipo(i.tipo)==='saida'&&i.categoria===cat.nome);} if(base.length===0){el.innerHTML='<div class="empty"><span>○</span>Sem lançamentos nesta categoria neste mês.</div>';return;} const total=base.reduce((s,i)=>s+num(i.valor),0); el.innerHTML=`<div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Total: <strong style="color:var(--text)">${fmt(total)}</strong></div>`+txHTML(base); }
+function renderDetalheCategoria(cat){
+  const el=document.getElementById('orc-detalhe-list'); const p=pessoaOrc();
+  let base; if(cat.nome==='Investimentos'){base=filtrarPorPessoaOrc(items).filter(i=>!ehNeutra(i)&&(normTipo(i.tipo)==='investimento'||i.categoria==='Investimentos'));}else{base=filtrarPorPessoaOrc(items).filter(i=>normTipo(i.tipo)==='saida'&&i.categoria===cat.nome);}
+  const l=calcOrcamento(items,categoriasSaida,[p]).linhas.find(x=>x.cat.id===cat.id);
+  const res=document.getElementById('orc-detalhe-resumo');
+  if(l){ const st=l.semLimite?'':l.pctGasto>1?'over':l.pctGasto>=0.8?'warn':''; const vals=saldosOcultos?'R$ •••• de R$ ••••':(l.semLimite?`${fmtReal(l.gasto)} · sem limite`:`${fmtReal(l.gasto)} de ${fmtReal(l.limite)}`); res.innerHTML=`<div class="m-paper"><div class="orc-row ${st}" style="cursor:default"><div class="top"><span class="nm">${p} · ${MESES_LONGOS[mesAtual.getMonth()]} de ${mesAtual.getFullYear()}</span><span class="pc">${l.semLimite?'':Math.round(l.pctGasto*100)+'%'}</span></div><div class="m-progress"><div style="width:${l.semLimite?0:Math.min(l.pctGasto*100,100).toFixed(1)}%"></div></div><span class="sb">${vals}</span></div></div>`; } else res.innerHTML='';
+  if(base.length===0){ el.innerHTML=`<div class="m-paper"><div class="vazio-box"><span class="theme-icon gray">${ICO_SEARCH}</span><div class="t">Nenhum lançamento</div><div class="m">Nada em ${escH(cat.nome)} para ${p} neste mês.</div></div></div>`; return; }
+  el.innerHTML=`<div class="m-paper">${txHTML(base)}</div>`;
+}
+window.editarOrcDetalhe=function(){ if(catDetalheAtiva)abrirOrcDrawer(catDetalheAtiva); };
 
 
 let appIniciado=false;
