@@ -473,6 +473,12 @@
     .m-btn-def.full svg { width:18px; height:18px; }
     .m-btn-def:disabled { opacity:.6; }
     .m-btn.redlight { background:var(--c-red-light); color:var(--c-red-light-color); } .m-btn.redlight svg { width:18px; height:18px; }
+    .busca { position:relative; }
+    .busca .m-input { padding-left:38px; padding-right:38px; }
+    .busca > svg { position:absolute; left:12px; top:12px; width:18px; height:18px; color:var(--c-dimmed); pointer-events:none; }
+    .busca input::-webkit-search-cancel-button { -webkit-appearance:none; display:none; }
+    .busca .close-btn { position:absolute; right:7px; top:7px; display:none; }
+    .busca.tem .close-btn { display:flex; }
     /* Tabs (Extrato | Assinaturas) */
     .m-tabs { display:flex; border-bottom:2px solid var(--c-default-border); }
     .m-tabs button { flex:1; height:40px; margin-bottom:-2px; border:none; border-bottom:2px solid transparent; background:none; color:var(--c-dimmed); font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; }
@@ -672,6 +678,7 @@
         <button class="m-btn-def periodo-btn" onclick="abrirPeriodo()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /> <path d="M16 3v4" /> <path d="M8 3v4" /> <path d="M4 11h16" /> <path d="M11 15h1" /> <path d="M12 15v3" /> </svg><span class="v" id="ext-periodo-txt">—</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M6 9l6 6l6 -6" /> </svg></button>
         <button class="m-btn-def" id="ext-filtros-btn" onclick="abrirFiltros()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M14 6m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /> <path d="M4 6l8 0" /> <path d="M16 6l4 0" /> <path d="M8 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /> <path d="M4 12l2 0" /> <path d="M10 12l10 0" /> <path d="M17 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /> <path d="M4 18l11 0" /> <path d="M19 18l1 0" /> </svg><span>Filtros</span><span class="badge" id="ext-filtros-n" style="display:none"></span></button>
       </div>
+      <div class="busca" id="ext-busca-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /> <path d="M21 21l-6 -6" /> </svg><input type="search" class="m-input" id="ext-busca" placeholder="Buscar lançamento" autocomplete="off" oninput="buscarExtrato()" /><button class="close-btn" onclick="limparBusca()" aria-label="Limpar busca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M18 6l-12 12" /> <path d="M6 6l12 12" /> </svg></button></div>
       <div class="pills" id="ext-pills"></div>
       <div id="extrato-list"><div class="loading">Carregando...</div></div>
     </div>
@@ -1571,6 +1578,9 @@ function renderExtrato(){
   if(filtroCartaoExt)base=base.filter(ehCartaoI);
   if(filtroParcExt)base=base.filter(i=>!!i.parcelaGrupoId);
   if(filtroTipo!=='todos')base=base.filter(i=>normTipo(i.tipo)===filtroTipo);
+  const termo=semAcento(document.getElementById('ext-busca').value.trim());
+  if(termo)base=base.filter(i=>semAcento(i.descricao||'').includes(termo));
+  if(base.length===0&&termo){ el.innerHTML=`<div class="m-paper"><div class="vazio-box"><span class="theme-icon gray">${ICO_SEARCH}</span><div class="t">Nenhum lançamento encontrado</div><div class="m">Nada com "${escH(document.getElementById('ext-busca').value.trim())}" nesse período${ativos.length?' e filtros':''}.</div><button class="m-btn-def" onclick="limparBusca()">Limpar busca</button></div></div>`; return; }
   if(base.length===0){ el.innerHTML=`<div class="m-paper"><div class="vazio-box"><span class="theme-icon gray">${ICO_SEARCH}</span><div class="t">Nenhum lançamento encontrado</div><div class="m">${ativos.length?'Tente outra combinação de filtros.':'Nada lançado nesse período.'}</div>${ativos.length?'<button class="m-btn-def" onclick="limparFiltros()">Limpar filtros</button>':''}</div></div>`; return; }
   el.innerHTML=`<div class="m-paper">${txHTML(base)}</div>`;
 }
@@ -1588,6 +1598,10 @@ function txHTML(lista){ return lista.map(i=>{
   const acao=i.parcelaGrupoId?`editarParcelamento('${i.parcelaGrupoId}')`:i.recorrenteGrupoId?`editarAssinatura('${i.recorrenteGrupoId}')`:`editarLancamento('${i.id}')`;
   return `<div class="lanc${neutra?' neutra':''}" onclick="${acao}"><span class="ti ${cls}">${ico}</span><div class="inf"><span class="nm">${escH(i.descricao||i.categoria||'')}</span><span class="sb">${escH(i.categoria||'')} · ${quem}</span><span class="sb">${linha3.join(' · ')}</span></div><span class="vl ${cls}">${valor}</span></div>`;
 }).join(''); }
+// busca por nome (sem diferenciar maiúsculas e acentos)
+const semAcento=t=>String(t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+window.buscarExtrato=function(){ document.getElementById('ext-busca-box').classList.toggle('tem',!!document.getElementById('ext-busca').value); renderExtrato(); };
+window.limparBusca=function(){ document.getElementById('ext-busca').value=''; buscarExtrato(); };
 // gaveta de filtros
 let fTmp={};
 function syncChips(){ document.querySelectorAll('#fil-ov .m-chip').forEach(c=>{ const g=c.dataset.g,v=c.dataset.v; c.classList.toggle('on', g==='tipo'?fTmp.tipo===v : g==='pes'?fTmp.pes===v : !!fTmp[g]); }); }
