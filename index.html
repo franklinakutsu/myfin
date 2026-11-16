@@ -946,7 +946,7 @@ const PESSOAS=['Franklin','Airton'];
 const pctDe=(c,p)=>{ const v=c?c['pct'+p]:null; return (v!==undefined&&v!==null&&v!=='')?num(v):num(c&&c.pct); };
 const pessoaOrc=()=>pessoaFiltro==='Todos'?'Franklin':pessoaFiltro; // Orçamento não tem "Todos"
 const pessoasDoFiltro=()=>[pessoaOrc()];
-let  saldosOcultos=(()=>{ try{ const v=localStorage.getItem('ocultarValores'); return v===null?true:v==='1'; }catch(e){ return true; } })();
+let  saldosOcultos=true; // sempre abre com os valores ocultos
 
 const num=v=>{ if(typeof v==='number')return isFinite(v)?v:0; if(typeof v==='string'){let s=v.trim();if(/,\d{1,2}$/.test(s))s=s.replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isFinite(n)?n:0;}return 0; };
 const fmtReal=v=>'R$ '+num(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -975,7 +975,7 @@ window.fecharMesPicker=function(){ document.getElementById('mp-ov').classList.re
 window.mpAno=function(d){ mpAnoSel+=d; renderMesPicker(); };
 window.escolherMes=function(a,m){ mesAtual=new Date(a,m,1); fecharMesPicker(); atualizarMesLabels(); carregarItems(); };
 function atualizarOlho(){ document.querySelectorAll('.eye-toggle').forEach(b=>b.innerHTML=saldosOcultos?ICO_EYE_OFF:ICO_EYE); }
-window.toggleOcultar=function(){ saldosOcultos=!saldosOcultos; try{localStorage.setItem('ocultarValores',saldosOcultos?'1':'0');}catch(e){} atualizarOlho(); renderTudo(); };
+window.toggleOcultar=function(){ saldosOcultos=!saldosOcultos; atualizarOlho(); renderTudo(); };
 atualizarOlho();
 window.setPessoaFiltro=function(p,e){ if(e)e.stopPropagation(); pessoaFiltro=p; document.querySelectorAll('#seg-pessoa-home button, #seg-pessoa-caixa button').forEach(b=>b.classList.toggle('on',b.textContent.trim()===p)); document.querySelectorAll('#orc-pessoa-row .chip').forEach(b=>b.classList.toggle('active',b.textContent.trim()===p)); renderTudo(); };
 
