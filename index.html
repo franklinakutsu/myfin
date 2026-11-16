@@ -479,6 +479,12 @@
     .busca input::-webkit-search-cancel-button { -webkit-appearance:none; display:none; }
     .busca .close-btn { position:absolute; right:7px; top:7px; display:none; }
     .busca.tem .close-btn { display:flex; }
+    .aloc { padding:12px 16px; display:flex; flex-direction:column; gap:8px; }
+    .aloc .top { display:flex; justify-content:space-between; align-items:baseline; font-size:14px; color:var(--c-text); }
+    .aloc .top b { font-weight:700; }
+    .aloc .sb { font-size:12px; color:var(--c-dimmed); }
+    .aloc.ok .m-progress > div { background:var(--c-green); } .aloc.ok .top b { color:var(--c-green); }
+    .aloc.over .m-progress > div { background:var(--c-red); } .aloc.over .top b, .aloc.over .sb { color:var(--c-red); }
     /* Tabs (Extrato | Assinaturas) */
     .m-tabs { display:flex; border-bottom:2px solid var(--c-default-border); }
     .m-tabs button { flex:1; height:40px; margin-bottom:-2px; border:none; border-bottom:2px solid transparent; background:none; color:var(--c-dimmed); font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; }
@@ -585,7 +591,7 @@
       </div>
       <div class="segmented" id="orc-pessoa-row"><button onclick="setFiltroPessoaOrc('Franklin')">Franklin</button><button onclick="setFiltroPessoaOrc('Airton')">Airton</button></div>
       <div class="tot-row"><div><div class="l">Total do mês</div><div class="v" id="orc-total">—</div></div><button class="m-btn-light" onclick="novaCategoria()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M12 5l0 14" /> <path d="M5 12l14 0" /> </svg>Adicionar</button></div>
-      <div id="orc-alloc-bar" style="display:none"></div>
+      <div id="orc-alloc-bar"></div>
       <div id="orc-lista"><div class="loading">Carregando...</div></div>
     </div>
   </section>
@@ -1652,8 +1658,11 @@ function barraAlocacao(nome,total){
 function renderOrcamento(){
   const p=pessoaOrc();
   document.querySelectorAll('#orc-pessoa-row button').forEach(b=>b.classList.toggle('on',b.textContent.trim()===p));
-  const {linhas}=calcOrcamento(items,categoriasSaida,[p]);
+  const {linhas,alocacao}=calcOrcamento(items,categoriasSaida,[p]);
   const vis=linhas.filter(l=>l.pcts[p]>0);
+  const al=Math.round((alocacao[p]||0)*100)/100, stA=al>100?'over':al===100?'ok':'';
+  const txtA=al===100?'Toda a renda está distribuída':al>100?`${fmtPct(al-100)}% acima da renda`:`Faltam ${fmtPct(100-al)}% para distribuir`;
+  document.getElementById('orc-alloc-bar').innerHTML=`<div class="m-paper"><div class="aloc ${stA}"><div class="top"><span>Alocado da renda de ${p}</span><b>${fmtPct(al)}%</b></div><div class="m-progress"><div style="width:${Math.min(al,100)}%"></div></div><span class="sb">${txtA}</span></div></div>`;
   const gT=vis.reduce((s,l)=>s+l.gasto,0), lT=vis.reduce((s,l)=>s+l.limite,0);
   document.getElementById('orc-total').textContent=saldosOcultos?'R$ •••• de R$ ••••':`${fmtReal(gT)} de ${fmtReal(lT)}`;
   const lista=document.getElementById('orc-lista');
