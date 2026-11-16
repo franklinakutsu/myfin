@@ -479,6 +479,7 @@
     .busca input::-webkit-search-cancel-button { -webkit-appearance:none; display:none; }
     .busca .close-btn { position:absolute; right:7px; top:7px; display:none; }
     .busca.tem .close-btn { display:flex; }
+    .orc-row.nolim .pc { color:var(--c-dimmed); font-weight:500; font-size:12px; }
     .aloc { padding:12px 16px; display:flex; flex-direction:column; gap:8px; }
     .aloc .top { display:flex; justify-content:space-between; align-items:baseline; font-size:14px; color:var(--c-text); }
     .aloc .top b { font-weight:700; }
@@ -1659,7 +1660,7 @@ function renderOrcamento(){
   const p=pessoaOrc();
   document.querySelectorAll('#orc-pessoa-row button').forEach(b=>b.classList.toggle('on',b.textContent.trim()===p));
   const {linhas,alocacao}=calcOrcamento(items,categoriasSaida,[p]);
-  const vis=linhas.filter(l=>l.pcts[p]>0);
+  const vis=linhas.filter(l=>l.pcts[p]>0||l.gasto>0);
   const al=Math.round((alocacao[p]||0)*100)/100, stA=al>100?'over':al===100?'ok':'';
   const txtA=al===100?'Toda a renda está distribuída':al>100?`${fmtPct(al-100)}% acima da renda`:`Faltam ${fmtPct(100-al)}% para distribuir`;
   document.getElementById('orc-alloc-bar').innerHTML=`<div class="m-paper"><div class="aloc ${stA}"><div class="top"><span>Alocado da renda de ${p}</span><b>${fmtPct(al)}%</b></div><div class="m-progress"><div style="width:${Math.min(al,100)}%"></div></div><span class="sb">${txtA}</span></div></div>`;
@@ -1667,13 +1668,13 @@ function renderOrcamento(){
   document.getElementById('orc-total').textContent=saldosOcultos?'R$ •••• de R$ ••••':`${fmtReal(gT)} de ${fmtReal(lT)}`;
   const lista=document.getElementById('orc-lista');
   if(!vis.length){ lista.innerHTML=`<div class="m-paper"><div class="vazio-box"><span class="theme-icon gray">${ICO_PIE}</span><div class="t">Nenhum orçamento em ${MESES_LONGOS[mesAtual.getMonth()].toLowerCase()}</div><div class="m">Toque em Adicionar para criar o primeiro.</div></div></div>`; return; }
-  lista.innerHTML='<div class="m-paper">'+vis.map(({cat,gasto,limite,pctGasto,pcts})=>{ const st=pctGasto>1?'over':pctGasto>=0.8?'warn':''; const vals=(saldosOcultos?'R$ •••• de R$ ••••':`${fmtReal(gasto)} de ${fmtReal(limite)}`)+` · ${fmtPct(pcts[p])}% da renda`; return `<div class="orc-row ${st}" onclick="abrirDetalheCategoria('${cat.id}')"><div class="top"><span class="nm">${escH(cat.nome)}</span><span class="pc">${Math.round(pctGasto*100)}%</span>${ICO_CHEV_R}</div><div class="m-progress"><div style="width:${Math.min(pctGasto*100,100).toFixed(1)}%"></div></div><span class="sb">${vals}</span></div>`; }).join('')+'</div>';
+  lista.innerHTML='<div class="m-paper">'+vis.map(({cat,gasto,limite,pctGasto,pcts,semLimite})=>{ const st=semLimite?'nolim':pctGasto>1?'over':pctGasto>=0.8?'warn':''; const vals=(saldosOcultos?(semLimite?'R$ •••• gastos':'R$ •••• de R$ ••••'):(semLimite?`${fmtReal(gasto)} gastos`:`${fmtReal(gasto)} de ${fmtReal(limite)}`))+` · ${fmtPct(pcts[p])}% da renda`; return `<div class="orc-row ${st}" onclick="abrirDetalheCategoria('${cat.id}')"><div class="top"><span class="nm">${escH(cat.nome)}</span><span class="pc">${semLimite?'sem limite':Math.round(pctGasto*100)+'%'}</span>${ICO_CHEV_R}</div><div class="m-progress"><div style="width:${semLimite?0:Math.min(pctGasto*100,100).toFixed(1)}%"></div></div><span class="sb">${vals}</span></div>`; }).join('')+'</div>';
 }
 // drawer de orçamento: pessoa, nome, limite em % das entradas do mês
 let odCat=null, odP='Franklin';
 const fmtPct=v=>(Math.round(v*100)/100).toLocaleString('pt-BR');
 function rendaMes(p){ return calcOrcamento(items,categoriasSaida,[p]).renda[p]; }
-window.odPessoa=function(p){ odP=p; document.querySelectorAll('#od-pessoa button').forEach(b=>b.classList.toggle('on',b.textContent.trim()===p)); if(odCat){ const v=pctDe(odCat,p); document.getElementById('od-pct').value=v>0?v:''; } odDesc(); };
+window.odPessoa=function(p){ odP=p; document.querySelectorAll('#od-pessoa button').forEach(b=>b.classList.toggle('on',b.textContent.trim()===p)); if(odCat){ const v=pctDe(odCat,p); document.getElementById('od-pct').value=v; } odDesc(); };
 window.odDesc=function(){ const r=rendaMes(odP), v=num(document.getElementById('od-pct').value), mesN=MESES_LONGOS[mesAtual.getMonth()].toLowerCase(); document.getElementById('od-desc').textContent=v>0?`= ${fmtReal(r*v/100)} · ${fmtPct(v)}% das entradas de ${mesN} (${fmtReal(r)})`:`% das entradas do mês de ${odP} (${fmtReal(r)})`; document.getElementById('od-pct-box').classList.remove('erro'); document.getElementById('err-od-pct').textContent=''; };
 function abrirOrcDrawer(cat){ odCat=cat; document.getElementById('od-titulo').textContent=cat?'Editar orçamento':'Novo orçamento'; document.getElementById('od-salvar').textContent=cat?'Salvar alterações':'Salvar'; document.getElementById('od-excluir').style.display=cat?'':'none'; document.getElementById('od-nome').value=cat?cat.nome:''; document.getElementById('od-pct').value=''; ['od-nome','od-pct-box'].forEach(i=>document.getElementById(i).classList.remove('erro')); ['err-od-nome','err-od-pct'].forEach(i=>document.getElementById(i).textContent=''); odPessoa(pessoaOrc()); document.getElementById('od-ov').classList.add('show'); }
 window.abrirEditarOrc=function(id){ const c=categoriasSaida.find(x=>x.id===id); if(c)abrirOrcDrawer(c); };
@@ -1683,7 +1684,7 @@ window.salvarOrcDrawer=async function(){
   const nome=document.getElementById('od-nome').value.trim(), v=num(document.getElementById('od-pct').value);
   let errou=false;
   if(!nome){ document.getElementById('od-nome').classList.add('erro'); document.getElementById('err-od-nome').textContent='Informe o nome'; errou=true; }
-  if(!(v>0)||v>100){ document.getElementById('od-pct-box').classList.add('erro'); document.getElementById('err-od-pct').textContent='Informe um percentual maior que zero'; errou=true; }
+  const pctTxt=document.getElementById('od-pct').value.trim(); if(pctTxt===''||v<0||v>100){ document.getElementById('od-pct-box').classList.add('erro'); document.getElementById('err-od-pct').textContent='Informe um percentual de 0 a 100'; errou=true; }
   if(errou)return;
   const pct=Math.round(v*100)/100, pess=odP;
   let alvo=odCat||categoriasSaida.find(c=>c.nome.toLowerCase()===nome.toLowerCase());
