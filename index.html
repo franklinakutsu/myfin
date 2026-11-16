@@ -1660,7 +1660,7 @@ function renderOrcamento(){
   const p=pessoaOrc();
   document.querySelectorAll('#orc-pessoa-row button').forEach(b=>b.classList.toggle('on',b.textContent.trim()===p));
   const {linhas,alocacao}=calcOrcamento(items,categoriasSaida,[p]);
-  const vis=linhas; // mostra todas as categorias, mesmo com 0%
+  const vis=linhas.slice().sort((a,b)=>(b.pcts[p]-a.pcts[p])||(b.gasto-a.gasto)); // todas, da maior % alocada para a menor
   const al=Math.round((alocacao[p]||0)*100)/100, stA=al>100?'over':al===100?'ok':'';
   const txtA=al===100?'Toda a renda está distribuída':al>100?`${fmtPct(al-100)}% acima da renda`:`Faltam ${fmtPct(100-al)}% para distribuir`;
   document.getElementById('orc-alloc-bar').innerHTML=`<div class="m-paper"><div class="aloc ${stA}"><div class="top"><span>Alocado da renda de ${p}</span><b>${fmtPct(al)}%</b></div><div class="m-progress"><div style="width:${Math.min(al,100)}%"></div></div><span class="sb">${txtA}</span></div></div>`;
